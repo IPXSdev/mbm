@@ -8,10 +8,33 @@ export async function middleware(request: NextRequest) {
     },
   })
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
+  // Get environment variables
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  // Skip middleware if Supabase credentials are not properly configured
+  if (!supabaseUrl || !supabaseAnonKey || !supabaseUrl.includes(".supabase.co")) {
+    console.log("⚠️ Middleware: Supabase credentials not configured properly, skipping auth middleware")
+    return response
+  }
+
+  // Skip middleware for certain paths
+  const path = request.nextUrl.pathname
+  if (
+    path.startsWith("/_next") ||
+    path.startsWith("/api") ||
+    path.includes(".") ||
+    path === "/debug-supabase" ||
+    path === "/test-simple" ||
+    path === "/favicon.ico" ||
+    path === "/dashboard" // SKIP DASHBOARD - let the page handle auth
+  ) {
+    console.log("Middleware: Skipping auth check for", path)
+    return response
+  }
+
+  try {
+    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
       cookies: {
         get(name: string) {
           return request.cookies.get(name)?.value
@@ -51,26 +74,37 @@ export async function middleware(request: NextRequest) {
           })
         },
       },
-    },
-  )
+    })
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser()
 
-  // If user is signed in and the current path is /login or /signup
-  // redirect the user to /dashboard
-  if (user && (request.nextUrl.pathname === "/login" || request.nextUrl.pathname === "/signup")) {
-    return NextResponse.redirect(new URL("/dashboard", request.url))
+    console.log(
+      "Middleware: Auth check for",
+      path,
+      "- User:",
+      !!user,
+      "User ID:",
+      user?.id?.slice(0, 8),
+      "Error:",
+      !!error,
+    )
+
+    // If user is signed in and trying to access login/signup, redirect to dashboard
+    if (user && (path === "/login" || path === "/signup")) {
+      console.log("Middleware: Redirecting authenticated user from", path, "to /dashboard")
+      return NextResponse.redirect(new URL("/dashboard", request.url))
+    }
+
+    // DO NOT redirect from dashboard - let the page handle it
+    return response
+  } catch (error) {
+    console.error("Middleware error:", error)
+    // If there's an error with Supabase, just continue without auth checks
+    return response
   }
-
-  // If user is not signed in and the current path is /dashboard
-  // redirect the user to /login
-  if (!user && request.nextUrl.pathname === "/dashboard") {
-    return NextResponse.redirect(new URL("/login", request.url))
-  }
-
-  return response
 }
 
 export const config = {
@@ -80,7 +114,6 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * Feel free to modify this pattern to include more paths.
      */
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],

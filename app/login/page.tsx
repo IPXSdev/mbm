@@ -1,187 +1,106 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Music, Eye, EyeOff, AlertCircle, Settings } from "lucide-react"
-import Link from "next/link"
+import { Eye, EyeOff, AlertCircle, Loader2 } from "lucide-react"
 import { supabase } from "@/lib/auth-client"
-import { useRouter } from "next/navigation"
 
 export default function LoginPage() {
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
-  const [isSupabaseConfigured, setIsSupabaseConfigured] = useState(false)
+  const [error, setError] = useState("")
   const router = useRouter()
 
-  // Check if Supabase is properly configured
-  useEffect(() => {
-    const checkSupabaseConfig = () => {
-      // Only check on client side
-      if (typeof window === "undefined") return
-
-      const hasUrl = !!process.env.NEXT_PUBLIC_SUPABASE_URL
-      const hasKey = !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-      console.log("🔍 Environment Check:")
-      console.log("NEXT_PUBLIC_SUPABASE_URL:", hasUrl ? "✅ Found" : "❌ Missing")
-      console.log("NEXT_PUBLIC_SUPABASE_ANON_KEY:", hasKey ? "✅ Found" : "❌ Missing")
-
-      if (!hasUrl || !hasKey) {
-        setIsSupabaseConfigured(false)
-        setError("Supabase is not configured. Please complete the setup process.")
-        setIsCheckingAuth(false)
-        return false
-      }
-
-      setIsSupabaseConfigured(true)
-      return true
-    }
-
-    if (!checkSupabaseConfig()) {
-      return
-    }
-
-    const checkAuth = async () => {
-      try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession()
-        if (session) {
-          router.push("/dashboard")
-          return
-        }
-      } catch (error) {
-        console.error("Auth check error:", error)
-      }
-      setIsCheckingAuth(false)
-    }
-
-    checkAuth()
-  }, [router])
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-
-    if (!isSupabaseConfigured) {
-      setError("Supabase is not configured. Please complete the setup first.")
-      return
-    }
-
     setLoading(true)
-    setError(null)
-
-    const formData = new FormData(e.currentTarget)
-    const email = formData.get("email") as string
-    const password = formData.get("password") as string
-
-    if (!email || !password) {
-      setError("Please fill in all fields")
-      setLoading(false)
-      return
-    }
+    setError("")
 
     try {
-      console.log("🔐 Attempting login for:", email)
-
-      const { data, error: authError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password: password,
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       })
 
-      if (authError) {
-        console.error("❌ Login error:", authError)
-        setError(authError.message)
-        setLoading(false)
+      if (error) {
+        setError(error.message)
         return
       }
 
-      if (data.user && data.session) {
-        console.log("✅ Login successful:", data.user.email)
-        await new Promise((resolve) => setTimeout(resolve, 100))
-        window.location.href = "/dashboard"
-      } else {
-        setError("Login failed - no session created")
-        setLoading(false)
+      if (data.user) {
+        const { error: profileError } = await supabase.from("profiles").upsert({
+          id: data.user.id,
+          email: data.user.email,
+          name: data.user.user_metadata?.name || "User",
+          role: "user",
+          updated_at: new Date().toISOString(),
+        })
+
+        if (profileError) {
+          console.error("Profile error:", profileError)
+        }
+
+        router.push("/dashboard")
+        router.refresh()
       }
-    } catch (error: any) {
-      console.error("💥 Unexpected error:", error)
-      setError("An unexpected error occurred. Please try again.")
+    } catch (err: any) {
+      setError(err.message || "An unexpected error occurred")
+    } finally {
       setLoading(false)
     }
   }
 
-  if (isCheckingAuth) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    )
-  }
-
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <Music className="h-12 w-12 text-primary" />
-          </div>
-          <CardTitle className="text-2xl">Welcome Back</CardTitle>
-          <CardDescription>Sign in to your Man Behind The Music account</CardDescription>
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold text-center">Sign In</CardTitle>
+          <CardDescription className="text-center">
+            Enter your email and password to access your account
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          {!isSupabaseConfigured && (
-            <Alert variant="destructive" className="mb-4">
-              <Settings className="h-4 w-4" />
-              <AlertDescription>
-                <div className="space-y-2">
-                  <p className="font-semibold">⚠️ Supabase Not Configured</p>
-                  <p className="text-sm">You need to set up your environment variables first.</p>
-                  <Link href="/setup" className="text-sm text-primary hover:underline block">
-                    → Complete setup guide
-                  </Link>
-                </div>
-              </AlertDescription>
-            </Alert>
-          )}
+          <form onSubmit={handleLogin} className="space-y-4">
+            {error && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
 
-          {error && isSupabaseConfigured && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
-                name="email"
                 type="email"
                 placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
-                autoComplete="email"
-                disabled={loading || !isSupabaseConfigured}
+                disabled={loading}
               />
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Input
                   id="password"
-                  name="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
-                  autoComplete="current-password"
-                  disabled={loading || !isSupabaseConfigured}
+                  disabled={loading}
                 />
                 <Button
                   type="button"
@@ -189,36 +108,36 @@ export default function LoginPage() {
                   size="sm"
                   className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                   onClick={() => setShowPassword(!showPassword)}
-                  disabled={loading || !isSupabaseConfigured}
+                  disabled={loading}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
               </div>
             </div>
-            <div className="flex items-center justify-between">
-              <Link
-                href="/forgot-password"
-                className={`text-sm hover:underline ${!isSupabaseConfigured ? "text-muted-foreground pointer-events-none" : "text-primary"}`}
-              >
-                Forgot Password?
-              </Link>
-            </div>
-            <Button type="submit" className="w-full" disabled={loading || !isSupabaseConfigured}>
-              {loading ? "Signing In..." : "Sign In"}
-            </Button>
-          </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-sm text-muted-foreground">
-              {"Don't have an account? "}
-              <Link
-                href="/signup"
-                className={`hover:underline ${!isSupabaseConfigured ? "text-muted-foreground pointer-events-none" : "text-primary"}`}
-              >
-                Sign up
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Signing In...
+                </>
+              ) : (
+                "Sign In"
+              )}
+            </Button>
+
+            <div className="text-center space-y-2">
+              <Link href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-500">
+                Forgot your password?
               </Link>
-            </p>
-          </div>
+              <div className="text-sm text-gray-600">
+                Don't have an account?{" "}
+                <Link href="/signup" className="text-blue-600 hover:text-blue-500">
+                  Sign up
+                </Link>
+              </div>
+            </div>
+          </form>
         </CardContent>
       </Card>
     </div>

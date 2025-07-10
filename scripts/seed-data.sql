@@ -1,19 +1,19 @@
 -- Insert sample episodes
 INSERT INTO public.episodes (title, artist, description, duration, audio_url, image_url, plays, published_at, featured) VALUES
-('The Making of Midnight Dreams', 'Luna Rodriguez', 'Luna shares the emotional journey behind her breakthrough single and how late-night studio sessions shaped her sound.', '45:32', '/placeholder-audio.mp3', '/placeholder.svg?height=300&width=300', 12500, '2024-01-15 10:00:00', true),
-('From Bedroom Producer to Chart Topper', 'Alex Chen', 'Alex discusses his transition from making beats in his bedroom to producing for major artists.', '38:15', '/placeholder-audio.mp3', '/placeholder.svg?height=300&width=300', 8900, '2024-01-08 14:30:00', false),
-('The Art of Storytelling Through Music', 'Sarah Williams', 'Country singer-songwriter Sarah explores how personal experiences become universal stories in her music.', '52:18', '/placeholder-audio.mp3', '/placeholder.svg?height=300&width=300', 15200, '2024-01-01 17:00:00', true),
-('Electronic Soundscapes and Emotion', 'Marcus Thompson', 'Electronic artist Marcus reveals how he creates emotional depth in instrumental compositions.', '41:27', '/placeholder-audio.mp3', '/placeholder.svg?height=300&width=300', 6700, '2023-12-25 12:00:00', false);
+('The Making of Midnight Dreams', 'Luna Rodriguez', 'Luna shares the emotional journey behind her breakthrough single and how late-night studio sessions shaped her sound.', '45:32', 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav', '/placeholder.svg?height=300&width=300', 12500, '2024-01-15 10:00:00', true),
+('From Bedroom Producer to Chart Topper', 'Alex Chen', 'Alex discusses his transition from making beats in his bedroom to producing for major artists.', '38:15', 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav', '/placeholder.svg?height=300&width=300', 8900, '2024-01-08 14:30:00', false),
+('The Art of Storytelling Through Music', 'Sarah Williams', 'Country singer-songwriter Sarah explores how personal experiences become universal stories in her music.', '52:18', 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav', '/placeholder.svg?height=300&width=300', 15200, '2024-01-01 17:00:00', true),
+('Electronic Soundscapes and Emotion', 'Marcus Thompson', 'Electronic artist Marcus reveals how he creates emotional depth in instrumental compositions.', '41:27', 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav', '/placeholder.svg?height=300&width=300', 6700, '2023-12-25 12:00:00', false);
 
 -- Insert sample tracks
 INSERT INTO public.tracks (title, artist, genre, description, file_url, image_url, plays, likes, shares, status, priority) VALUES
-('Midnight Dreams', 'Luna Rodriguez', 'indie', 'A dreamy indie track with ethereal vocals and shimmering guitars.', '/placeholder-audio.mp3', '/placeholder.svg?height=300&width=300', 45230, 3420, 890, 'approved', 'high'),
-('Electric Nights', 'Marcus Thompson', 'electronic', 'Pulsing electronic beats with atmospheric synths.', '/placeholder-audio.mp3', '/placeholder.svg?height=300&width=300', 38950, 2890, 720, 'approved', 'medium'),
-('Country Roads Home', 'Sarah Williams', 'country', 'A heartfelt country ballad about finding your way back home.', '/placeholder-audio.mp3', '/placeholder.svg?height=300&width=300', 35670, 4120, 1200, 'approved', 'medium'),
-('Beat Drop', 'Alex Chen', 'hip-hop', 'Hard-hitting hip-hop track with intricate production.', '/placeholder-audio.mp3', '/placeholder.svg?height=300&width=300', 32100, 2650, 580, 'approved', 'low'),
-('Acoustic Soul', 'Jamie Park', 'folk', 'Raw acoustic performance with soulful vocals.', '/placeholder-audio.mp3', '/placeholder.svg?height=300&width=300', 28900, 3200, 650, 'approved', 'medium'),
-('Neon Lights', 'DJ Pulse', 'electronic', 'An energetic electronic track with pulsing synths and driving beats.', '/placeholder-audio.mp3', '/placeholder.svg?height=300&width=300', 0, 0, 0, 'pending', 'high'),
-('Mountain Song', 'River Valley', 'folk', 'A heartfelt folk ballad inspired by hiking through the Rocky Mountains.', '/placeholder-audio.mp3', '/placeholder.svg?height=300&width=300', 0, 0, 0, 'under_review', 'medium');
+('Midnight Dreams', 'Luna Rodriguez', 'indie', 'A dreamy indie track with ethereal vocals and shimmering guitars.', 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav', '/placeholder.svg?height=300&width=300', 45230, 3420, 890, 'approved', 'high'),
+('Electric Nights', 'Marcus Thompson', 'electronic', 'Pulsing electronic beats with atmospheric synths.', 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav', '/placeholder.svg?height=300&width=300', 38950, 2890, 720, 'approved', 'medium'),
+('Country Roads Home', 'Sarah Williams', 'country', 'A heartfelt country ballad about finding your way back home.', 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav', '/placeholder.svg?height=300&width=300', 35670, 4120, 1200, 'approved', 'medium'),
+('Beat Drop', 'Alex Chen', 'hip-hop', 'Hard-hitting hip-hop track with intricate production.', 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav', '/placeholder.svg?height=300&width=300', 32100, 2650, 580, 'approved', 'low'),
+('Acoustic Soul', 'Jamie Park', 'folk', 'Raw acoustic performance with soulful vocals.', 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav', '/placeholder.svg?height=300&width=300', 28900, 3200, 650, 'approved', 'medium'),
+('Neon Lights', 'DJ Pulse', 'electronic', 'An energetic electronic track with pulsing synths and driving beats.', 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav', '/placeholder.svg?height=300&width=300', 0, 0, 0, 'pending', 'high'),
+('Mountain Song', 'River Valley', 'folk', 'A heartfelt folk ballad inspired by hiking through the Rocky Mountains.', 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav', '/placeholder.svg?height=300&width=300', 0, 0, 0, 'under_review', 'medium');
 
 -- Insert sample products
 INSERT INTO public.products (name, artist, price, original_price, description, image_url, category, in_stock, featured) VALUES
