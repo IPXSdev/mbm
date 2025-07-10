@@ -2,94 +2,81 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import type { User } from "@supabase/supabase-js"
+import { createClient } from "@/lib/supabase-client"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Menu, LogOut } from "lucide-react"
-import { supabase } from "@/lib/auth-client"
-import { useRouter } from "next/navigation"
+import { VisuallyHidden } from "@/components/ui/visually-hidden"
+import { Menu, UserIcon, LogOut, Settings, Shield, Users, FileText } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
-interface AuthUser {
+interface Profile {
   id: string
-  email?: string
-  user_metadata?: {
-    full_name?: string
-    avatar_url?: string
-  }
+  email: string
+  full_name?: string
+  role: "user" | "admin" | "master_admin"
 }
 
-export function AuthNavbar() {
-  const [user, setUser] = useState<AuthUser | null>(null)
+export default function AuthNavbar() {
+  const [user, setUser] = useState<User | null>(null)
+  const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
-  const [isOpen, setIsOpen] = useState(false)
   const router = useRouter()
+  const supabase = createClient()
 
   useEffect(() => {
-    let mounted = true
+    const getUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      setUser(user)
 
-    const getSession = async () => {
-      try {
-        const {
-          data: { session },
-          error,
-        } = await supabase.auth.getSession()
+      if (user) {
+        // Get user profile to check role
+        const { data: profileData } = await supabase.from("profiles").select("*").eq("id", user.id).single()
 
-        if (error) {
-          console.error("Session error:", error)
-          if (mounted) {
-            setUser(null)
-            setLoading(false)
-          }
-          return
-        }
-
-        if (mounted) {
-          setUser(session?.user || null)
-          setLoading(false)
-        }
-      } catch (error) {
-        console.error("Auth error:", error)
-        if (mounted) {
-          setUser(null)
-          setLoading(false)
-        }
+        setProfile(profileData)
       }
+
+      setLoading(false)
     }
 
-    getSession()
+    getUser()
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state changed:", event, session?.user?.email)
-      if (mounted) {
-        setUser(session?.user || null)
-        setLoading(false)
+      setUser(session?.user ?? null)
+
+      if (session?.user) {
+        const { data: profileData } = await supabase.from("profiles").select("*").eq("id", session.user.id).single()
+
+        setProfile(profileData)
+      } else {
+        setProfile(null)
       }
+
+      setLoading(false)
     })
 
-    return () => {
-      mounted = false
-      subscription.unsubscribe()
-    }
-  }, [])
+    return () => subscription.unsubscribe()
+  }, [supabase])
 
   const handleSignOut = async () => {
-    try {
-      setLoading(true)
-      const { error } = await supabase.auth.signOut()
-      if (error) {
-        console.error("Sign out error:", error)
-      } else {
-        setUser(null)
-        router.push("/")
-      }
-    } catch (error) {
-      console.error("Sign out error:", error)
-    } finally {
-      setLoading(false)
-      setIsOpen(false)
-    }
+    await supabase.auth.signOut()
+    router.push("/")
   }
+
+  const isAdmin = profile?.role === "admin" || profile?.role === "master_admin"
+  const isMasterAdmin = profile?.role === "master_admin"
 
   const navItems = [
     { href: "/", label: "Home" },
@@ -98,120 +85,228 @@ export function AuthNavbar() {
     { href: "/placements", label: "Placements" },
     { href: "/leaderboard", label: "Leaderboard" },
     { href: "/store", label: "Store" },
+    { href: "/pricing", label: "Pricing" },
     { href: "/contact", label: "Contact" },
   ]
 
-  const userNavItems = user
-    ? [
-        { href: "/dashboard", label: "Dashboard" },
-        { href: "/submit", label: "Submit Music" },
-        { href: "/profile", label: "Profile" },
-      ]
-    : []
-
-  const allNavItems = [...navItems, ...userNavItems]
+  if (loading) {
+    return (
+      <nav className="bg-black text-white p-4">
+        <div className="container mx-auto flex justify-between items-center">
+          <Link href="/" className="text-2xl font-bold">
+            Man Behind The Music
+          </Link>
+          <div>Loading...</div>
+        </div>
+      </nav>
+    )
+  }
 
   return (
-    <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <span className="text-xl font-bold">Man Behind The Music</span>
-          </Link>
+    <nav className="bg-black text-white p-4 sticky top-0 z-50">
+      <div className="container mx-auto flex justify-between items-center">
+        <Link href="/" className="text-2xl font-bold">
+          Man Behind The Music
+        </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-6">
-            {allNavItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="text-sm font-medium transition-colors hover:text-primary"
-              >
-                {item.label}
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex items-center space-x-6">
+          {navItems.map((item) => (
+            <Link key={item.href} href={item.href} className="hover:text-yellow-400 transition-colors">
+              {item.label}
+            </Link>
+          ))}
+
+          {user ? (
+            <div className="flex items-center space-x-4">
+              <Link href="/submit">
+                <Button variant="outline" className="text-black border-white hover:bg-yellow-400 bg-transparent">
+                  Submit Music
+                </Button>
               </Link>
-            ))}
-          </div>
 
-          {/* Auth Section */}
-          <div className="hidden md:flex items-center space-x-4">
-            {loading ? (
-              <div className="h-4 w-16 bg-muted animate-pulse rounded" />
-            ) : user ? (
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-muted-foreground">{user.user_metadata?.full_name || user.email}</span>
-                <Button variant="outline" size="sm" onClick={handleSignOut} disabled={loading}>
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Sign Out
-                </Button>
-              </div>
-            ) : (
-              <div className="flex items-center space-x-2">
-                <Button variant="outline" size="sm" asChild>
-                  <Link href="/login">Sign In</Link>
-                </Button>
-                <Button size="sm" asChild>
-                  <Link href="/signup">Sign Up</Link>
-                </Button>
-              </div>
-            )}
-          </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="text-white hover:text-yellow-400">
+                    <UserIcon className="h-4 w-4 mr-2" />
+                    {profile?.full_name || user.email}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile" className="cursor-pointer">
+                      <UserIcon className="mr-2 h-4 w-4" />
+                      Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard" className="cursor-pointer">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Dashboard
+                    </Link>
+                  </DropdownMenuItem>
 
-          {/* Mobile Menu */}
-          <Sheet open={isOpen} onOpenChange={setIsOpen}>
-            <SheetTrigger asChild className="md:hidden">
-              <Button variant="outline" size="sm">
-                <Menu className="h-4 w-4" />
+                  {isAdmin && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuLabel>Admin</DropdownMenuLabel>
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin" className="cursor-pointer">
+                          <Shield className="mr-2 h-4 w-4" />
+                          Admin Dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin/submissions" className="cursor-pointer">
+                          <FileText className="mr-2 h-4 w-4" />
+                          Review Submissions
+                        </Link>
+                      </DropdownMenuItem>
+                      {isMasterAdmin && (
+                        <DropdownMenuItem asChild>
+                          <Link href="/admin/users" className="cursor-pointer">
+                            <Users className="mr-2 h-4 w-4" />
+                            Manage Users
+                          </Link>
+                        </DropdownMenuItem>
+                      )}
+                    </>
+                  )}
+
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          ) : (
+            <div className="flex items-center space-x-4">
+              <Link href="/login">
+                <Button variant="ghost" className="text-white hover:text-yellow-400">
+                  Login
+                </Button>
+              </Link>
+              <Link href="/signup">
+                <Button variant="outline" className="text-black border-white hover:bg-yellow-400 bg-transparent">
+                  Sign Up
+                </Button>
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* Mobile Navigation */}
+        <div className="md:hidden">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="sm" className="text-white">
+                <Menu className="h-6 w-6" />
+                <VisuallyHidden>Open menu</VisuallyHidden>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-              <div className="flex flex-col space-y-4 mt-4">
-                {allNavItems.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="text-sm font-medium transition-colors hover:text-primary py-2"
-                    onClick={() => setIsOpen(false)}
-                  >
+            <SheetContent side="right" className="bg-black text-white border-gray-800">
+              <div className="flex flex-col space-y-4 mt-8">
+                {navItems.map((item) => (
+                  <Link key={item.href} href={item.href} className="text-lg hover:text-yellow-400 transition-colors">
                     {item.label}
                   </Link>
                 ))}
 
-                <div className="border-t pt-4 mt-4">
-                  {loading ? (
-                    <div className="h-4 w-24 bg-muted animate-pulse rounded" />
-                  ) : user ? (
-                    <div className="space-y-2">
-                      <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                        {/* User icon is removed to avoid redeclaration */}
-                        <span>{user.user_metadata?.full_name || user.email}</span>
+                {user ? (
+                  <>
+                    <div className="border-t border-gray-800 pt-4">
+                      <p className="text-sm text-gray-400 mb-4">{profile?.full_name || user.email}</p>
+                      <div className="flex flex-col space-y-2">
+                        <Link href="/submit">
+                          <Button
+                            variant="outline"
+                            className="w-full text-black border-white hover:bg-yellow-400 bg-transparent"
+                          >
+                            Submit Music
+                          </Button>
+                        </Link>
+                        <Link href="/profile">
+                          <Button variant="ghost" className="w-full justify-start text-white hover:text-yellow-400">
+                            <UserIcon className="mr-2 h-4 w-4" />
+                            Profile
+                          </Button>
+                        </Link>
+                        <Link href="/dashboard">
+                          <Button variant="ghost" className="w-full justify-start text-white hover:text-yellow-400">
+                            <Settings className="mr-2 h-4 w-4" />
+                            Dashboard
+                          </Button>
+                        </Link>
+
+                        {isAdmin && (
+                          <>
+                            <div className="border-t border-gray-800 pt-2 mt-2">
+                              <p className="text-xs text-gray-400 mb-2">Admin</p>
+                              <Link href="/admin">
+                                <Button
+                                  variant="ghost"
+                                  className="w-full justify-start text-white hover:text-yellow-400"
+                                >
+                                  <Shield className="mr-2 h-4 w-4" />
+                                  Admin Dashboard
+                                </Button>
+                              </Link>
+                              <Link href="/admin/submissions">
+                                <Button
+                                  variant="ghost"
+                                  className="w-full justify-start text-white hover:text-yellow-400"
+                                >
+                                  <FileText className="mr-2 h-4 w-4" />
+                                  Review Submissions
+                                </Button>
+                              </Link>
+                              {isMasterAdmin && (
+                                <Link href="/admin/users">
+                                  <Button
+                                    variant="ghost"
+                                    className="w-full justify-start text-white hover:text-yellow-400"
+                                  >
+                                    <Users className="mr-2 h-4 w-4" />
+                                    Manage Users
+                                  </Button>
+                                </Link>
+                              )}
+                            </div>
+                          </>
+                        )}
+
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start text-white hover:text-yellow-400"
+                          onClick={handleSignOut}
+                        >
+                          <LogOut className="mr-2 h-4 w-4" />
+                          Sign Out
+                        </Button>
                       </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="border-t border-gray-800 pt-4 space-y-2">
+                    <Link href="/login">
+                      <Button variant="ghost" className="w-full text-white hover:text-yellow-400">
+                        Login
+                      </Button>
+                    </Link>
+                    <Link href="/signup">
                       <Button
                         variant="outline"
-                        size="sm"
-                        onClick={handleSignOut}
-                        disabled={loading}
-                        className="w-full bg-transparent"
+                        className="w-full text-black border-white hover:bg-yellow-400 bg-transparent"
                       >
-                        <LogOut className="h-4 w-4 mr-2" />
-                        Sign Out
+                        Sign Up
                       </Button>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <Button variant="outline" size="sm" asChild className="w-full bg-transparent">
-                        <Link href="/login" onClick={() => setIsOpen(false)}>
-                          Sign In
-                        </Link>
-                      </Button>
-                      <Button size="sm" asChild className="w-full">
-                        <Link href="/signup" onClick={() => setIsOpen(false)}>
-                          Sign Up
-                        </Link>
-                      </Button>
-                    </div>
-                  )}
-                </div>
+                    </Link>
+                  </div>
+                )}
               </div>
             </SheetContent>
           </Sheet>
@@ -220,3 +315,6 @@ export function AuthNavbar() {
     </nav>
   )
 }
+
+// Named export for compatibility
+export { AuthNavbar }

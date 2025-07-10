@@ -9,7 +9,28 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Slider } from "@/components/ui/slider"
-import { Play, Pause, Volume2, VolumeX, SkipBack, SkipForward, Download, ArrowLeft, Star, Clock, CheckCircle, XCircle, Eye, User, Mail, Calendar, Music, Tag, FileAudio, AlertTriangle } from 'lucide-react'
+import {
+  Play,
+  Pause,
+  Volume2,
+  VolumeX,
+  SkipBack,
+  SkipForward,
+  Download,
+  ArrowLeft,
+  Star,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Eye,
+  User,
+  Mail,
+  Calendar,
+  Music,
+  Tag,
+  FileAudio,
+  AlertTriangle,
+} from "lucide-react"
 
 // Mock data for demo purposes
 const mockTrack = {
@@ -32,6 +53,9 @@ const mockTrack = {
   reviewed_at: null,
 }
 
+type TrackStatus = "pending" | "under_review" | "approved" | "rejected"
+type TrackPriority = "low" | "medium" | "high"
+
 type Track = typeof mockTrack
 
 export default function SubmissionDetailPage() {
@@ -51,10 +75,10 @@ export default function SubmissionDetailPage() {
   const [isUpdating, setIsUpdating] = useState(false)
 
   // Review form state
-  const [newStatus, setNewStatus] = useState<Track["status"]>("pending")
+  const [newStatus, setNewStatus] = useState<TrackStatus>("pending")
   const [adminNotes, setAdminNotes] = useState("")
   const [rating, setRating] = useState<number>(0)
-  const [priority, setPriority] = useState<"low" | "medium" | "high">("medium")
+  const [priority, setPriority] = useState<TrackPriority>("medium")
 
   useEffect(() => {
     // Load mock data for demo
@@ -62,7 +86,7 @@ export default function SubmissionDetailPage() {
     setNewStatus(mockTrack.status)
     setAdminNotes(mockTrack.admin_notes || "")
     setRating(mockTrack.rating || 0)
-    setPriority(mockTrack.priority || "medium")
+    setPriority(mockTrack.priority)
     setLoading(false)
   }, [trackId])
 
@@ -422,7 +446,7 @@ export default function SubmissionDetailPage() {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <label className="text-white text-sm font-medium">Status</label>
-                  <Select value={newStatus} onValueChange={(value) => setNewStatus(value as Track["status"])}>
+                  <Select value={newStatus} onValueChange={(value) => setNewStatus(value as TrackStatus)}>
                     <SelectTrigger className="bg-white/10 border-white/20 text-white">
                       <SelectValue />
                     </SelectTrigger>
@@ -437,7 +461,7 @@ export default function SubmissionDetailPage() {
 
                 <div className="space-y-2">
                   <label className="text-white text-sm font-medium">Priority</label>
-                  <Select value={priority} onValueChange={(value) => setPriority(value as "low" | "medium" | "high")}>
+                  <Select value={priority} onValueChange={(value) => setPriority(value as TrackPriority)}>
                     <SelectTrigger className="bg-white/10 border-white/20 text-white">
                       <SelectValue />
                     </SelectTrigger>
