@@ -13,75 +13,94 @@ import { Eye, EyeOff, AlertCircle, Loader2, CheckCircle } from "lucide-react"
 import { supabase } from "@/lib/auth-client"
 
 export default function SignUpPage() {
-  const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
+  const [name, setName] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
-  const [success, setSuccess] = useState("")
+  const [success, setSuccess] = useState(false)
   const router = useRouter()
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
-    setError("")
-    setSuccess("")
 
-    // Validation
+    if (!email || !password || !name) {
+      setError("Please fill in all required fields")
+      return
+    }
+
     if (password !== confirmPassword) {
       setError("Passwords do not match")
-      setLoading(false)
       return
     }
 
     if (password.length < 6) {
       setError("Password must be at least 6 characters long")
-      setLoading(false)
       return
     }
 
-    try {
-      console.log("🔄 Attempting signup with:", { email, name })
+    setLoading(true)
+    setError("")
 
+    try {
       const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
+        email: email.trim(),
+        password: password,
         options: {
           data: {
-            name,
+            name: name.trim(),
           },
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       })
 
-      console.log("Signup response:", { data, error })
-
       if (error) {
-        console.error("Signup error:", error)
+        console.error("Sign up error:", error)
         setError(error.message)
         return
       }
 
       if (data.user) {
+        console.log("Sign up successful:", data.user.email)
+        setSuccess(true)
+
+        // If user is immediately confirmed (no email verification required)
         if (data.user.email_confirmed_at) {
-          // User is immediately confirmed
-          console.log("✅ Signup successful and confirmed, redirecting to dashboard")
-          router.push("/dashboard")
+          setTimeout(() => {
+            router.push("/dashboard")
+          }, 2000)
         } else {
-          // User needs to confirm email
-          console.log("📧 Signup successful, email confirmation required")
-          setSuccess("Please check your email to verify your account before signing in.")
+          // Show success message for email verification
+          setTimeout(() => {
+            router.push("/login")
+          }, 3000)
         }
       }
     } catch (err: any) {
-      console.error("Signup exception:", err)
+      console.error("Sign up catch error:", err)
       setError(err.message || "An unexpected error occurred")
     } finally {
       setLoading(false)
     }
+  }
+
+  if (success) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <Card className="w-full max-w-md">
+          <CardContent className="p-6 text-center">
+            <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Account Created!</h2>
+            <p className="text-gray-600 mb-4">Your account has been created successfully. You can now sign in.</p>
+            <Button onClick={() => router.push("/login")} className="w-full">
+              Continue to Sign In
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (
@@ -100,13 +119,6 @@ export default function SignUpPage() {
               </Alert>
             )}
 
-            {success && (
-              <Alert className="border-green-200 bg-green-50">
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <AlertDescription className="text-green-800">{success}</AlertDescription>
-              </Alert>
-            )}
-
             <div className="space-y-2">
               <Label htmlFor="name">Full Name</Label>
               <Input
@@ -117,6 +129,7 @@ export default function SignUpPage() {
                 onChange={(e) => setName(e.target.value)}
                 required
                 disabled={loading}
+                autoComplete="name"
               />
             </div>
 
@@ -130,6 +143,7 @@ export default function SignUpPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={loading}
+                autoComplete="email"
               />
             </div>
 
@@ -139,11 +153,12 @@ export default function SignUpPage() {
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
+                  placeholder="Create a password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   disabled={loading}
+                  autoComplete="new-password"
                 />
                 <Button
                   type="button"
@@ -169,6 +184,7 @@ export default function SignUpPage() {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
                   disabled={loading}
+                  autoComplete="new-password"
                 />
                 <Button
                   type="button"
@@ -194,13 +210,11 @@ export default function SignUpPage() {
               )}
             </Button>
 
-            <div className="text-center">
-              <div className="text-sm text-gray-600">
-                Already have an account?{" "}
-                <Link href="/login" className="text-blue-600 hover:text-blue-500">
-                  Sign in
-                </Link>
-              </div>
+            <div className="text-center text-sm text-gray-600">
+              Already have an account?{" "}
+              <Link href="/login" className="text-blue-600 hover:text-blue-500">
+                Sign in
+              </Link>
             </div>
           </form>
         </CardContent>

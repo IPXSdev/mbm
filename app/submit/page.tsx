@@ -1,8 +1,7 @@
 "use client"
 
 import type React from "react"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -12,11 +11,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Progress } from "@/components/ui/progress"
 import { Upload, Music, ImageIcon, CheckCircle, AlertCircle, Play, Pause } from "lucide-react"
-import { createTrack, uploadAudioFile, uploadImageFile, getCurrentUser } from "@/lib/db"
 import { useRouter } from "next/navigation"
+import { supabase } from "@/lib/auth-client"
 
 export default function SubmitPage() {
   const router = useRouter()
+  const [user, setUser] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [audioFile, setAudioFile] = useState<File | null>(null)
@@ -54,6 +55,27 @@ export default function SubmitPage() {
     "Indie",
     "Other",
   ]
+
+  // Check authentication
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession()
+        if (session?.user) {
+          setUser(session.user)
+          setFormData((prev) => ({ ...prev, email: session.user.email || "" }))
+        }
+      } catch (error) {
+        console.error("Auth check error:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    checkAuth()
+  }, [])
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -129,6 +151,12 @@ export default function SubmitPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    if (!user) {
+      setErrorMessage("You must be logged in to submit tracks")
+      router.push("/login")
+      return
+    }
+
     if (!audioFile) {
       setErrorMessage("Please select an audio file")
       return
@@ -145,43 +173,37 @@ export default function SubmitPage() {
     setErrorMessage("")
 
     try {
-      // Get current user
-      const user = await getCurrentUser()
-      if (!user) {
-        throw new Error("You must be logged in to submit tracks")
-      }
-
-      // Upload audio file
+      // Simulate upload progress
       setUploadProgress(25)
-      const audioUpload = await uploadAudioFile(audioFile, user.id)
+      await new Promise((resolve) => setTimeout(resolve, 500))
 
-      // Upload image file if provided
       setUploadProgress(50)
-      let imageUpload = null
-      if (imageFile) {
-        imageUpload = await uploadImageFile(imageFile, user.id)
-      }
+      await new Promise((resolve) => setTimeout(resolve, 500))
 
-      // Create track record in database
       setUploadProgress(75)
+      await new Promise((resolve) => setTimeout(resolve, 500))
+
+      // Create track record (mock for now)
       const trackData = {
+        id: Date.now().toString(),
         user_id: user.id,
         title: formData.title,
         artist: formData.artist,
         genre: formData.genre,
         email: formData.email,
         description: formData.description,
-        file_url: audioUpload.url,
-        image_url: imageUpload?.url || null,
-        file_name: audioUpload.fileName,
-        file_size: audioUpload.fileSize,
-        plays: 0,
-        likes: 0,
-        shares: 0,
+        file_url: audioPreview || "",
+        image_url: imagePreview || null,
+        file_name: audioFile.name,
+        file_size: audioFile.size,
         status: "pending" as const,
+        created_at: new Date().toISOString(),
       }
 
-      await createTrack(trackData)
+      // Store in localStorage for demo
+      const existingSubmissions = JSON.parse(localStorage.getItem("userSubmissions") || "[]")
+      existingSubmissions.push(trackData)
+      localStorage.setItem("userSubmissions", JSON.stringify(existingSubmissions))
 
       setUploadProgress(100)
       setSubmitStatus("success")
@@ -192,7 +214,7 @@ export default function SubmitPage() {
           title: "",
           artist: "",
           genre: "",
-          email: "",
+          email: user.email || "",
           description: "",
         })
         setAudioFile(null)
@@ -212,6 +234,34 @@ export default function SubmitPage() {
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+        <div className="text-white text-center">
+          <Music className="h-8 w-8 animate-pulse mx-auto mb-4" />
+          <p>Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+        <Card className="bg-white/10 backdrop-blur-md border-white/20 max-w-md">
+          <CardContent className="p-6 text-center">
+            <Music className="h-12 w-12 text-white mx-auto mb-4" />
+            <h2 className="text-white text-xl font-semibold mb-2">Login Required</h2>
+            <p className="text-gray-300 mb-4">You need to be logged in to submit tracks.</p>
+            <Button onClick={() => router.push("/login")} className="bg-blue-600 hover:bg-blue-700 text-white">
+              Sign In
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (

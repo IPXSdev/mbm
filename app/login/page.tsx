@@ -22,25 +22,35 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (!email || !password) {
+      setError("Please enter both email and password")
+      return
+    }
+
     setLoading(true)
     setError("")
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email: email.trim(),
+        password: password,
       })
 
       if (error) {
+        console.error("Login error:", error)
         setError(error.message)
         return
       }
 
       if (data.user) {
+        console.log("Login successful:", data.user.email)
+
+        // Create/update profile
         const { error: profileError } = await supabase.from("profiles").upsert({
           id: data.user.id,
           email: data.user.email,
-          name: data.user.user_metadata?.name || "User",
+          name: data.user.user_metadata?.name || data.user.email?.split("@")[0] || "User",
           role: "user",
           updated_at: new Date().toISOString(),
         })
@@ -53,6 +63,7 @@ export default function LoginPage() {
         router.refresh()
       }
     } catch (err: any) {
+      console.error("Login catch error:", err)
       setError(err.message || "An unexpected error occurred")
     } finally {
       setLoading(false)
@@ -87,6 +98,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={loading}
+                autoComplete="email"
               />
             </div>
 
@@ -101,6 +113,7 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   disabled={loading}
+                  autoComplete="current-password"
                 />
                 <Button
                   type="button"
