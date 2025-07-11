@@ -32,14 +32,10 @@ export default function LoginPage() {
     setError("")
 
     try {
-      console.log("Attempting login with:", email)
-
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password,
       })
-
-      console.log("Login response:", { data, error })
 
       if (error) {
         console.error("Login error:", error)

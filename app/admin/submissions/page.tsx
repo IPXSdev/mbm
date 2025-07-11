@@ -1,592 +1,117 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import { useSearchParams, useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import { supabase } from "@/lib/auth-client"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Slider } from "@/components/ui/slider"
-import { getTrackById, updateTrackStatus, getCurrentUser } from "@/lib/db"
-import type { Track, User } from "@/lib/db"
-import {
-  Play,
-  Pause,
-  Volume2,
-  VolumeX,
-  SkipBack,
-  SkipForward,
-  Download,
-  ArrowLeft,
-  Star,
-  Clock,
-  CheckCircle,
-  XCircle,
-  Eye,
-  UserIcon,
-  Mail,
-  Calendar,
-  Music,
-  Tag,
-  FileAudio,
-  AlertTriangle,
-} from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Loader2, AlertCircle } from "lucide-react"
 
-type TrackStatus = "pending" | "under_review" | "approved" | "rejected"
-type TrackPriority = "low" | "medium" | "high"
-
-export default function SubmissionDetailPage() {
-  const searchParams = useSearchParams()
+export default function AdminSubmissionsPage() {
   const router = useRouter()
-  const trackId = searchParams.get("id")
-  const audioRef = useRef<HTMLAudioElement>(null)
-
-  const [track, setTrack] = useState<Track | null>(null)
-  const [currentUser, setCurrentUser] = useState<User | null>(null)
+  const [submissions, setSubmissions] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [currentTime, setCurrentTime] = useState(0)
-  const [duration, setDuration] = useState(0)
-  const [volume, setVolume] = useState(1)
-  const [isMuted, setIsMuted] = useState(false)
-  const [isUpdating, setIsUpdating] = useState(false)
-
-  // Review form state
-  const [newStatus, setNewStatus] = useState<TrackStatus>("pending")
-  const [adminNotes, setAdminNotes] = useState("")
-  const [rating, setRating] = useState<number>(0)
-  const [priority, setPriority] = useState<TrackPriority>("medium")
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchSubmissions = async () => {
       try {
-        setLoading(true)
+        const {
+          data: { session },
+        } = await supabase.auth.getSession()
 
-        // Get current user to verify admin access
-        const user = await getCurrentUser()
-        if (!user || (user.role !== "admin" && user.role !== "master_admin")) {
-          setError("Access denied. Admin privileges required.")
-          return
-        }
-        setCurrentUser(user)
-
-        // Get track data
-        if (!trackId) {
-          setError("No track ID provided")
+        if (!session?.user) {
+          setError("You must be logged in as an admin to view this page")
+          setLoading(false)
           return
         }
 
-        const trackData = await getTrackById(trackId)
-        if (!trackData) {
-          setError("Track not found")
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", session.user.id)
+          .single()
+
+        if (profileError || profile?.role !== "admin") {
+          setError("Access denied. Admins only.")
+          setLoading(false)
           return
         }
 
-        setTrack(trackData)
-        setNewStatus(trackData.status)
-        setAdminNotes(trackData.admin_notes || "")
-        setRating(trackData.rating || 0)
-        setPriority(trackData.priority || "medium")
-      } catch (err) {
-        console.error("Error fetching data:", err)
-        setError("Failed to load track data")
+        const { data, error: submissionsError } = await supabase
+          .from("submissions")
+          .select("*")
+          .order("created_at", { ascending: false })
+
+        if (submissionsError) {
+          throw submissionsError
+        }
+
+        setSubmissions(data || [])
+      } catch (err: any) {
+        console.error("Fetch error:", err)
+        setError("Failed to fetch submissions")
       } finally {
         setLoading(false)
       }
     }
 
-    fetchData()
-  }, [trackId])
-
-  useEffect(() => {
-    const audio = audioRef.current
-    if (!audio) return
-
-    const updateTime = () => setCurrentTime(audio.currentTime)
-    const updateDuration = () => setDuration(audio.duration)
-    const handleEnded = () => setIsPlaying(false)
-
-    audio.addEventListener("timeupdate", updateTime)
-    audio.addEventListener("loadedmetadata", updateDuration)
-    audio.addEventListener("ended", handleEnded)
-
-    return () => {
-      audio.removeEventListener("timeupdate", updateTime)
-      audio.removeEventListener("loadedmetadata", updateDuration)
-      audio.removeEventListener("ended", handleEnded)
-    }
-  }, [track])
-
-  const togglePlayPause = () => {
-    const audio = audioRef.current
-    if (!audio) return
-
-    if (isPlaying) {
-      audio.pause()
-    } else {
-      audio.play()
-    }
-    setIsPlaying(!isPlaying)
-  }
-
-  const handleSeek = (value: number[]) => {
-    const audio = audioRef.current
-    if (!audio) return
-
-    const newTime = (value[0] / 100) * duration
-    audio.currentTime = newTime
-    setCurrentTime(newTime)
-  }
-
-  const handleVolumeChange = (value: number[]) => {
-    const audio = audioRef.current
-    if (!audio) return
-
-    const newVolume = value[0] / 100
-    audio.volume = newVolume
-    setVolume(newVolume)
-    setIsMuted(newVolume === 0)
-  }
-
-  const toggleMute = () => {
-    const audio = audioRef.current
-    if (!audio) return
-
-    if (isMuted) {
-      audio.volume = volume
-      setIsMuted(false)
-    } else {
-      audio.volume = 0
-      setIsMuted(true)
-    }
-  }
-
-  const skipTime = (seconds: number) => {
-    const audio = audioRef.current
-    if (!audio) return
-
-    audio.currentTime = Math.max(0, Math.min(duration, audio.currentTime + seconds))
-  }
-
-  const formatTime = (time: number) => {
-    const minutes = Math.floor(time / 60)
-    const seconds = Math.floor(time % 60)
-    return `${minutes}:${seconds.toString().padStart(2, "0")}`
-  }
-
-  const handleStatusUpdate = async () => {
-    if (!track || !currentUser) return
-
-    try {
-      setIsUpdating(true)
-
-      await updateTrackStatus(
-        track.id,
-        newStatus,
-        rating || undefined,
-        adminNotes || undefined,
-        priority,
-        currentUser.email,
-      )
-
-      // Update local state
-      setTrack({
-        ...track,
-        status: newStatus,
-        admin_notes: adminNotes,
-        rating,
-        priority,
-        reviewed_by: currentUser.email,
-        reviewed_at: new Date().toISOString(),
-      })
-
-      setError("")
-    } catch (err) {
-      console.error("Error updating track:", err)
-      setError("Failed to update track")
-    } finally {
-      setIsUpdating(false)
-    }
-  }
-
-  const getStatusBadge = (status: string) => {
-    const statusConfig = {
-      pending: { color: "bg-yellow-500", text: "Pending", icon: Clock },
-      under_review: { color: "bg-blue-500", text: "Under Review", icon: Eye },
-      approved: { color: "bg-green-500", text: "Approved", icon: CheckCircle },
-      rejected: { color: "bg-red-500", text: "Rejected", icon: XCircle },
-    }
-
-    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending
-    const Icon = config.icon
-
-    return (
-      <Badge className={`${config.color} text-white`}>
-        <Icon className="w-3 h-3 mr-1" />
-        {config.text}
-      </Badge>
-    )
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
-        <div className="text-white text-center">
-          <Music className="h-8 w-8 animate-pulse mx-auto mb-4" />
-          <p>Loading track details...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (error || !track) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
-        <Card className="bg-white/10 backdrop-blur-md border-white/20 max-w-md">
-          <CardContent className="p-6 text-center">
-            <AlertTriangle className="h-12 w-12 text-red-400 mx-auto mb-4" />
-            <h2 className="text-white text-xl font-semibold mb-2">Error</h2>
-            <p className="text-gray-300 mb-4">{error || "Track not found"}</p>
-            <Button onClick={() => router.back()} className="bg-blue-600 hover:bg-blue-700 text-white">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Go Back
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
+    fetchSubmissions()
+  }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <Button
-              onClick={() => router.back()}
-              variant="outline"
-              className="bg-white/10 border-white/20 text-white hover:bg-white/20"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
-            </Button>
-            <div>
-              <h1 className="text-3xl font-bold text-white">{track.title}</h1>
-              <p className="text-gray-300">by {track.artist}</p>
-            </div>
-          </div>
-          {getStatusBadge(track.status)}
-        </div>
-
-        {error && (
-          <Alert className="mb-6 bg-red-500/20 border-red-500/50">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription className="text-white">{error}</AlertDescription>
-          </Alert>
-        )}
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Audio Player */}
-            <Card className="bg-white/10 backdrop-blur-md border-white/20">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <FileAudio className="h-5 w-5" />
-                  Audio Player
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {track.file_url && <audio ref={audioRef} src={track.file_url} preload="metadata" />}
-
-                {/* Cover Image */}
-                {track.image_url && (
-                  <div className="flex justify-center">
-                    <img
-                      src={track.image_url || "/placeholder.svg"}
-                      alt={`${track.title} cover`}
-                      className="w-64 h-64 object-cover rounded-lg shadow-lg"
-                    />
-                  </div>
-                )}
-
-                {/* Progress Bar */}
-                <div className="space-y-2">
-                  <Slider
-                    value={[duration ? (currentTime / duration) * 100 : 0]}
-                    onValueChange={handleSeek}
-                    max={100}
-                    step={0.1}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-sm text-gray-300">
-                    <span>{formatTime(currentTime)}</span>
-                    <span>{formatTime(duration)}</span>
-                  </div>
-                </div>
-
-                {/* Controls */}
-                <div className="flex items-center justify-center gap-4">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => skipTime(-10)}
-                    className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+    <div className="min-h-screen bg-black text-white py-10 px-4">
+      <div className="max-w-4xl mx-auto">
+        <Card className="bg-white/10 backdrop-blur-md border-white/20">
+          <CardHeader>
+            <CardTitle className="text-white">Admin Submissions</CardTitle>
+            <CardDescription className="text-gray-300">
+              Review all user-submitted tracks below.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="flex justify-center items-center py-10">
+                <Loader2 className="animate-spin h-8 w-8 text-white" />
+              </div>
+            ) : error ? (
+              <Alert className="bg-red-500/10 border-red-500/40">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            ) : submissions.length === 0 ? (
+              <p className="text-gray-400 text-center">No submissions found.</p>
+            ) : (
+              <div className="space-y-4">
+                {submissions.map((submission) => (
+                  <div
+                    key={submission.id}
+                    className="p-4 border border-white/20 rounded bg-white/5"
                   >
-                    <SkipBack className="h-4 w-4" />
-                  </Button>
-
-                  <Button
-                    size="lg"
-                    onClick={togglePlayPause}
-                    className="bg-blue-600 hover:bg-blue-700 text-white rounded-full w-12 h-12"
-                    disabled={!track.file_url}
-                  >
-                    {isPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
-                  </Button>
-
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => skipTime(10)}
-                    className="bg-white/10 border-white/20 text-white hover:bg-white/20"
-                  >
-                    <SkipForward className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                {/* Volume Control */}
-                <div className="flex items-center gap-2">
-                  <Button size="sm" variant="ghost" onClick={toggleMute} className="text-white hover:bg-white/10">
-                    {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-                  </Button>
-                  <Slider
-                    value={[isMuted ? 0 : volume * 100]}
-                    onValueChange={handleVolumeChange}
-                    max={100}
-                    step={1}
-                    className="flex-1 max-w-32"
-                  />
-                </div>
-
-                {/* Download Button */}
-                {track.file_url && (
-                  <div className="flex justify-center">
-                    <Button asChild className="bg-green-600 hover:bg-green-700 text-white">
-                      <a href={track.file_url} download={track.file_name || `${track.title}.mp3`}>
-                        <Download className="h-4 w-4 mr-2" />
-                        Download Track
-                      </a>
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Track Details */}
-            <Card className="bg-white/10 backdrop-blur-md border-white/20">
-              <CardHeader>
-                <CardTitle className="text-white">Track Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex items-center gap-2">
-                    <UserIcon className="h-4 w-4 text-gray-400" />
-                    <span className="text-gray-400">Artist:</span>
-                    <span className="text-white">{track.artist}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Tag className="h-4 w-4 text-gray-400" />
-                    <span className="text-gray-400">Genre:</span>
-                    <span className="text-white">{track.genre}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Mail className="h-4 w-4 text-gray-400" />
-                    <span className="text-gray-400">Email:</span>
-                    <span className="text-white">{track.email}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-gray-400" />
-                    <span className="text-gray-400">Submitted:</span>
-                    <span className="text-white">{new Date(track.created_at).toLocaleDateString()}</span>
-                  </div>
-                  {track.file_size && (
-                    <div className="flex items-center gap-2">
-                      <FileAudio className="h-4 w-4 text-gray-400" />
-                      <span className="text-gray-400">File Size:</span>
-                      <span className="text-white">{(track.file_size / 1024 / 1024).toFixed(1)}MB</span>
-                    </div>
-                  )}
-                  {track.file_name && (
-                    <div className="flex items-center gap-2">
-                      <FileAudio className="h-4 w-4 text-gray-400" />
-                      <span className="text-gray-400">File Name:</span>
-                      <span className="text-white">{track.file_name}</span>
-                    </div>
-                  )}
-                </div>
-
-                {track.description && (
-                  <div>
-                    <h4 className="text-white font-medium mb-2">Description</h4>
-                    <p className="text-gray-300">{track.description}</p>
-                  </div>
-                )}
-
-                {track.rating && (
-                  <div>
-                    <h4 className="text-white font-medium mb-2">Current Rating</h4>
-                    <div className="flex items-center gap-1">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`h-5 w-5 ${i < track.rating! ? "text-yellow-400 fill-current" : "text-gray-600"}`}
-                        />
-                      ))}
-                      <span className="text-white ml-2">{track.rating}/5</span>
-                    </div>
-                  </div>
-                )}
-
-                {track.admin_notes && (
-                  <div>
-                    <h4 className="text-white font-medium mb-2">Previous Notes</h4>
-                    <p className="text-gray-300 bg-white/5 p-3 rounded-lg">{track.admin_notes}</p>
-                  </div>
-                )}
-
-                {track.reviewed_by && track.reviewed_at && (
-                  <div className="text-sm text-gray-400">
-                    Last reviewed by {track.reviewed_by} on {new Date(track.reviewed_at).toLocaleDateString()}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Review Panel */}
-          <div className="space-y-6">
-            <Card className="bg-white/10 backdrop-blur-md border-white/20">
-              <CardHeader>
-                <CardTitle className="text-white">Review Track</CardTitle>
-                <CardDescription className="text-gray-300">Update status and add review notes</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-white text-sm font-medium">Status</label>
-                  <Select value={newStatus} onValueChange={(value) => setNewStatus(value as TrackStatus)}>
-                    <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="under_review">Under Review</SelectItem>
-                      <SelectItem value="approved">Approved</SelectItem>
-                      <SelectItem value="rejected">Rejected</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-white text-sm font-medium">Priority</label>
-                  <Select value={priority} onValueChange={(value) => setPriority(value as TrackPriority)}>
-                    <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="low">Low</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="high">High</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-white text-sm font-medium">Rating</label>
-                  <div className="flex items-center gap-1">
-                    {[...Array(5)].map((_, i) => (
-                      <button key={i} type="button" onClick={() => setRating(i + 1)} className="focus:outline-none">
-                        <Star
-                          className={`h-6 w-6 transition-colors ${
-                            i < rating ? "text-yellow-400 fill-current" : "text-gray-600 hover:text-yellow-300"
-                          }`}
-                        />
-                      </button>
-                    ))}
-                    {rating > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => setRating(0)}
-                        className="ml-2 text-sm text-gray-400 hover:text-white"
-                      >
-                        Clear
-                      </button>
+                    <p><strong>Title:</strong> {submission.title}</p>
+                    <p><strong>Artist:</strong> {submission.artist}</p>
+                    <p><strong>Email:</strong> {submission.email}</p>
+                    <p><strong>Genre:</strong> {submission.genre}</p>
+                    <p><strong>Description:</strong> {submission.description}</p>
+                    <p><strong>Status:</strong> {submission.status}</p>
+                    <p><strong>Submitted:</strong> {new Date(submission.created_at).toLocaleString()}</p>
+                    {submission.file_url && (
+                      <audio controls src={submission.file_url} className="mt-2 w-full" />
+                    )}
+                    {submission.image_url && (
+                      <img
+                        src={submission.image_url}
+                        alt="Cover"
+                        className="mt-2 h-32 w-32 object-cover rounded"
+                      />
                     )}
                   </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-white text-sm font-medium">Admin Notes</label>
-                  <Textarea
-                    value={adminNotes}
-                    onChange={(e) => setAdminNotes(e.target.value)}
-                    placeholder="Add review notes..."
-                    className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-                    rows={4}
-                  />
-                </div>
-
-                <Button
-                  onClick={handleStatusUpdate}
-                  disabled={isUpdating}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  {isUpdating ? "Updating..." : "Update Review"}
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Quick Actions */}
-            <Card className="bg-white/10 backdrop-blur-md border-white/20">
-              <CardHeader>
-                <CardTitle className="text-white">Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <Button
-                  onClick={() => {
-                    setNewStatus("approved")
-                    setRating(5)
-                  }}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white"
-                >
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  Quick Approve
-                </Button>
-                <Button
-                  onClick={() => {
-                    setNewStatus("rejected")
-                    setRating(1)
-                  }}
-                  className="w-full bg-red-600 hover:bg-red-700 text-white"
-                >
-                  <XCircle className="h-4 w-4 mr-2" />
-                  Quick Reject
-                </Button>
-                <Button
-                  onClick={() => setNewStatus("under_review")}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  <Eye className="h-4 w-4 mr-2" />
-                  Mark Under Review
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   )
