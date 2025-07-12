@@ -35,6 +35,7 @@ export default function DashboardPage() {
   const [submittedTracks, setSubmittedTracks] = useState<SubmittedTrack[]>([])
   const [loadingTracks, setLoadingTracks] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
+  const [isMasterAdmin, setIsMasterAdmin] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -70,7 +71,10 @@ export default function DashboardPage() {
           setUser(session.user)
           setError(null)
           // Check admin role
-          getProfileRole(session.user.id || "", session.user.email || "").then((role) => setIsAdmin(role === "admin" || role === "master_admin"))
+          getProfileRole(session.user.id || "", session.user.email || "").then((role) => {
+            setIsAdmin(role === "admin" || role === "master_admin" || (session.user.email?.toLowerCase() === "2668harris@gmail.com"));
+            setIsMasterAdmin(role === "master_admin" || (session.user.email?.toLowerCase() === "2668harris@gmail.com"));
+          })
           // Load user's actual submissions
           await loadUserSubmissions(session.user.id)
         } else if (mounted) {
@@ -103,7 +107,10 @@ export default function DashboardPage() {
         setUser(session.user)
         setError(null)
         setLoading(false)
-        getProfileRole(session.user.id || "", session.user.email || "").then((role) => setIsAdmin(role === "admin" || role === "master_admin"))
+        getProfileRole(session.user.id || "", session.user.email || "").then((role) => {
+          setIsAdmin(role === "admin" || role === "master_admin" || (session.user.email?.toLowerCase() === "2668harris@gmail.com"));
+          setIsMasterAdmin(role === "master_admin" || (session.user.email?.toLowerCase() === "2668harris@gmail.com"));
+        })
         await loadUserSubmissions(session.user.id)
       } else if (event === "SIGNED_OUT") {
         setUser(null)
@@ -251,7 +258,7 @@ export default function DashboardPage() {
         <div className="flex items-center gap-2">
           {isAdmin && (
             <Button variant="default" asChild>
-              <Link href="/admin">
+              <Link href="/admin-portal">
                 Admin Portal
               </Link>
             </Button>

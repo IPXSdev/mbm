@@ -72,8 +72,8 @@ export default function AuthNavbar() {
     router.push("/")
   }
 
-  const isAdmin = profile?.role === "admin" || profile?.role === "master_admin" || (user?.email === "2668Harris@gmail.com")
-  const isMasterAdmin = profile?.role === "master_admin"
+  const isAdmin = profile?.role === "admin" || profile?.role === "master_admin" || (user?.email?.toLowerCase() === "2668harris@gmail.com")
+  const isMasterAdmin = profile?.role === "master_admin" || (user?.email?.toLowerCase() === "2668harris@gmail.com")
 
   const navItems = [
     { href: "/", label: "Home" },
@@ -192,7 +192,7 @@ export default function AuthNavbar() {
                           <>
                             <div className="border-t border-gray-800 pt-2 mt-2">
                               <p className="text-xs text-gray-400 mb-2">Admin</p>
-                              <Link href="/admin">
+                              <Link href="/admin-portal">
                                 <Button
                                   variant="ghost"
                                   className="w-full justify-start text-white hover:text-yellow-400"
@@ -201,7 +201,7 @@ export default function AuthNavbar() {
                                   Admin Dashboard
                                 </Button>
                               </Link>
-                              <Link href="/admin/submissions">
+                              <Link href="/admin-portal/submissions">
                                 <Button
                                   variant="ghost"
                                   className="w-full justify-start text-white hover:text-yellow-400"
@@ -211,7 +211,7 @@ export default function AuthNavbar() {
                                 </Button>
                               </Link>
                               {isMasterAdmin && (
-                                <Link href="/admin/users">
+                                <Link href="/admin-portal/users">
                                   <Button
                                     variant="ghost"
                                     className="w-full justify-start text-white hover:text-yellow-400"

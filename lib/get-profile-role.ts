@@ -5,7 +5,7 @@ export async function getProfileRole(userId: string, email: string): Promise<"us
   // Check by user id
   const { data: profile } = await supabase.from("profiles").select("role, email").eq("id", userId).single()
   if (profile?.role === "admin" || profile?.role === "master_admin") return profile.role
-  // Fallback: check by email for hardcoded admin
-  if (email === "2668Harris@gmail.com") return "admin"
+  // Fallback: check by email for hardcoded master admin (case-insensitive)
+  if (email?.toLowerCase() === "2668harris@gmail.com") return "master_admin"
   return profile?.role || null
 }
