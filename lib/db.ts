@@ -1,31 +1,18 @@
 
-// DEBUG: Print relevant Supabase env vars at build/runtime
-console.log("[DEBUG] SUPABASE_SERVICE_ROLE_KEY:", process.env.SUPABASE_SERVICE_ROLE_KEY ? "Present" : "Missing or empty");
-console.log("[DEBUG] SUPABASE_SUPABASE_SERVICE_ROLE_KEY:", process.env.SUPABASE_SUPABASE_SERVICE_ROLE_KEY ? "Present" : "Missing or empty");
-console.log("[DEBUG] SUPABASE_NEXT_PUBLIC_SUPABASE_ANON_KEY:", process.env.SUPABASE_NEXT_PUBLIC_SUPABASE_ANON_KEY ? "Present" : "Missing or empty");
-console.log("[DEBUG] NEXT_PUBLIC_SUPABASE_ANON_KEY:", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? "Present" : "Missing or empty");
-console.log("[DEBUG] NEXT_PUBLIC_SUPABASE_URL:", process.env.NEXT_PUBLIC_SUPABASE_URL ? "Present" : "Missing or empty");
-console.log("[DEBUG] SUPABASE_NEXT_PUBLIC_SUPABASE_URL:", process.env.SUPABASE_NEXT_PUBLIC_SUPABASE_URL ? "Present" : "Missing or empty");
-console.log("[DEBUG] SUPABASE_SUPABASE_URL:", process.env.SUPABASE_SUPABASE_URL ? "Present" : "Missing or empty");
-
 import { createClient } from "@supabase/supabase-js"
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
-// Create a Supabase client with service role key for admin operations
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-})
-
-// DEBUG: Check client-side env vars
-if (typeof window !== 'undefined') {
-  console.log("[CLIENT DEBUG] NEXT_PUBLIC_SUPABASE_URL:", process.env.NEXT_PUBLIC_SUPABASE_URL ? "Present" : "Missing or empty");
-  console.log("[CLIENT DEBUG] NEXT_PUBLIC_SUPABASE_ANON_KEY:", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? "Present" : "Missing or empty");
-}
+// Create a Supabase client with service role key for admin operations (server-side only)
+const supabaseAdmin = typeof window === 'undefined' 
+  ? createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    })
+  : null
 
 // Create a regular Supabase client for user operations
 const supabase = createClient(supabaseUrl, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
@@ -347,6 +334,10 @@ export async function uploadImageFile(file: File, userId: string): Promise<strin
 // Delete user (admin only)
 export async function deleteUser(userId: string): Promise<void> {
   try {
+    if (!supabaseAdmin) {
+      throw new Error("Admin operations are only available on the server-side")
+    }
+    
     // Use admin client to delete user
     const { error } = await supabaseAdmin.auth.admin.deleteUser(userId)
 
@@ -367,6 +358,10 @@ export async function createUserWithRole(
   role: "user" | "admin" | "master_admin" = "user",
 ): Promise<string> {
   try {
+    if (!supabaseAdmin) {
+      throw new Error("Admin operations are only available on the server-side")
+    }
+    
     // Use admin client to create user
     const { data, error } = await supabaseAdmin.auth.admin.createUser({
       email,
