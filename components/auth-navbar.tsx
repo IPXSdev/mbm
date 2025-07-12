@@ -33,38 +33,85 @@ export default function AuthNavbar() {
   const supabase = createClient()
 
   useEffect(() => {
+    let mounted = true
+    let timeoutId: NodeJS.Timeout
+    
     const getUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-      setUser(user)
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser()
+        
+        if (!mounted) return
+        
+        setUser(user)
 
-      if (user) {
-        const { data: profileData } = await supabase.from("profiles").select("*").eq("id", user.id).single()
-        setProfile(profileData)
+        if (user) {
+          try {
+            const { data: profileData } = await supabase.from("profiles").select("*").eq("id", user.id).single()
+            if (mounted) {
+              setProfile(profileData)
+            }
+          } catch (profileError) {
+            console.warn("Could not fetch profile:", profileError)
+            // Continue without profile data
+          }
+        }
+
+        if (mounted) {
+          setLoading(false)
+        }
+      } catch (error) {
+        console.error("Error getting user:", error)
+        if (mounted) {
+          setLoading(false)
+        }
       }
-
-      setLoading(false)
     }
+
+    // Set a timeout to ensure loading state doesn't persist too long
+    timeoutId = setTimeout(() => {
+      if (mounted && loading) {
+        console.warn("Auth loading timeout - forcing loaded state")
+        setLoading(false)
+      }
+    }, 3000)
 
     getUser()
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!mounted) return
+      
       setUser(session?.user ?? null)
 
       if (session?.user) {
-        const { data: profileData } = await supabase.from("profiles").select("*").eq("id", session.user.id).single()
-        setProfile(profileData)
+        try {
+          const { data: profileData } = await supabase.from("profiles").select("*").eq("id", session.user.id).single()
+          if (mounted) {
+            setProfile(profileData)
+          }
+        } catch (profileError) {
+          console.warn("Could not fetch profile:", profileError)
+          // Continue without profile data
+        }
       } else {
-        setProfile(null)
+        if (mounted) {
+          setProfile(null)
+        }
       }
 
-      setLoading(false)
+      if (mounted) {
+        setLoading(false)
+      }
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      mounted = false
+      clearTimeout(timeoutId)
+      subscription.unsubscribe()
+    }
   }, [supabase])
 
   const handleSignOut = async () => {
@@ -86,15 +133,22 @@ export default function AuthNavbar() {
     { href: "/contact", label: "Contact" },
   ]
 
-  // Only show loading if user is logged in and profile is still loading
-  if (user && loading) {
+  // Show loading only initially while checking auth state
+  if (loading) {
     return (
       <nav className="bg-black text-white p-4">
         <div className="container mx-auto flex justify-between items-center">
           <Link href="/" className="text-2xl font-bold">
             Man Behind The Music
           </Link>
-          <div>Loading...</div>
+          <div className="hidden md:flex items-center space-x-6">
+            {navItems.map((item) => (
+              <Link key={item.href} href={item.href} className="hover:text-yellow-400 transition-colors">
+                {item.label}
+              </Link>
+            ))}
+            <div className="text-sm">Loading...</div>
+          </div>
         </div>
       </nav>
     )
