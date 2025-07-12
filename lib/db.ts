@@ -21,6 +21,12 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
   },
 })
 
+// DEBUG: Check client-side env vars
+if (typeof window !== 'undefined') {
+  console.log("[CLIENT DEBUG] NEXT_PUBLIC_SUPABASE_URL:", process.env.NEXT_PUBLIC_SUPABASE_URL ? "Present" : "Missing or empty");
+  console.log("[CLIENT DEBUG] NEXT_PUBLIC_SUPABASE_ANON_KEY:", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? "Present" : "Missing or empty");
+}
+
 // Create a regular Supabase client for user operations
 const supabase = createClient(supabaseUrl, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
 
