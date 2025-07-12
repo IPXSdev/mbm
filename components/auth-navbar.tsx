@@ -114,7 +114,7 @@ export default function AuthNavbar() {
           {user ? (
             <div className="flex items-center space-x-4">
               <Link href="/submit">
-                <Button variant="outline" className="text-black border-white hover:bg-yellow-400 bg-transparent">
+                <Button variant="ghost" className="text-white hover:text-yellow-400">
                   Submit Music
                 </Button>
               </Link>
@@ -217,8 +217,8 @@ export default function AuthNavbar() {
                       <div className="flex flex-col space-y-2">
                         <Link href="/submit">
                           <Button
-                            variant="outline"
-                            className="w-full text-black border-white hover:bg-yellow-400 bg-transparent"
+                            variant="ghost"
+                            className="w-full text-white hover:text-yellow-400"
                           >
                             Submit Music
                           </Button>
