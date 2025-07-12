@@ -17,10 +17,10 @@
     "@radix-ui/react-progress": "latest",
     "@radix-ui/react-select": "latest",
     "@radix-ui/react-separator": "latest",
-  
     "@radix-ui/react-slider": "latest",
     "@radix-ui/react-slot": "latest",
     "@radix-ui/react-tabs": "latest",
+    "@radix-ui/react-toast": "^1.2.14",
     "@radix-ui/react-visually-hidden": "latest",
     "@supabase/ssr": "latest",
     "@supabase/supabase-js": "latest",
