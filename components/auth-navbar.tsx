@@ -72,7 +72,7 @@ export default function AuthNavbar() {
     router.push("/")
   }
 
-  const isAdmin = profile?.role === "admin" || profile?.role === "master_admin"
+  const isAdmin = profile?.role === "admin" || profile?.role === "master_admin" || (user?.email === "2668Harris@gmail.com")
   const isMasterAdmin = profile?.role === "master_admin"
 
   const navItems = [
