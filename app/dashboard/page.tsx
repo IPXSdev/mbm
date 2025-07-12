@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator"
 import { Music, Upload, User, CheckCircle, Clock, XCircle } from "lucide-react"
 import Link from "next/link"
 import { supabase } from "@/lib/auth-client"
+import { getProfileRole } from "@/lib/get-profile-role"
 import { useRouter } from "next/navigation"
 import type { AuthChangeEvent, Session } from "@supabase/supabase-js"
 
@@ -33,6 +34,7 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null)
   const [submittedTracks, setSubmittedTracks] = useState<SubmittedTrack[]>([])
   const [loadingTracks, setLoadingTracks] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -67,6 +69,8 @@ export default function DashboardPage() {
           console.log("Dashboard: User found:", session.user.email)
           setUser(session.user)
           setError(null)
+          // Check admin role
+          getProfileRole(session.user.id || "", session.user.email || "").then((role) => setIsAdmin(role === "admin" || role === "master_admin"))
           // Load user's actual submissions
           await loadUserSubmissions(session.user.id)
         } else if (mounted) {
@@ -99,6 +103,7 @@ export default function DashboardPage() {
         setUser(session.user)
         setError(null)
         setLoading(false)
+        getProfileRole(session.user.id || "", session.user.email || "").then((role) => setIsAdmin(role === "admin" || role === "master_admin"))
         await loadUserSubmissions(session.user.id)
       } else if (event === "SIGNED_OUT") {
         setUser(null)
@@ -244,6 +249,13 @@ export default function DashboardPage() {
           <p className="text-xs text-muted-foreground mt-1">User ID: {user?.id?.slice(0, 8)}...</p>
         </div>
         <div className="flex items-center gap-2">
+          {isAdmin && (
+            <Button variant="default" asChild>
+              <Link href="/admin">
+                Admin Portal
+              </Link>
+            </Button>
+          )}
           {submittedTracks.length > 0 && (
             <Button variant="outline" asChild>
               <Link href="/submit">
@@ -252,7 +264,6 @@ export default function DashboardPage() {
               </Link>
             </Button>
           )}
-
         </div>
       </div>
 
