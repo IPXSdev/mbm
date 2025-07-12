@@ -1,3 +1,13 @@
+
+// DEBUG: Print relevant Supabase env vars at build/runtime
+console.log("[DEBUG] SUPABASE_SERVICE_ROLE_KEY:", process.env.SUPABASE_SERVICE_ROLE_KEY ? "Present" : "Missing or empty");
+console.log("[DEBUG] SUPABASE_SUPABASE_SERVICE_ROLE_KEY:", process.env.SUPABASE_SUPABASE_SERVICE_ROLE_KEY ? "Present" : "Missing or empty");
+console.log("[DEBUG] SUPABASE_NEXT_PUBLIC_SUPABASE_ANON_KEY:", process.env.SUPABASE_NEXT_PUBLIC_SUPABASE_ANON_KEY ? "Present" : "Missing or empty");
+console.log("[DEBUG] NEXT_PUBLIC_SUPABASE_ANON_KEY:", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? "Present" : "Missing or empty");
+console.log("[DEBUG] NEXT_PUBLIC_SUPABASE_URL:", process.env.NEXT_PUBLIC_SUPABASE_URL ? "Present" : "Missing or empty");
+console.log("[DEBUG] SUPABASE_NEXT_PUBLIC_SUPABASE_URL:", process.env.SUPABASE_NEXT_PUBLIC_SUPABASE_URL ? "Present" : "Missing or empty");
+console.log("[DEBUG] SUPABASE_SUPABASE_URL:", process.env.SUPABASE_SUPABASE_URL ? "Present" : "Missing or empty");
+
 import { createClient } from "@supabase/supabase-js"
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
