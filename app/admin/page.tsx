@@ -28,56 +28,27 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/auth-client"
 
-// Mock data for demo
-type TrackStatus = "pending" | "under_review" | "approved" | "rejected"
+import { getTracks } from "@/lib/db"
+
 type Track = {
   id: string
   title: string
   artist: string
   genre: string
   email: string
-  status: TrackStatus
+  status: string
   created_at: string
-  file_size: number
-  admin_notes: string
-  rating: number
-  priority: "low" | "medium" | "high"
+  file_size?: number
+  admin_notes?: string
+  rating?: number
+  priority?: string
 }
-
-const mockTracks: Track[] = [
-  {
-    id: "1",
-    title: "Sample Track 1",
-    artist: "Demo Artist 1",
-    genre: "Hip Hop",
-    email: "artist1@example.com",
-    status: "pending",
-    created_at: new Date().toISOString(),
-    file_size: 5242880,
-    admin_notes: "",
-    rating: 0,
-    priority: "medium",
-  },
-  {
-    id: "2",
-    title: "Sample Track 2",
-    artist: "Demo Artist 2",
-    genre: "R&B",
-    email: "artist2@example.com",
-    status: "approved",
-    created_at: new Date(Date.now() - 86400000).toISOString(),
-    file_size: 7340032,
-    admin_notes: "Great track!",
-    rating: 5,
-    priority: "high",
-  },
-]
 
 
 export default function AdminDashboard() {
   // Assume user is authenticated (handled by layout)
-  const [tracks, setTracks] = useState<Track[]>(mockTracks)
-  const [filteredTracks, setFilteredTracks] = useState<Track[]>(mockTracks)
+  const [tracks, setTracks] = useState<Track[]>([])
+  const [filteredTracks, setFilteredTracks] = useState<Track[]>([])
   const [error, setError] = useState("")
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
@@ -88,13 +59,25 @@ export default function AdminDashboard() {
   const [isUpdating, setIsUpdating] = useState(false)
 
   useEffect(() => {
+    async function fetchTracks() {
+      try {
+        const data = await getTracks()
+        setTracks(data)
+      } catch (err) {
+        setError("Failed to load submissions.")
+      }
+    }
+    fetchTracks()
+  }, [])
+
+  useEffect(() => {
     let filtered = tracks
     if (searchTerm) {
       filtered = filtered.filter(
         (track) =>
-          track.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          track.artist.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          track.email.toLowerCase().includes(searchTerm.toLowerCase()),
+          track.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          track.artist?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          track.email?.toLowerCase().includes(searchTerm.toLowerCase()),
       )
     }
     if (statusFilter !== "all") {
@@ -412,7 +395,7 @@ export default function AdminDashboard() {
                           <p className="text-gray-300 text-sm">by {track.artist}</p>
                         </div>
                         <div className="flex items-center gap-2">
-                          {getPriorityBadge(track.priority)}
+                          {getPriorityBadge(track.priority || "medium")}
                           {getStatusBadge(track.status)}
                         </div>
                       </div>
@@ -442,14 +425,14 @@ export default function AdminDashboard() {
                         </div>
                       </div>
 
-                      {track.rating > 0 && (
+                      {typeof track.rating === "number" && track.rating > 0 && (
                         <div className="flex items-center mt-2">
                           <span className="text-gray-400 text-sm mr-2">Rating:</span>
                           {[...Array(5)].map((_, i) => (
                             <Star
                               key={i}
                               className={`h-4 w-4 ${
-                                i < track.rating ? "text-yellow-400 fill-current" : "text-gray-600"
+                                i < (track.rating ?? 0) ? "text-yellow-400 fill-current" : "text-gray-600"
                               }`}
                             />
                           ))}
