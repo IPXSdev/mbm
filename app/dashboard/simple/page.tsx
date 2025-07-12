@@ -42,7 +42,7 @@ export default function SimpleDashboard() {
           <p className="text-muted-foreground">{user?.user_metadata?.name || user?.email}</p>
         </div>
         <Button asChild>
-          <Link href="/submit">
+          <Link href="/submit" className="text-white hover:text-yellow-400">
             <Upload className="mr-2 h-4 w-4" />
             Submit Music
           </Link>

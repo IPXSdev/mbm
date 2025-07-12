@@ -264,7 +264,7 @@ export default function DashboardPage() {
         </div>
         <div className="flex items-center gap-2">
           <Button asChild>
-            <Link href="/submit">
+            <Link href="/submit" className="text-white hover:text-yellow-400">
               <Upload className="mr-2 h-4 w-4" />
               Submit Music
             </Link>
