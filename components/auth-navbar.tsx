@@ -40,9 +40,7 @@ export default function AuthNavbar() {
       setUser(user)
 
       if (user) {
-        // Get user profile to check role
         const { data: profileData } = await supabase.from("profiles").select("*").eq("id", user.id).single()
-
         setProfile(profileData)
       }
 
@@ -58,7 +56,6 @@ export default function AuthNavbar() {
 
       if (session?.user) {
         const { data: profileData } = await supabase.from("profiles").select("*").eq("id", session.user.id).single()
-
         setProfile(profileData)
       } else {
         setProfile(null)
@@ -80,11 +77,8 @@ export default function AuthNavbar() {
 
   const navItems = [
     { href: "/", label: "Home" },
-    { href: "/episodes", label: "Episodes" },
     { href: "/podcast", label: "Podcast" },
     { href: "/placements", label: "Placements" },
-    { href: "/leaderboard", label: "Leaderboard" },
-    { href: "/store", label: "Store" },
     { href: "/pricing", label: "Pricing" },
     { href: "/contact", label: "Contact" },
   ]

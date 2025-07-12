@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Slider } from "@/components/ui/slider"
+import { getTrackById, updateTrackStatus, getCurrentUser } from "@/lib/db"
+import type { Track, User } from "@/lib/db"
 import {
   Play,
   Pause,
@@ -23,7 +25,7 @@ import {
   CheckCircle,
   XCircle,
   Eye,
-  User,
+  UserIcon,
   Mail,
   Calendar,
   Music,
@@ -32,31 +34,8 @@ import {
   AlertTriangle,
 } from "lucide-react"
 
-// Mock data for demo purposes
-const mockTrack = {
-  id: "1",
-  title: "Sample Track",
-  artist: "Demo Artist",
-  genre: "Hip Hop",
-  email: "artist@example.com",
-  status: "pending" as const,
-  created_at: new Date().toISOString(),
-  file_url: "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav",
-  image_url: "/placeholder.svg?height=256&width=256",
-  description: "This is a demo track for testing purposes.",
-  file_size: 5242880, // 5MB
-  file_name: "demo-track.mp3",
-  admin_notes: "",
-  rating: 0,
-  priority: "medium" as const,
-  reviewed_by: null,
-  reviewed_at: null,
-}
-
 type TrackStatus = "pending" | "under_review" | "approved" | "rejected"
 type TrackPriority = "low" | "medium" | "high"
-
-type Track = typeof mockTrack
 
 export default function SubmissionDetailPage() {
   const searchParams = useSearchParams()
@@ -65,6 +44,7 @@ export default function SubmissionDetailPage() {
   const audioRef = useRef<HTMLAudioElement>(null)
 
   const [track, setTrack] = useState<Track | null>(null)
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [isPlaying, setIsPlaying] = useState(false)
@@ -81,13 +61,44 @@ export default function SubmissionDetailPage() {
   const [priority, setPriority] = useState<TrackPriority>("medium")
 
   useEffect(() => {
-    // Load mock data for demo
-    setTrack(mockTrack)
-    setNewStatus(mockTrack.status)
-    setAdminNotes(mockTrack.admin_notes || "")
-    setRating(mockTrack.rating || 0)
-    setPriority(mockTrack.priority)
-    setLoading(false)
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+
+        // Get current user to verify admin access
+        const user = await getCurrentUser()
+        if (!user || (user.role !== "admin" && user.role !== "master_admin")) {
+          setError("Access denied. Admin privileges required.")
+          return
+        }
+        setCurrentUser(user)
+
+        // Get track data
+        if (!trackId) {
+          setError("No track ID provided")
+          return
+        }
+
+        const trackData = await getTrackById(trackId)
+        if (!trackData) {
+          setError("Track not found")
+          return
+        }
+
+        setTrack(trackData)
+        setNewStatus(trackData.status)
+        setAdminNotes(trackData.admin_notes || "")
+        setRating(trackData.rating || 0)
+        setPriority(trackData.priority || "medium")
+      } catch (err) {
+        console.error("Error fetching data:", err)
+        setError("Failed to load track data")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
   }, [trackId])
 
   useEffect(() => {
@@ -167,14 +178,32 @@ export default function SubmissionDetailPage() {
   }
 
   const handleStatusUpdate = async () => {
-    if (!track) return
+    if (!track || !currentUser) return
 
     try {
       setIsUpdating(true)
-      // Mock update for demo
-      console.log("Updating track status:", { newStatus, adminNotes, rating, priority })
-      // In real app, this would call an API
-      setTrack({ ...track, status: newStatus, admin_notes: adminNotes, rating, priority })
+
+      await updateTrackStatus(
+        track.id,
+        newStatus,
+        rating || undefined,
+        adminNotes || undefined,
+        priority,
+        currentUser.email,
+      )
+
+      // Update local state
+      setTrack({
+        ...track,
+        status: newStatus,
+        admin_notes: adminNotes,
+        rating,
+        priority,
+        reviewed_by: currentUser.email,
+        reviewed_at: new Date().toISOString(),
+      })
+
+      setError("")
     } catch (err) {
       console.error("Error updating track:", err)
       setError("Failed to update track")
@@ -272,7 +301,7 @@ export default function SubmissionDetailPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <audio ref={audioRef} src={track.file_url} preload="metadata" />
+                {track.file_url && <audio ref={audioRef} src={track.file_url} preload="metadata" />}
 
                 {/* Cover Image */}
                 {track.image_url && (
@@ -315,6 +344,7 @@ export default function SubmissionDetailPage() {
                     size="lg"
                     onClick={togglePlayPause}
                     className="bg-blue-600 hover:bg-blue-700 text-white rounded-full w-12 h-12"
+                    disabled={!track.file_url}
                   >
                     {isPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
                   </Button>
@@ -344,14 +374,16 @@ export default function SubmissionDetailPage() {
                 </div>
 
                 {/* Download Button */}
-                <div className="flex justify-center">
-                  <Button asChild className="bg-green-600 hover:bg-green-700 text-white">
-                    <a href={track.file_url} download={track.file_name || `${track.title}.mp3`}>
-                      <Download className="h-4 w-4 mr-2" />
-                      Download Track
-                    </a>
-                  </Button>
-                </div>
+                {track.file_url && (
+                  <div className="flex justify-center">
+                    <Button asChild className="bg-green-600 hover:bg-green-700 text-white">
+                      <a href={track.file_url} download={track.file_name || `${track.title}.mp3`}>
+                        <Download className="h-4 w-4 mr-2" />
+                        Download Track
+                      </a>
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -363,7 +395,7 @@ export default function SubmissionDetailPage() {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex items-center gap-2">
-                    <User className="h-4 w-4 text-gray-400" />
+                    <UserIcon className="h-4 w-4 text-gray-400" />
                     <span className="text-gray-400">Artist:</span>
                     <span className="text-white">{track.artist}</span>
                   </div>
