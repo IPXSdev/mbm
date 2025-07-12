@@ -83,7 +83,8 @@ export default function AuthNavbar() {
     { href: "/contact", label: "Contact" },
   ]
 
-  if (loading) {
+  // Only show loading if user is logged in and profile is still loading
+  if (user && loading) {
     return (
       <nav className="bg-black text-white p-4">
         <div className="container mx-auto flex justify-between items-center">
