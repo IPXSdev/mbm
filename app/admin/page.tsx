@@ -5,27 +5,33 @@ import { useEffect, useState } from "react"
 import { getTracks } from "@/lib/db"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Music } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Music, RefreshCw } from "lucide-react"
 
 export default function AdminDashboard() {
   const [tracks, setTracks] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
-  useEffect(() => {
-    async function fetchTracks() {
-      try {
-        console.log("Admin dashboard: Fetching tracks...")
-        const data = await getTracks()
-        console.log("Admin dashboard: Tracks fetched successfully:", data)
-        setTracks(data)
-      } catch (err: any) {
-        console.error("Admin dashboard: Error fetching tracks:", err)
-        setError("Failed to load submissions.")
-      } finally {
-        setLoading(false)
-      }
+  const fetchTracks = async () => {
+    try {
+      setLoading(true)
+      setError("")
+      console.log("Admin dashboard: Fetching tracks...")
+      const data = await getTracks()
+      console.log("Admin dashboard: Tracks fetched successfully:", data)
+      console.log("Admin dashboard: Number of tracks:", data.length)
+      console.log("Admin dashboard: Track details:", JSON.stringify(data, null, 2))
+      setTracks(data)
+    } catch (err: any) {
+      console.error("Admin dashboard: Error fetching tracks:", err)
+      setError("Failed to load submissions.")
+    } finally {
+      setLoading(false)
     }
+  }
+
+  useEffect(() => {
     fetchTracks()
   }, [])
 
@@ -48,9 +54,18 @@ export default function AdminDashboard() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-white mb-6">Platform Uploads</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-white">Platform Uploads</h1>
+        <Button onClick={fetchTracks} variant="outline" disabled={loading}>
+          <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+          Refresh
+        </Button>
+      </div>
       {tracks.length === 0 ? (
-        <p className="text-gray-300">No submissions yet.</p>
+        <div className="text-center py-8">
+          <p className="text-gray-300 mb-4">No submissions yet.</p>
+          <p className="text-gray-400 text-sm">Check the browser console for debugging info.</p>
+        </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {tracks.map((track) => (
