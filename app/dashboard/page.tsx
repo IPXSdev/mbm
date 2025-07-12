@@ -263,12 +263,14 @@ export default function DashboardPage() {
           <p className="text-xs text-muted-foreground mt-1">User ID: {user?.id?.slice(0, 8)}...</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button asChild>
-            <Link href="/submit" className="text-white hover:text-yellow-400">
-              <Upload className="mr-2 h-4 w-4" />
-              Submit Music
-            </Link>
-          </Button>
+          {submittedTracks.length > 0 && (
+            <Button asChild>
+              <Link href="/submit" className="text-white hover:text-yellow-400">
+                <Upload className="mr-2 h-4 w-4" />
+                Submit Music
+              </Link>
+            </Button>
+          )}
           <Button variant="outline" onClick={handleSignOut}>
             <LogOut className="mr-2 h-4 w-4" />
             Sign Out
