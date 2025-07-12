@@ -1,9 +1,11 @@
 "use client"
 
+
 import type React from "react"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/auth-client"
+import { AuthNavbar } from "@/components/auth-navbar"
 
 export default function AdminLayoutClient({
   children,
@@ -40,15 +42,23 @@ export default function AdminLayoutClient({
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
+      <>
+        <AuthNavbar />
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </>
     )
   }
 
   if (!user) {
-    return null
+    return <AuthNavbar />
   }
 
-  return <>{children}</>
+  return (
+    <>
+      <AuthNavbar />
+      {children}
+    </>
+  )
 }
