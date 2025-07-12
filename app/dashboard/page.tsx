@@ -1,3 +1,4 @@
+"use client"
 import dynamic from "next/dynamic"
 const GrantAdminForm = dynamic(() => import("../admin-portal/users/grant-admin"), { ssr: false })
 "use client"
