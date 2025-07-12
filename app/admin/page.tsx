@@ -90,40 +90,17 @@ export default function AdminDashboard() {
   }, [tracks, searchTerm, statusFilter, genreFilter])
 
   const handleStatusUpdate = async (trackId: string, newStatus: Track["status"]) => {
-    try {
-      setIsUpdating(true)
-      // Mock update for demo
-      setTracks((prev) => prev.map((track) => (track.id === trackId ? { ...track, status: newStatus } : track)))
-    } catch (err) {
-      console.error("Error updating status:", err)
-      setError("Failed to update track status")
-    } finally {
-      setIsUpdating(false)
-    }
+    // TODO: Implement real update logic here (e.g., call API, then refetch)
+    setError("Track status updates must be implemented with real backend logic.")
+    setIsUpdating(false)
   }
 
   const handleBulkAction = async () => {
     if (!bulkAction || selectedTracks.length === 0) return
 
-    try {
-      setIsUpdating(true)
-      // Mock bulk update for demo
-      setTracks((prev) =>
-        prev.map((track) =>
-          selectedTracks.includes(track.id)
-            ? { ...track, status: bulkAction as Track["status"], admin_notes: bulkNotes || track.admin_notes }
-            : track,
-        ),
-      )
-      setSelectedTracks([])
-      setBulkAction("")
-      setBulkNotes("")
-    } catch (err) {
-      console.error("Error with bulk action:", err)
-      setError("Failed to perform bulk action")
-    } finally {
-      setIsUpdating(false)
-    }
+    // TODO: Implement real bulk update logic here (e.g., call API, then refetch)
+    setError("Bulk actions must be implemented with real backend logic.")
+    setIsUpdating(false)
   }
 
   const toggleTrackSelection = (trackId: string) => {
