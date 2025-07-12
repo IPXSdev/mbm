@@ -119,64 +119,15 @@ export default function AuthNavbar() {
                   Submit Music
                 </Button>
               </Link>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="text-white hover:text-yellow-400">
-                    <UserIcon className="h-4 w-4 mr-2" />
-                    {profile?.full_name || user.email}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/profile" className="cursor-pointer">
-                      <UserIcon className="mr-2 h-4 w-4" />
-                      Profile
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard" className="cursor-pointer">
-                      <Settings className="mr-2 h-4 w-4" />
-                      Dashboard
-                    </Link>
-                  </DropdownMenuItem>
-
-                  {isAdmin && (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuLabel>Admin</DropdownMenuLabel>
-                      <DropdownMenuItem asChild>
-                        <Link href="/admin" className="cursor-pointer">
-                          <Shield className="mr-2 h-4 w-4" />
-                          Admin Dashboard
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href="/admin/submissions" className="cursor-pointer">
-                          <FileText className="mr-2 h-4 w-4" />
-                          Review Submissions
-                        </Link>
-                      </DropdownMenuItem>
-                      {isMasterAdmin && (
-                        <DropdownMenuItem asChild>
-                          <Link href="/admin/users" className="cursor-pointer">
-                            <Users className="mr-2 h-4 w-4" />
-                            Manage Users
-                          </Link>
-                        </DropdownMenuItem>
-                      )}
-                    </>
-                  )}
-
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Sign Out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <Link href="/dashboard">
+                <Button variant="ghost" className="text-white hover:text-yellow-400">
+                  Dashboard
+                </Button>
+              </Link>
+              <Button variant="ghost" className="text-white hover:text-yellow-400" onClick={handleSignOut}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign Out
+              </Button>
             </div>
           ) : (
             <div className="flex items-center space-x-4">
