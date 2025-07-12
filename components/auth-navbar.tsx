@@ -185,7 +185,7 @@ export default function AuthNavbar() {
                 </Button>
               </Link>
               <Link href="/signup">
-                <Button variant="outline" className="text-black border-white hover:bg-yellow-400 bg-transparent">
+                <Button variant="ghost" className="text-white hover:text-yellow-400">
                   Sign Up
                 </Button>
               </Link>
@@ -293,8 +293,8 @@ export default function AuthNavbar() {
                     </Link>
                     <Link href="/signup">
                       <Button
-                        variant="outline"
-                        className="w-full text-black border-white hover:bg-yellow-400 bg-transparent"
+                        variant="ghost"
+                        className="w-full text-white hover:text-yellow-400"
                       >
                         Sign Up
                       </Button>
