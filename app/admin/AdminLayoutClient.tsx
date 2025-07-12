@@ -13,6 +13,7 @@ export default function AdminLayoutClient({
 }) {
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<any>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -28,6 +29,19 @@ export default function AdminLayoutClient({
         }
 
         setUser(user)
+
+        // Fetch profile to check role
+        const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
+        // Allow if admin, master_admin, or specific email
+        if (
+          profile?.role === "admin" ||
+          profile?.role === "master_admin" ||
+          user.email === "2668Harris@gmail.com"
+        ) {
+          setIsAdmin(true)
+        } else {
+          setIsAdmin(false)
+        }
       } catch (error) {
         console.error("Auth error:", error)
         router.push("/login")
@@ -49,6 +63,15 @@ export default function AdminLayoutClient({
 
   if (!user) {
     return null
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-center text-lg text-gray-400">
+        You are not authorized to access the admin portal.<br />
+        <a href="/" className="text-yellow-400 underline">Go to Home</a>
+      </div>
+    )
   }
 
   return <>{children}</>
