@@ -41,7 +41,7 @@ const mockTrack = {
   email: "artist@example.com",
   status: "pending" as const,
   created_at: new Date().toISOString(),
-  file_url: "/placeholder-audio.mp3",
+  file_url: "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav",
   image_url: "/placeholder.svg?height=256&width=256",
   description: "This is a demo track for testing purposes.",
   file_size: 5242880, // 5MB

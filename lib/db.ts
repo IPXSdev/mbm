@@ -41,6 +41,8 @@ export interface Track {
   reviewed_at?: string
   created_at: string
   updated_at: string
+  description?: string
+  image_url?: string
 }
 
 // Get current user from session
@@ -236,23 +238,17 @@ export async function submitTrack(trackData: {
   artist: string
   email: string
   genre: string
+  description?: string
   file_url?: string
   file_name?: string
   file_size?: number
+  image_url?: string
+  user_id: string
 }): Promise<string> {
   try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-      throw new Error("User not authenticated")
-    }
-
     const { data, error } = await supabase
       .from("submissions")
       .insert({
-        user_id: user.id,
         ...trackData,
         status: "pending",
       })
@@ -276,9 +272,12 @@ export async function createTrack(trackData: {
   artist: string
   email: string
   genre: string
+  description?: string
   file_url?: string
   file_name?: string
   file_size?: number
+  image_url?: string
+  user_id: string
 }): Promise<string> {
   return submitTrack(trackData)
 }

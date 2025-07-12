@@ -9,15 +9,62 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Textarea } from "@/components/ui/textarea"
-import { Music, Clock, CheckCircle, XCircle, Eye, Search, RefreshCw, Star, AlertTriangle } from "lucide-react"
-import { getTracks, updateTrackStatus, updateMultipleTrackStatus, getCurrentUser, type Track } from "@/lib/db"
+import {
+  Music,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Eye,
+  Search,
+  RefreshCw,
+  Star,
+  AlertTriangle,
+  Mail,
+  Calendar,
+  Tag,
+  FileAudio,
+} from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { supabase } from "@/lib/auth-client"
+
+// Mock data for demo
+const mockTracks = [
+  {
+    id: "1",
+    title: "Sample Track 1",
+    artist: "Demo Artist 1",
+    genre: "Hip Hop",
+    email: "artist1@example.com",
+    status: "pending" as const,
+    created_at: new Date().toISOString(),
+    file_size: 5242880,
+    admin_notes: "",
+    rating: 0,
+    priority: "medium" as const,
+  },
+  {
+    id: "2",
+    title: "Sample Track 2",
+    artist: "Demo Artist 2",
+    genre: "R&B",
+    email: "artist2@example.com",
+    status: "approved" as const,
+    created_at: new Date(Date.now() - 86400000).toISOString(),
+    file_size: 7340032,
+    admin_notes: "Great track!",
+    rating: 5,
+    priority: "high" as const,
+  },
+]
+
+type Track = (typeof mockTracks)[0]
 
 export default function AdminDashboard() {
   const router = useRouter()
-  const [tracks, setTracks] = useState<Track[]>([])
-  const [filteredTracks, setFilteredTracks] = useState<Track[]>([])
+  const [user, setUser] = useState<any>(null)
+  const [tracks, setTracks] = useState<Track[]>(mockTracks)
+  const [filteredTracks, setFilteredTracks] = useState<Track[]>(mockTracks)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [searchTerm, setSearchTerm] = useState("")
@@ -29,22 +76,36 @@ export default function AdminDashboard() {
   const [isUpdating, setIsUpdating] = useState(false)
 
   useEffect(() => {
-    loadTracks()
+    checkAuth()
   }, [])
 
   useEffect(() => {
     filterTracks()
   }, [tracks, searchTerm, statusFilter, genreFilter])
 
-  const loadTracks = async () => {
+  const checkAuth = async () => {
     try {
-      setLoading(true)
-      setError("")
-      const data = await getTracks()
-      setTracks(data)
-    } catch (err) {
-      console.error("Error loading tracks:", err)
-      setError("Failed to load tracks")
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
+      if (!user) {
+        router.push("/admin-login")
+        return
+      }
+
+      // Check if user is admin
+      const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
+
+      if (!profile || (profile.role !== "admin" && profile.role !== "master_admin")) {
+        router.push("/")
+        return
+      }
+
+      setUser(user)
+    } catch (error) {
+      console.error("Auth error:", error)
+      router.push("/admin-login")
     } finally {
       setLoading(false)
     }
@@ -76,9 +137,8 @@ export default function AdminDashboard() {
   const handleStatusUpdate = async (trackId: string, newStatus: Track["status"]) => {
     try {
       setIsUpdating(true)
-      const user = await getCurrentUser()
-      await updateTrackStatus(trackId, newStatus, undefined, undefined, undefined, user?.email || "Admin")
-      await loadTracks()
+      // Mock update for demo
+      setTracks((prev) => prev.map((track) => (track.id === trackId ? { ...track, status: newStatus } : track)))
     } catch (err) {
       console.error("Error updating status:", err)
       setError("Failed to update track status")
@@ -92,17 +152,17 @@ export default function AdminDashboard() {
 
     try {
       setIsUpdating(true)
-      const user = await getCurrentUser()
-      await updateMultipleTrackStatus(
-        selectedTracks,
-        bulkAction as Track["status"],
-        bulkNotes || undefined,
-        user?.email || "Admin",
+      // Mock bulk update for demo
+      setTracks((prev) =>
+        prev.map((track) =>
+          selectedTracks.includes(track.id)
+            ? { ...track, status: bulkAction as Track["status"], admin_notes: bulkNotes || track.admin_notes }
+            : track,
+        ),
       )
       setSelectedTracks([])
       setBulkAction("")
       setBulkNotes("")
-      await loadTracks()
     } catch (err) {
       console.error("Error with bulk action:", err)
       setError("Failed to perform bulk action")
@@ -168,7 +228,7 @@ export default function AdminDashboard() {
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
         <div className="text-white text-center">
           <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p>Loading submissions...</p>
+          <p>Loading admin dashboard...</p>
         </div>
       </div>
     )
@@ -182,8 +242,8 @@ export default function AdminDashboard() {
             <h1 className="text-4xl font-bold text-white mb-2">Admin Dashboard</h1>
             <p className="text-gray-300">Manage music submissions and track reviews</p>
           </div>
-          <Button onClick={loadTracks} disabled={loading} className="bg-white/10 hover:bg-white/20 text-white">
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
+          <Button onClick={() => window.location.reload()} className="bg-white/10 hover:bg-white/20 text-white">
+            <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
           </Button>
         </div>
@@ -389,40 +449,44 @@ export default function AdminDashboard() {
                           <p className="text-gray-300 text-sm">by {track.artist}</p>
                         </div>
                         <div className="flex items-center gap-2">
-                          {track.priority && getPriorityBadge(track.priority)}
+                          {getPriorityBadge(track.priority)}
                           {getStatusBadge(track.status)}
                         </div>
                       </div>
 
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                        <div>
+                        <div className="flex items-center gap-1">
+                          <Tag className="h-3 w-3 text-gray-400" />
                           <span className="text-gray-400">Genre:</span>
-                          <span className="text-white ml-1">{track.genre}</span>
+                          <span className="text-white">{track.genre}</span>
                         </div>
-                        <div>
+                        <div className="flex items-center gap-1">
+                          <Mail className="h-3 w-3 text-gray-400" />
                           <span className="text-gray-400">Email:</span>
-                          <span className="text-white ml-1">{track.email}</span>
+                          <span className="text-white truncate">{track.email}</span>
                         </div>
-                        <div>
+                        <div className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3 text-gray-400" />
                           <span className="text-gray-400">Submitted:</span>
-                          <span className="text-white ml-1">{new Date(track.created_at).toLocaleDateString()}</span>
+                          <span className="text-white">{new Date(track.created_at).toLocaleDateString()}</span>
                         </div>
-                        <div>
+                        <div className="flex items-center gap-1">
+                          <FileAudio className="h-3 w-3 text-gray-400" />
                           <span className="text-gray-400">Size:</span>
-                          <span className="text-white ml-1">
+                          <span className="text-white">
                             {track.file_size ? `${(track.file_size / 1024 / 1024).toFixed(1)}MB` : "N/A"}
                           </span>
                         </div>
                       </div>
 
-                      {track.rating && (
+                      {track.rating > 0 && (
                         <div className="flex items-center mt-2">
                           <span className="text-gray-400 text-sm mr-2">Rating:</span>
                           {[...Array(5)].map((_, i) => (
                             <Star
                               key={i}
                               className={`h-4 w-4 ${
-                                i < track.rating! ? "text-yellow-400 fill-current" : "text-gray-600"
+                                i < track.rating ? "text-yellow-400 fill-current" : "text-gray-600"
                               }`}
                             />
                           ))}
