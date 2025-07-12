@@ -15,9 +15,12 @@ export default function AdminDashboard() {
   useEffect(() => {
     async function fetchTracks() {
       try {
+        console.log("Admin dashboard: Fetching tracks...")
         const data = await getTracks()
+        console.log("Admin dashboard: Tracks fetched successfully:", data)
         setTracks(data)
       } catch (err: any) {
+        console.error("Admin dashboard: Error fetching tracks:", err)
         setError("Failed to load submissions.")
       } finally {
         setLoading(false)
