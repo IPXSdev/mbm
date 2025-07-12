@@ -73,7 +73,7 @@ export async function getCurrentUser(): Promise<User | null> {
     return {
       id: profile.id,
       email: profile.email,
-      name: profile.full_name,
+      name: profile.name,
       role: profile.role,
       created_at: profile.created_at,
       updated_at: profile.updated_at,
@@ -95,7 +95,7 @@ export async function createUserProfile(
     const { error } = await supabase.from("profiles").upsert({
       id: userId,
       email,
-      full_name: fullName,
+      name: fullName,
       role,
     })
 
@@ -120,7 +120,7 @@ export async function getAllUsers(): Promise<User[]> {
     return data.map((profile) => ({
       id: profile.id,
       email: profile.email,
-      name: profile.full_name,
+      name: profile.name,
       role: profile.role,
       created_at: profile.created_at,
       updated_at: profile.updated_at,
@@ -367,7 +367,7 @@ export async function createUserWithRole(
       email,
       password,
       user_metadata: {
-        full_name: fullName,
+        name: fullName,
       },
       email_confirm: true,
     })
