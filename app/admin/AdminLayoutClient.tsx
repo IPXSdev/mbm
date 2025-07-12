@@ -5,7 +5,6 @@ import type React from "react"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/auth-client"
-import { AuthNavbar } from "@/components/auth-navbar"
 
 export default function AdminLayoutClient({
   children,
@@ -52,10 +51,5 @@ export default function AdminLayoutClient({
     return null
   }
 
-  return (
-    <>
-      <AuthNavbar />
-      {children}
-    </>
-  )
+  return <>{children}</>
 }
