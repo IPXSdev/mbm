@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { Music, Upload, User, LogOut, CheckCircle, Clock, XCircle } from "lucide-react"
+import { Music, Upload, User, CheckCircle, Clock, XCircle } from "lucide-react"
 import Link from "next/link"
 import { supabase } from "@/lib/auth-client"
 import { useRouter } from "next/navigation"
@@ -136,26 +136,7 @@ export default function DashboardPage() {
     }
   }
 
-  const handleSignOut = async () => {
-    try {
-      console.log("Dashboard: Signing out...")
-      setLoading(true)
-      const { error } = await supabase.auth.signOut()
-      if (error) {
-        console.error("Dashboard: Sign out error:", error)
-        setError("Sign out error: " + error.message)
-      } else {
-        setUser(null)
-        setSubmittedTracks([])
-        router.push("/")
-      }
-    } catch (error) {
-      console.error("Dashboard: Sign out error:", error)
-      setError("Sign out error: " + (error as Error).message)
-    } finally {
-      setLoading(false)
-    }
-  }
+
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -271,10 +252,7 @@ export default function DashboardPage() {
               </Link>
             </Button>
           )}
-          <Button variant="outline" onClick={handleSignOut}>
-            <LogOut className="mr-2 h-4 w-4" />
-            Sign Out
-          </Button>
+
         </div>
       </div>
 
