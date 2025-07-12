@@ -1,7 +1,6 @@
-import dynamic from "next/dynamic"
+"use client"
 import GrantAdminForm from "./grant-admin"
-
-const UsersPage = dynamic(() => import("../../admin/users/page"), { ssr: false })
+import UsersPage from "../../admin/users/page"
 
 export default function AdminUsersPage() {
   return (
