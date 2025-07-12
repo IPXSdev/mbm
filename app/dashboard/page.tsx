@@ -1,3 +1,5 @@
+import dynamic from "next/dynamic"
+const GrantAdminForm = dynamic(() => import("../admin-portal/users/grant-admin"), { ssr: false })
 "use client"
 
 import { useState, useEffect } from "react"
@@ -36,6 +38,7 @@ export default function DashboardPage() {
   const [loadingTracks, setLoadingTracks] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
   const [isMasterAdmin, setIsMasterAdmin] = useState(false)
+  const [showGrantModal, setShowGrantModal] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -263,6 +266,11 @@ export default function DashboardPage() {
               </Link>
             </Button>
           )}
+          {isMasterAdmin && (
+            <Button variant="outline" onClick={() => setShowGrantModal(true)}>
+              Grant Admin Access
+            </Button>
+          )}
           {submittedTracks.length > 0 && (
             <Button variant="outline" asChild>
               <Link href="/submit">
@@ -272,6 +280,16 @@ export default function DashboardPage() {
             </Button>
           )}
         </div>
+
+        {/* Grant Admin Modal */}
+        {showGrantModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
+            <div className="bg-gray-900 p-6 rounded-lg shadow-lg w-full max-w-md relative">
+              <button className="absolute top-2 right-2 text-gray-400 hover:text-yellow-400" onClick={() => setShowGrantModal(false)}>&times;</button>
+              <GrantAdminForm />
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
