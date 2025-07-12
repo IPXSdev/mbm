@@ -68,6 +68,9 @@ export default function AuthNavbar() {
   }, [supabase])
 
   const handleSignOut = async () => {
+    setLoading(true)
+    setUser(null)
+    setProfile(null)
     await supabase.auth.signOut()
     router.push("/")
   }
