@@ -29,19 +29,34 @@ import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/auth-client"
 
 // Mock data for demo
-const mockTracks = [
+type TrackStatus = "pending" | "under_review" | "approved" | "rejected"
+type Track = {
+  id: string
+  title: string
+  artist: string
+  genre: string
+  email: string
+  status: TrackStatus
+  created_at: string
+  file_size: number
+  admin_notes: string
+  rating: number
+  priority: "low" | "medium" | "high"
+}
+
+const mockTracks: Track[] = [
   {
     id: "1",
     title: "Sample Track 1",
     artist: "Demo Artist 1",
     genre: "Hip Hop",
     email: "artist1@example.com",
-    status: "pending" as const,
+    status: "pending",
     created_at: new Date().toISOString(),
     file_size: 5242880,
     admin_notes: "",
     rating: 0,
-    priority: "medium" as const,
+    priority: "medium",
   },
   {
     id: "2",
@@ -49,23 +64,20 @@ const mockTracks = [
     artist: "Demo Artist 2",
     genre: "R&B",
     email: "artist2@example.com",
-    status: "approved" as const,
+    status: "approved",
     created_at: new Date(Date.now() - 86400000).toISOString(),
     file_size: 7340032,
     admin_notes: "Great track!",
     rating: 5,
-    priority: "high" as const,
+    priority: "high",
   },
 ]
 
-type Track = (typeof mockTracks)[0]
 
 export default function AdminDashboard() {
-  const router = useRouter()
-  const [user, setUser] = useState<any>(null)
+  // Assume user is authenticated (handled by layout)
   const [tracks, setTracks] = useState<Track[]>(mockTracks)
   const [filteredTracks, setFilteredTracks] = useState<Track[]>(mockTracks)
-  const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
@@ -76,44 +88,7 @@ export default function AdminDashboard() {
   const [isUpdating, setIsUpdating] = useState(false)
 
   useEffect(() => {
-    checkAuth()
-  }, [])
-
-  useEffect(() => {
-    filterTracks()
-  }, [tracks, searchTerm, statusFilter, genreFilter])
-
-  const checkAuth = async () => {
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-
-      if (!user) {
-        router.push("/admin-login")
-        return
-      }
-
-      // Check if user is admin
-      const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
-
-      if (!profile || (profile.role !== "admin" && profile.role !== "master_admin")) {
-        router.push("/")
-        return
-      }
-
-      setUser(user)
-    } catch (error) {
-      console.error("Auth error:", error)
-      router.push("/admin-login")
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const filterTracks = () => {
     let filtered = tracks
-
     if (searchTerm) {
       filtered = filtered.filter(
         (track) =>
@@ -122,17 +97,14 @@ export default function AdminDashboard() {
           track.email.toLowerCase().includes(searchTerm.toLowerCase()),
       )
     }
-
     if (statusFilter !== "all") {
       filtered = filtered.filter((track) => track.status === statusFilter)
     }
-
     if (genreFilter !== "all") {
       filtered = filtered.filter((track) => track.genre === genreFilter)
     }
-
     setFilteredTracks(filtered)
-  }
+  }, [tracks, searchTerm, statusFilter, genreFilter])
 
   const handleStatusUpdate = async (trackId: string, newStatus: Track["status"]) => {
     try {
@@ -223,16 +195,7 @@ export default function AdminDashboard() {
 
   const uniqueGenres = [...new Set(tracks.map((track) => track.genre))].sort()
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
-        <div className="text-white text-center">
-          <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p>Loading admin dashboard...</p>
-        </div>
-      </div>
-    )
-  }
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
