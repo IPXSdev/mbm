@@ -7,6 +7,7 @@ import { Menu, Music, User } from "lucide-react"
 import Image from "next/image"
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
 
+// Navigation items for the main menu
 const navigation = [
   { name: "Home", href: "/" },
   { name: "About", href: "/about" },
