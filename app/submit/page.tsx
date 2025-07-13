@@ -152,8 +152,8 @@ export default function SubmitPage() {
       setUploadProgress(10)
 
       let audioUrl = ""
-      // Use a default music note image for all submissions
-      const imageUrl = "/placeholder-logo.png" // Default music note image
+      // Use a default vinyl record cover image for all submissions
+      const imageUrl = "/vinyl-cover.png" // Default vinyl record cover image
 
       // Try to upload audio file if present, but don't fail if upload fails
       if (audioFile) {
