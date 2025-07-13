@@ -22,12 +22,10 @@ export default function AdminDashboard() {
   const [reviewData, setReviewData] = useState<{
     rating: number
     status: string
-    priority: string
     notes: string
   }>({
     rating: 0,
     status: "pending",
-    priority: "medium",
     notes: ""
   })
 
@@ -79,14 +77,14 @@ export default function AdminDashboard() {
           reviewData.status as any,
           reviewData.rating || undefined,
           reviewData.notes || undefined,
-          reviewData.priority as any,
+          undefined, // Remove priority parameter
           "admin" // You might want to use actual admin user ID
         )
         
         // Refresh tracks after update
         await fetchTracks()
         setReviewingTrack(null)
-        setReviewData({ rating: 0, status: "pending", priority: "medium", notes: "" })
+        setReviewData({ rating: 0, status: "pending", notes: "" })
       } catch (error) {
         console.error("Failed to update track:", error)
         setError("Failed to update track status")
@@ -98,7 +96,6 @@ export default function AdminDashboard() {
         setReviewData({
           rating: track.rating || 0,
           status: track.status || "pending",
-          priority: track.priority || "medium",
           notes: track.admin_notes || ""
         })
         setReviewingTrack(trackId)
@@ -152,7 +149,10 @@ export default function AdminDashboard() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-white">Platform Uploads</h1>
+        <div>
+          <h1 className="text-3xl font-bold text-white">Platform Uploads</h1>
+          <p className="text-gray-400 text-sm mt-1">Submissions are ranked by star rating (highest first)</p>
+        </div>
         <Button onClick={fetchTracks} variant="outline" disabled={loading}>
           <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
           Refresh
@@ -272,34 +272,18 @@ export default function AdminDashboard() {
                   <div className="space-y-4 border-t border-white/20 pt-4">
                     <h3 className="text-white font-semibold">Review Track</h3>
                     
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-gray-300 text-sm mb-1 block">Status</label>
-                        <Select value={reviewData.status} onValueChange={(value) => setReviewData(prev => ({ ...prev, status: value }))}>
-                          <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="pending">Pending</SelectItem>
-                            <SelectItem value="under_review">Under Consideration</SelectItem>
-                            <SelectItem value="approved">Approved</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div>
-                        <label className="text-gray-300 text-sm mb-1 block">Priority</label>
-                        <Select value={reviewData.priority} onValueChange={(value) => setReviewData(prev => ({ ...prev, priority: value }))}>
-                          <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="low">Low</SelectItem>
-                            <SelectItem value="medium">Medium</SelectItem>
-                            <SelectItem value="high">High</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
+                    <div>
+                      <label className="text-gray-300 text-sm mb-1 block">Status</label>
+                      <Select value={reviewData.status} onValueChange={(value) => setReviewData(prev => ({ ...prev, status: value }))}>
+                        <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="pending">Pending</SelectItem>
+                          <SelectItem value="under_review">Under Consideration</SelectItem>
+                          <SelectItem value="approved">Approved</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
 
                     <div>

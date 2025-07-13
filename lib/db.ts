@@ -52,7 +52,6 @@ export interface Track {
   file_name?: string
   file_size?: number
   status: "pending" | "under_review" | "approved" | "rejected"
-  priority?: "low" | "medium" | "high"
   rating?: number
   admin_notes?: string
   reviewed_by?: string
@@ -163,13 +162,27 @@ export async function updateUserRole(userId: string, role: "user" | "admin" | "m
 // Get all tracks/submissions
 export async function getTracks(): Promise<Track[]> {
   try {
-    const { data, error } = await supabase.from("submissions").select("*").order("created_at", { ascending: false })
+    // Get all submissions and sort them by rating (highest first), then by creation date
+    const { data, error } = await supabase.from("submissions").select("*")
 
     if (error) {
       throw error
     }
 
-    return data || []
+    // Sort by rating (highest first), then by creation date (newest first) for same ratings
+    const sortedData = (data || []).sort((a, b) => {
+      // First sort by rating (5 stars first, then 4, etc.)
+      if (a.rating !== b.rating) {
+        const ratingA = a.rating || 0
+        const ratingB = b.rating || 0
+        return ratingB - ratingA
+      }
+      
+      // If ratings are equal, sort by creation date (newest first)
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    })
+
+    return sortedData
   } catch (error) {
     console.error("Error getting tracks:", error)
     throw error
@@ -182,7 +195,7 @@ export async function updateTrackStatus(
   status: Track["status"],
   rating?: number,
   adminNotes?: string,
-  priority?: Track["priority"],
+  _priority?: undefined, // Keep parameter for backward compatibility but ignore it
   reviewedBy?: string,
 ): Promise<void> {
   try {
@@ -193,7 +206,6 @@ export async function updateTrackStatus(
 
     if (rating !== undefined) updateData.rating = rating
     if (adminNotes !== undefined) updateData.admin_notes = adminNotes
-    if (priority !== undefined) updateData.priority = priority
     if (reviewedBy !== undefined) updateData.reviewed_by = reviewedBy
 
     const { error } = await supabase.from("submissions").update(updateData).eq("id", trackId)

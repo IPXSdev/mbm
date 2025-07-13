@@ -10,7 +10,6 @@ export interface Track {
   likes: number
   shares: number
   status: "pending" | "under_review" | "approved" | "rejected"
-  priority: "low" | "medium" | "high"
   user_id: string
   admin_notes?: string
   created_at: string
@@ -46,7 +45,6 @@ const mockTracks: Track[] = [
     likes: 3420,
     shares: 890,
     status: "approved",
-    priority: "high",
     user_id: "dev-user-id",
     created_at: "2024-01-15T10:00:00Z",
     updated_at: "2024-01-15T10:00:00Z",
@@ -63,7 +61,6 @@ const mockTracks: Track[] = [
     likes: 2890,
     shares: 720,
     status: "approved",
-    priority: "medium",
     user_id: "dev-user-id",
     created_at: "2024-01-14T10:00:00Z",
     updated_at: "2024-01-14T10:00:00Z",
