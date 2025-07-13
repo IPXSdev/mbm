@@ -1,8 +1,7 @@
-
 "use client"
 
 import { useEffect, useState } from "react"
-import { getTracks, updateTrackStatus, checkSyncFinalizationStatus, getPendingSyncNotifications } from "@/lib/db"
+import { getTracks, updateTrackStatus, checkSyncFinalizationStatus, getPendingSyncNotifications, getChatSession, createChatSession, sendSyncMessage, getSyncMessages, getCurrentUser } from "@/lib/db"
 import dynamic from "next/dynamic"
 
 const ViewFinalizedSubmission = dynamic(() => import("@/components/view-finalized-submission"), { ssr: false })
@@ -13,7 +12,9 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { Music, RefreshCw, Star, CheckCircle, XCircle, Clock, AlertTriangle, MessageCircle } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Music, RefreshCw, Star, CheckCircle, XCircle, Clock, AlertTriangle, MessageCircle, Send, X } from "lucide-react"
 
 export default function AdminDashboard() {
   const [tracks, setTracks] = useState<any[]>([])
@@ -27,6 +28,12 @@ export default function AdminDashboard() {
   const [selectedTrackForFinalized, setSelectedTrackForFinalized] = useState<any>(null)
   const [syncStatusMap, setSyncStatusMap] = useState<Record<string, string>>({})
   const [pendingNotifications, setPendingNotifications] = useState<any[]>([])
+  const [showChatModal, setShowChatModal] = useState(false)
+  const [selectedTrackForChat, setSelectedTrackForChat] = useState<any>(null)
+  const [chatMessages, setChatMessages] = useState<any[]>([])
+  const [newMessage, setNewMessage] = useState("")
+  const [sendingMessage, setSendingMessage] = useState(false)
+  const [currentAdmin, setCurrentAdmin] = useState<any>(null)
   const [reviewData, setReviewData] = useState<{
     rating: number
     status: string
@@ -171,6 +178,60 @@ export default function AdminDashboard() {
       case "under_review": return "bg-yellow-500/20 text-yellow-300"
       default: return "bg-gray-500/20 text-gray-300"
     }
+  }
+
+  const openChatModal = async (track: any) => {
+    try {
+      setSelectedTrackForChat(track)
+      setShowChatModal(true)
+      
+      // Get current admin user
+      const admin = await getCurrentUser()
+      setCurrentAdmin(admin)
+      
+      // Get or create chat session
+      let chatSession = await getChatSession(track.id)
+      if (!chatSession) {
+        chatSession = await createChatSession(track.id, track.user_id, admin?.id)
+      }
+      
+      // Load existing messages
+      const messages = await getSyncMessages(track.id)
+      setChatMessages(messages)
+    } catch (error) {
+      console.error("Error opening chat:", error)
+      setError("Failed to open chat")
+    }
+  }
+
+  const sendMessage = async () => {
+    if (!newMessage.trim() || !selectedTrackForChat || !currentAdmin) return
+    
+    try {
+      setSendingMessage(true)
+      const message = await sendSyncMessage(
+        selectedTrackForChat.id,
+        currentAdmin.id,
+        "admin",
+        newMessage.trim()
+      )
+      
+      setChatMessages(prev => [...prev, message])
+      setNewMessage("")
+    } catch (error) {
+      console.error("Error sending message:", error)
+      setError("Failed to send message")
+    } finally {
+      setSendingMessage(false)
+    }
+  }
+
+  const closeChatModal = () => {
+    setShowChatModal(false)
+    setSelectedTrackForChat(null)
+    setChatMessages([])
+    setNewMessage("")
+    setCurrentAdmin(null)
   }
 
   useEffect(() => {
@@ -490,10 +551,7 @@ export default function AdminDashboard() {
                         
                         {/* Chat Button - Only show for approved tracks */}
                         <Button
-                          onClick={() => {
-                            // TODO: Open chat modal
-                            console.log("Open chat for track:", track.id)
-                          }}
+                          onClick={() => openChatModal(track)}
                           variant="outline"
                           size="sm"
                           className="bg-purple-600/20 border-purple-400/40 text-purple-300 hover:bg-purple-600/30"
@@ -529,6 +587,71 @@ export default function AdminDashboard() {
             setSelectedTrackForFinalized(null)
           }}
         />
+      )}
+      
+      {/* Chat Modal */}
+      {showChatModal && selectedTrackForChat && (
+        <Dialog open={showChatModal} onOpenChange={closeChatModal}>
+          <DialogContent className="max-w-2xl p-6 mx-auto bg-gray-800 rounded-lg">
+            <DialogHeader>
+              <DialogTitle className="text-white">
+                Chat for "{selectedTrackForChat.title}" by {selectedTrackForChat.artist}
+              </DialogTitle>
+            </DialogHeader>
+            
+            <ScrollArea className="h-80 mb-4">
+              <div className="space-y-4 p-2">
+                {chatMessages.length === 0 ? (
+                  <p className="text-gray-400 text-center py-8">
+                    No messages yet. Start the conversation!
+                  </p>
+                ) : (
+                  chatMessages.map((message) => (
+                    <div key={message.id} className={`flex gap-3 ${message.sender_role === "admin" ? "justify-end" : "justify-start"}`}>
+                      <div className={`max-w-xs rounded-lg px-4 py-2 text-sm ${
+                        message.sender_role === "admin" 
+                          ? "bg-blue-600 text-white" 
+                          : "bg-gray-700 text-gray-300"
+                      }`}>
+                        <p className="mb-1">{message.message}</p>
+                        <p className="text-xs opacity-70">
+                          {new Date(message.created_at).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </ScrollArea>
+            
+            <div className="flex gap-2">
+              <Input
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault()
+                    sendMessage()
+                  }
+                }}
+                className="flex-1 bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+                placeholder="Type your message..."
+                disabled={sendingMessage}
+              />
+              <Button
+                onClick={sendMessage}
+                className="whitespace-nowrap bg-blue-600 hover:bg-blue-700"
+                disabled={sendingMessage || !newMessage.trim()}
+              >
+                {sendingMessage ? (
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Send className="w-4 h-4" />
+                )}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   )

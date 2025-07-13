@@ -1,4 +1,3 @@
-
 "use client"
 import dynamic from "next/dynamic"
 const GrantAdminForm = dynamic(() => import("../admin-portal/users/grant-admin"), { ssr: false })
@@ -9,10 +8,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { Music, Upload, User, CheckCircle, Clock, XCircle } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Input } from "@/components/ui/input"
+import { Music, Upload, User, CheckCircle, Clock, XCircle, MessageCircle, Send, RefreshCw } from "lucide-react"
 import Link from "next/link"
 import { supabase } from "@/lib/supabase-client"
-import { getCurrentUser } from "@/lib/db"
+import { getCurrentUser, getChatSession, createChatSession, sendSyncMessage, getSyncMessages } from "@/lib/db"
 import { useRouter } from "next/navigation"
 import type { AuthChangeEvent, Session } from "@supabase/supabase-js"
 
@@ -43,6 +45,11 @@ export default function DashboardPage() {
   const [showGrantModal, setShowGrantModal] = useState(false)
   const [showFinalizeModal, setShowFinalizeModal] = useState(false)
   const [selectedTrackForFinalize, setSelectedTrackForFinalize] = useState<SubmittedTrack | null>(null)
+  const [showChatModal, setShowChatModal] = useState(false)
+  const [selectedTrackForChat, setSelectedTrackForChat] = useState<SubmittedTrack | null>(null)
+  const [chatMessages, setChatMessages] = useState<any[]>([])
+  const [newMessage, setNewMessage] = useState("")
+  const [sendingMessage, setSendingMessage] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -205,6 +212,56 @@ export default function DashboardPage() {
       default:
         return "Your track is currently under review. We'll notify you once we've made a decision."
     }
+  }
+
+  // Chat functionality
+  const openChatModal = async (track: SubmittedTrack) => {
+    try {
+      setSelectedTrackForChat(track)
+      setShowChatModal(true)
+      
+      // Get or create chat session
+      let chatSession = await getChatSession(track.id)
+      if (!chatSession && user) {
+        chatSession = await createChatSession(track.id, user.id)
+      }
+      
+      // Load existing messages
+      const messages = await getSyncMessages(track.id)
+      setChatMessages(messages)
+    } catch (error) {
+      console.error("Error opening chat:", error)
+      setError("Failed to open chat")
+    }
+  }
+
+  const sendMessage = async () => {
+    if (!newMessage.trim() || !selectedTrackForChat || !user) return
+    
+    try {
+      setSendingMessage(true)
+      const message = await sendSyncMessage(
+        selectedTrackForChat.id,
+        user.id,
+        "user",
+        newMessage.trim()
+      )
+      
+      setChatMessages(prev => [...prev, message])
+      setNewMessage("")
+    } catch (error) {
+      console.error("Error sending message:", error)
+      setError("Failed to send message")
+    } finally {
+      setSendingMessage(false)
+    }
+  }
+
+  const closeChatModal = () => {
+    setShowChatModal(false)
+    setSelectedTrackForChat(null)
+    setChatMessages([])
+    setNewMessage("")
   }
 
   // Show loading state
@@ -467,15 +524,53 @@ export default function DashboardPage() {
                               🎉 <strong>Great news!</strong> Your track is now in our active catalog and being pitched
                               for placement opportunities.
                             </p>
+                            <div className="flex gap-2 mt-3">
+                              <Button 
+                                size="sm" 
+                                className="bg-green-600 hover:bg-green-700 text-white"
+                                onClick={() => {
+                                  setSelectedTrackForFinalize(track)
+                                  setShowFinalizeModal(true)
+                                }}
+                              >
+                                📋 Finalize Submission
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                className="border-purple-300 text-purple-600 hover:bg-purple-50"
+                                onClick={() => openChatModal(track)}
+                              >
+                                <MessageCircle className="w-4 h-4 mr-2" />
+                                Chat with Admin
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Chat button for under review tracks */}
+                        {track.status === "under_review" && (
+                          <div className="mt-3">
                             <Button 
                               size="sm" 
-                              className="mt-3 bg-green-600 hover:bg-green-700 text-white"
-                              onClick={() => {
-                                setSelectedTrackForFinalize(track)
-                                setShowFinalizeModal(true)
-                              }}
+                              variant="outline"
+                              className="border-purple-300 text-purple-600 hover:bg-purple-50"
+                              onClick={() => openChatModal(track)}
                             >
-                              📋 Finalize Submission
+                              <MessageCircle className="w-4 h-4 mr-2" />
+                              Chat with Admin
+                            </Button>
+                          </div>
+                        )}
+                        {track.status === "under_review" && (
+                          <div className="flex flex-col gap-2">
+                            <Button 
+                              variant="outline" 
+                              onClick={() => openChatModal(track)}
+                              className="w-full"
+                            >
+                              <MessageCircle className="mr-2 h-4 w-4" />
+                              {chatMessages.length > 0 ? "Continue Chat" : "Contact Support"}
                             </Button>
                           </div>
                         )}
@@ -498,6 +593,77 @@ export default function DashboardPage() {
             setSelectedTrackForFinalize(null)
           }}
         />
+      )}
+
+      {/* Chat Modal */}
+      {showChatModal && selectedTrackForChat && (
+        <Dialog open={showChatModal} onOpenChange={closeChatModal}>
+          <DialogContent className="max-w-lg p-6 mx-auto rounded-lg bg-gray-800">
+            <DialogHeader>
+              <DialogTitle className="text-lg font-semibold text-white">
+                Chat for "{selectedTrackForChat.title}"
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="mt-4">
+              <ScrollArea className="h-80">
+                <div className="space-y-4 p-2">
+                  {chatMessages.length === 0 ? (
+                    <div className="text-center py-12">
+                      <MessageCircle className="h-16 w-16 mx-auto mb-4 text-gray-400" />
+                      <h3 className="text-lg font-medium mb-2 text-white">No messages yet</h3>
+                      <p className="text-gray-400">
+                        Start the conversation by sending a message!
+                      </p>
+                    </div>
+                  ) : (
+                    chatMessages.map((message) => (
+                      <div key={message.id} className={`flex gap-3 ${message.sender_role === "user" ? "justify-end" : "justify-start"}`}>
+                        <div className={`max-w-xs rounded-lg px-4 py-2 text-sm ${
+                          message.sender_role === "user" 
+                            ? "bg-blue-600 text-white" 
+                            : "bg-gray-700 text-gray-300"
+                        }`}>
+                          <p className="mb-1">{message.message}</p>
+                          <p className="text-xs opacity-70">
+                            {new Date(message.created_at).toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </ScrollArea>
+
+              <div className="flex gap-2 mt-4">
+                <Input 
+                  placeholder="Type your message here..."
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault()
+                      sendMessage()
+                    }
+                  }}
+                  className="flex-1 bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+                  disabled={sendingMessage}
+                />
+                <Button 
+                  onClick={sendMessage}
+                  className="whitespace-nowrap bg-blue-600 hover:bg-blue-700"
+                  disabled={sendingMessage || !newMessage.trim()}
+                >
+                  {sendingMessage ? (
+                    <RefreshCw className="animate-spin h-4 w-4" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   )
