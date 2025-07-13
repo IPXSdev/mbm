@@ -265,29 +265,32 @@ export default function PricingPage() {
           </Card>
 
           {/* Pack 2 */}
-          <Card className="relative overflow-hidden border-2 border-purple-200 hover:border-purple-400 transition-colors">
-            <div className="absolute top-0 left-0 right-0 bg-purple-600 text-white text-center py-1 text-sm font-medium">
-              Best Value
-            </div>
-            <CardHeader className="text-center pt-8">
-              <Badge variant="secondary" className="w-fit mx-auto mb-2 bg-purple-100 text-purple-800">
-                PACK 2 - BEST VALUE
+          <div className="relative">
+            <div className="text-center mb-2">
+              <Badge className="bg-purple-600 text-white hover:bg-purple-700 mb-1">
+                Best Value
               </Badge>
-              <div className="flex justify-center mb-4">
-                <div className="p-3 rounded-full bg-purple-100">
-                  <Crown className="h-8 w-8 text-purple-600" />
-                </div>
-              </div>
-              <CardTitle className="text-xl">Power Pack</CardTitle>
-              <CardDescription>Maximum submission credits</CardDescription>
-              <div className="mt-4">
-                <span className="text-3xl font-bold text-purple-600">$15</span>
-                <span className="text-muted-foreground"> one-time</span>
-              </div>
               <div className="text-xs text-green-600 font-medium">
                 Save $5 vs. buying separately
               </div>
-            </CardHeader>
+            </div>
+            <Card className="relative overflow-hidden border-2 border-purple-200 hover:border-purple-400 transition-colors">
+              <CardHeader className="text-center">
+                <Badge variant="secondary" className="w-fit mx-auto mb-2 bg-purple-100 text-purple-800">
+                  PACK 2
+                </Badge>
+                <div className="flex justify-center mb-4">
+                  <div className="p-3 rounded-full bg-purple-100">
+                    <Crown className="h-8 w-8 text-purple-600" />
+                  </div>
+                </div>
+                <CardTitle className="text-xl">Power Pack</CardTitle>
+                <CardDescription>Maximum submission credits</CardDescription>
+                <div className="mt-4">
+                  <span className="text-3xl font-bold text-purple-600">$15</span>
+                  <span className="text-muted-foreground"> one-time</span>
+                </div>
+              </CardHeader>
             <CardContent className="space-y-6">
               <Button className="w-full bg-purple-600 hover:bg-purple-700" size="lg">
                 Add Pack 2
@@ -324,6 +327,7 @@ export default function PricingPage() {
               </div>
             </CardContent>
           </Card>
+          </div>
         </div>
         
         <div className="text-center mt-8">
