@@ -153,12 +153,67 @@ export default function PricingPage() {
           </p>
         </div>
         
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          {/* Pack 0 - Single */}
+          <Card className="relative overflow-hidden border-2 border-green-200 hover:border-green-400 transition-colors">
+            <CardHeader className="text-center">
+              <Badge variant="secondary" className="w-fit mx-auto mb-2 bg-green-100 text-green-800">
+                PACK 0
+              </Badge>
+              <div className="flex justify-center mb-4">
+                <div className="p-3 rounded-full bg-green-100">
+                  <Star className="h-8 w-8 text-green-600" />
+                </div>
+              </div>
+              <CardTitle className="text-xl">Single Credit</CardTitle>
+              <CardDescription>Perfect for testing the waters</CardDescription>
+              <div className="mt-4">
+                <span className="text-3xl font-bold text-green-600">$5</span>
+                <span className="text-muted-foreground"> one-time</span>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <Button className="w-full bg-green-600 hover:bg-green-700" size="lg">
+                Add Pack 0
+              </Button>
+              
+              <div className="space-y-3">
+                <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">
+                  What You Get
+                </h4>
+                <ul className="space-y-2">
+                  <li className="flex items-start gap-3">
+                    <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm"><strong>+1 submission credit</strong></span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Credit never expires</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Full A&R review process</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Most affordable option</span>
+                  </li>
+                </ul>
+              </div>
+              
+              <div className="bg-green-50 p-3 rounded-lg">
+                <p className="text-sm text-green-800">
+                  <strong>Perfect for:</strong> First-time users or one-off submissions
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Pack 1 */}
           <Card className="relative overflow-hidden border-2 border-blue-200 hover:border-blue-400 transition-colors">
             <CardHeader className="text-center">
               <Badge variant="secondary" className="w-fit mx-auto mb-2 bg-blue-100 text-blue-800">
-                PACK 1
+                PACK 1 - POPULAR
               </Badge>
               <div className="flex justify-center mb-4">
                 <div className="p-3 rounded-full bg-blue-100">
@@ -216,7 +271,7 @@ export default function PricingPage() {
             </div>
             <CardHeader className="text-center pt-8">
               <Badge variant="secondary" className="w-fit mx-auto mb-2 bg-purple-100 text-purple-800">
-                PACK 2
+                PACK 2 - BEST VALUE
               </Badge>
               <div className="flex justify-center mb-4">
                 <div className="p-3 rounded-full bg-purple-100">
