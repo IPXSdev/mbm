@@ -505,6 +505,17 @@ export async function saveSyncFinalization(data: Omit<SyncFinalization, 'id' | '
   try {
     const client = supabaseAdmin || supabase
     
+    // Check if sync_finalizations table exists and if user has access
+    const { data: tableExists, error: tableError } = await client
+      .from('sync_finalizations')
+      .select('id')
+      .limit(1)
+      .maybeSingle()
+
+    if (tableError && tableError.code === '42P01') {
+      throw new Error("Database tables not found. Please contact admin to set up sync finalization tables.")
+    }
+    
     const { data: result, error } = await client
       .from('sync_finalizations')
       .upsert({
@@ -519,7 +530,17 @@ export async function saveSyncFinalization(data: Omit<SyncFinalization, 'id' | '
 
     if (error) {
       console.error("Error saving sync finalization:", error)
-      throw error
+      
+      // Provide more specific error messages
+      if (error.code === '23503') {
+        throw new Error("Invalid track or user reference. Please refresh the page and try again.")
+      } else if (error.code === '23505') {
+        throw new Error("This track has already been finalized.")
+      } else if (error.code === '42501') {
+        throw new Error("You don't have permission to perform this action. Please ensure you're logged in.")
+      } else {
+        throw new Error(`Database error: ${error.message}`)
+      }
     }
 
     return result

@@ -168,37 +168,78 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
     setStatus(null)
 
     try {
+      // Validate required fields
+      if (!firstName.trim()) {
+        throw new Error("First name is required")
+      }
+      if (!lastName.trim()) {
+        throw new Error("Last name is required")
+      }
+      if (!email.trim()) {
+        throw new Error("Email is required")
+      }
+      if (!contactNumber.trim()) {
+        throw new Error("Contact number is required")
+      }
+      if (!proPlan) {
+        throw new Error("PRO plan is required")
+      }
+      if (!proNumber.trim()) {
+        throw new Error("PRO number is required")
+      }
+      if (!publisherName.trim()) {
+        throw new Error("Publisher name is required")
+      }
+      if (!publisherPRO) {
+        throw new Error("Publisher PRO is required")
+      }
+      if (!publisherNumber.trim()) {
+        throw new Error("Publisher number is required")
+      }
+      if (!copyrightOwner.trim()) {
+        throw new Error("Copyright owner is required")
+      }
+      if (!masterOwner.trim()) {
+        throw new Error("Master owner is required")
+      }
+      if (!territoryRights.trim()) {
+        throw new Error("Territory rights is required")
+      }
+      if (!duration.trim()) {
+        throw new Error("Duration is required")
+      }
+
       // Get current user
       const user = await getCurrentUser()
       if (!user) {
-        throw new Error("User not authenticated")
+        throw new Error("You must be logged in to finalize a submission")
       }
 
       // Prepare submission data
       const submissionData = {
         track_id: track.id,
         user_id: user.id,
-        first_name: firstName,
-        middle_name: middleName || undefined,
-        last_name: lastName,
-        email: email,
-        contact_number: contactNumber,
+        first_name: firstName.trim(),
+        middle_name: middleName.trim() || undefined,
+        last_name: lastName.trim(),
+        email: email.trim(),
+        contact_number: contactNumber.trim(),
         pro_plan: proPlan,
-        pro_number: proNumber,
-        publisher_name: publisherName,
+        pro_number: proNumber.trim(),
+        publisher_name: publisherName.trim(),
         publisher_pro: publisherPRO,
-        publisher_number: publisherNumber,
-        copyright_owner: copyrightOwner,
-        master_owner: masterOwner,
-        isrc: isrc || undefined,
-        upc: upc || undefined,
-        territory_rights: territoryRights,
-        duration: duration,
-        bpm: bpm || undefined,
-        key: key || undefined,
-        lyrics: lyrics || undefined,
+        publisher_number: publisherNumber.trim(),
+        copyright_owner: copyrightOwner.trim(),
+        master_owner: masterOwner.trim(),
+        isrc: isrc.trim() || undefined,
+        upc: upc.trim() || undefined,
+        territory_rights: territoryRights.trim(),
+        duration: duration.trim(),
+        bpm: bpm.trim() || undefined,
+        key: key.trim() || undefined,
+        lyrics: lyrics.trim() || undefined,
         instrumental_available: instrumentalAvailable,
-        additional_notes: additionalNotes || undefined,
+        additional_notes: additionalNotes.trim() || undefined,
         contributors: contributors
       }
 
@@ -219,7 +260,8 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
       
     } catch (error: any) {
       console.error("Error finalizing submission:", error)
-      setStatus("❌ Failed to finalize submission. Please try again.")
+      const errorMessage = error.message || "Failed to finalize submission. Please try again."
+      setStatus(`❌ ${errorMessage}`)
     } finally {
       setLoading(false)
     }
