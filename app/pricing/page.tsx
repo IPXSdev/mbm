@@ -154,27 +154,27 @@ export default function PricingPage() {
         </div>
         
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {/* Pack 0 - Single */}
-          <Card className="relative overflow-hidden border-2 border-green-200 hover:border-green-400 transition-colors">
+          {/* Silver Pack */}
+          <Card className="relative overflow-hidden border-2 border-gray-200 hover:border-gray-400 transition-colors">
             <CardHeader className="text-center">
-              <Badge variant="secondary" className="w-fit mx-auto mb-2 bg-green-100 text-green-800">
-                PACK 0
+              <Badge variant="secondary" className="w-fit mx-auto mb-2 bg-gray-100 text-gray-800">
+                SILVER
               </Badge>
               <div className="flex justify-center mb-4">
-                <div className="p-3 rounded-full bg-green-100">
-                  <Star className="h-8 w-8 text-green-600" />
+                <div className="p-3 rounded-full bg-gray-100">
+                  <Star className="h-8 w-8 text-gray-600" />
                 </div>
               </div>
               <CardTitle className="text-xl">Single Credit</CardTitle>
               <CardDescription>Perfect for testing the waters</CardDescription>
               <div className="mt-4">
-                <span className="text-3xl font-bold text-green-600">$5</span>
+                <span className="text-3xl font-bold text-gray-600">$5</span>
                 <span className="text-muted-foreground"> one-time</span>
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
-              <Button className="w-full bg-green-600 hover:bg-green-700" size="lg">
-                Add Pack 0
+              <Button className="w-full bg-gray-600 hover:bg-gray-700" size="lg">
+                Add Silver Pack
               </Button>
               
               <div className="space-y-3">
@@ -201,35 +201,35 @@ export default function PricingPage() {
                 </ul>
               </div>
               
-              <div className="bg-green-50 p-3 rounded-lg">
-                <p className="text-sm text-green-800">
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <p className="text-sm text-gray-800">
                   <strong>Perfect for:</strong> First-time users or one-off submissions
                 </p>
               </div>
             </CardContent>
           </Card>
 
-          {/* Pack 1 */}
-          <Card className="relative overflow-hidden border-2 border-blue-200 hover:border-blue-400 transition-colors">
+          {/* Gold Pack */}
+          <Card className="relative overflow-hidden border-2 border-yellow-200 hover:border-yellow-400 transition-colors">
             <CardHeader className="text-center">
-              <Badge variant="secondary" className="w-fit mx-auto mb-2 bg-blue-100 text-blue-800">
-                PACK 1 - POPULAR
+              <Badge variant="secondary" className="w-fit mx-auto mb-2 bg-yellow-100 text-yellow-800">
+                GOLD
               </Badge>
               <div className="flex justify-center mb-4">
-                <div className="p-3 rounded-full bg-blue-100">
-                  <Zap className="h-8 w-8 text-blue-600" />
+                <div className="p-3 rounded-full bg-yellow-100">
+                  <Zap className="h-8 w-8 text-yellow-600" />
                 </div>
               </div>
               <CardTitle className="text-xl">Extra Submissions</CardTitle>
               <CardDescription>One-time credit purchase</CardDescription>
               <div className="mt-4">
-                <span className="text-3xl font-bold text-blue-600">$10</span>
+                <span className="text-3xl font-bold text-yellow-600">$10</span>
                 <span className="text-muted-foreground"> one-time</span>
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
-              <Button className="w-full bg-blue-600 hover:bg-blue-700" size="lg">
-                Add Pack 1
+              <Button className="w-full bg-yellow-600 hover:bg-yellow-700" size="lg">
+                Add Gold Pack
               </Button>
               
               <div className="space-y-3">
@@ -256,19 +256,19 @@ export default function PricingPage() {
                 </ul>
               </div>
               
-              <div className="bg-blue-50 p-3 rounded-lg">
-                <p className="text-sm text-blue-800">
+              <div className="bg-yellow-50 p-3 rounded-lg">
+                <p className="text-sm text-yellow-800">
                   <strong>Perfect for:</strong> Artists who want extra credits that never expire
                 </p>
               </div>
             </CardContent>
           </Card>
 
-          {/* Pack 2 */}
+          {/* Platinum Pack */}
           <Card className="relative overflow-hidden border-2 border-purple-200 hover:border-purple-400 transition-colors">
             <CardHeader className="text-center">
               <Badge variant="secondary" className="w-fit mx-auto mb-2 bg-purple-100 text-purple-800">
-                PACK 2
+                PLATINUM
               </Badge>
               <div className="flex justify-center mb-4">
                 <div className="p-3 rounded-full bg-purple-100">
@@ -284,7 +284,7 @@ export default function PricingPage() {
             </CardHeader>
             <CardContent className="space-y-6">
               <Button className="w-full bg-purple-600 hover:bg-purple-700" size="lg">
-                Add Pack 2
+                Add Platinum Pack
               </Button>
               
               <div className="space-y-3">
