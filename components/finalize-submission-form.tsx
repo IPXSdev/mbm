@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Trash2 } from "lucide-react"
 import { saveSyncFinalization, getCurrentUser } from "@/lib/db"
+import { supabase } from "@/lib/supabase-client"
 
 interface SubmittedTrack {
   id: string
@@ -209,16 +210,37 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
         throw new Error("Duration is required")
       }
 
-      // Get current user
+      // Check authentication with multiple methods
+      console.log("Checking authentication...")
+      
+      // Method 1: Direct auth check
+      const { data: { user: authUser }, error: authError } = await supabase.auth.getUser()
+      console.log("Auth user:", authUser, "Error:", authError)
+      
+      // Method 2: Our getCurrentUser function
       const user = await getCurrentUser()
-      if (!user) {
-        throw new Error("You must be logged in to finalize a submission")
+      console.log("getCurrentUser result:", user)
+      
+      // Use auth user if available
+      const finalUser = user || (authUser ? {
+        id: authUser.id,
+        email: authUser.email || "",
+        name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || "User",
+        role: "user",
+        created_at: authUser.created_at || new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      } : null)
+      
+      if (!finalUser) {
+        throw new Error("Authentication failed. Please log out and log back in.")
       }
+
+      console.log("Using user:", finalUser)
 
       // Prepare submission data
       const submissionData = {
         track_id: track.id,
-        user_id: user.id,
+        user_id: finalUser.id,
         first_name: firstName.trim(),
         middle_name: middleName.trim() || undefined,
         last_name: lastName.trim(),

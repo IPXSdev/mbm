@@ -121,26 +121,42 @@ export async function getCurrentUser(): Promise<User | null> {
     } = await supabase.auth.getUser()
 
     if (error || !user) {
+      console.log("No auth user found:", error)
       return null
     }
 
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", user.id)
-      .single()
+    console.log("Auth user found:", user.id, user.email)
 
-    if (profileError || !profile) {
-      return null
+    // Try to get profile, but don't fail if profiles table doesn't exist
+    try {
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single()
+
+      if (!profileError && profile) {
+        return {
+          id: profile.id,
+          email: profile.email,
+          name: profile.name,
+          role: profile.role,
+          created_at: profile.created_at,
+          updated_at: profile.updated_at,
+        }
+      }
+    } catch (profileErr) {
+      console.log("Profiles table not accessible, using auth user directly")
     }
 
+    // Fallback: use auth user data directly
     return {
-      id: profile.id,
-      email: profile.email,
-      name: profile.name,
-      role: profile.role,
-      created_at: profile.created_at,
-      updated_at: profile.updated_at,
+      id: user.id,
+      email: user.email || "",
+      name: user.user_metadata?.name || user.email?.split('@')[0] || "User",
+      role: "user", // Default role
+      created_at: user.created_at || new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     }
   } catch (error) {
     console.error("Error getting current user:", error)
