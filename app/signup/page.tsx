@@ -88,28 +88,52 @@ export default function SignUpPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <Card className="w-full max-w-md">
-          <CardContent className="p-6 text-center">
-            <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Account Created!</h2>
-            <p className="text-gray-600 mb-4">Your account has been created successfully. You can now sign in.</p>
-            <Button onClick={() => router.push("/login")} className="w-full">
-              Continue to Sign In
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="container mx-auto px-4 py-8 max-w-6xl min-h-screen">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Card className="w-full max-w-md bg-zinc-900 border-gray-800 text-white">
+            <CardContent className="p-6 text-center">
+              <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
+              <h2 className="text-xl font-semibold mb-2">Welcome to The Family! 🎉</h2>
+              <p className="text-gray-300 mb-4">
+                Your account has been created successfully. You're now part of an exclusive 
+                community of music creators ready to take on the industry!
+              </p>
+              <Button onClick={() => router.push("/login")} className="w-full">
+                Continue to Sign In
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Create Account</CardTitle>
-          <CardDescription className="text-center">Enter your information to create your account</CardDescription>
-        </CardHeader>
+    <div className="container mx-auto px-4 py-8 max-w-6xl min-h-screen">
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="w-full max-w-md space-y-6">
+          {/* Encouraging Message */}
+          <div className="text-center space-y-3">
+            <h1 className="text-3xl font-bold text-white">🎵 Begin Your Musical Journey</h1>
+            <p className="text-gray-300 text-lg leading-relaxed">
+              Join an exclusive community of artists, producers, and creators. 
+              Get your music heard by industry professionals and unlock opportunities 
+              for sync placements, collaborations, and career growth.
+            </p>
+            <div className="flex justify-center space-x-6 text-sm text-yellow-400">
+              <span>✨ Industry Access</span>
+              <span>🎯 Sync Placements</span>
+              <span>🚀 Career Growth</span>
+            </div>
+          </div>
+
+          <Card className="w-full bg-zinc-900 border-gray-800 text-white">
+            <CardHeader className="space-y-1">
+              <CardTitle className="text-2xl font-bold text-center">Create Account</CardTitle>
+              <CardDescription className="text-center text-gray-300">
+                Enter your information to join the community
+              </CardDescription>
+            </CardHeader>
         <CardContent>
           <form onSubmit={handleSignUp} className="space-y-4">
             {error && (
@@ -210,15 +234,17 @@ export default function SignUpPage() {
               )}
             </Button>
 
-            <div className="text-center text-sm text-gray-600">
+            <div className="text-center text-sm text-gray-400">
               Already have an account?{" "}
-              <Link href="/login" className="text-blue-600 hover:text-blue-500">
+              <Link href="/login" className="text-blue-400 hover:text-yellow-400">
                 Sign in
               </Link>
             </div>
           </form>
         </CardContent>
       </Card>
+        </div>
+      </div>
     </div>
   )
 }
