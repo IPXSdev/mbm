@@ -12,7 +12,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Progress } from "@/components/ui/progress"
 import { Upload, Music, ImageIcon, CheckCircle, AlertCircle, Play, Pause } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/auth-client"
+import { createClient } from "@/lib/supabase-client"
+import { submitTrack, uploadAudioFile, uploadImageFile } from "@/lib/db"
 
 export default function SubmitPage() {
   const router = useRouter()
@@ -60,6 +61,7 @@ export default function SubmitPage() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        const supabase = createClient()
         const {
           data: { session },
         } = await supabase.auth.getSession()
@@ -173,37 +175,45 @@ export default function SubmitPage() {
     setErrorMessage("")
 
     try {
-      // Simulate upload progress
-      setUploadProgress(25)
-      await new Promise((resolve) => setTimeout(resolve, 500))
+      console.log("Starting submission process...")
+      setUploadProgress(10)
 
-      setUploadProgress(50)
-      await new Promise((resolve) => setTimeout(resolve, 500))
+      let audioUrl = ""
+      let imageUrl = ""
 
-      setUploadProgress(75)
-      await new Promise((resolve) => setTimeout(resolve, 500))
+      // Upload audio file if present
+      if (audioFile) {
+        console.log("Uploading audio file...")
+        audioUrl = await uploadAudioFile(audioFile, user.id)
+        console.log("Audio uploaded:", audioUrl)
+        setUploadProgress(40)
+      }
 
-      // Create track record (mock for now)
+      // Upload image file if present
+      if (imageFile) {
+        console.log("Uploading image file...")
+        imageUrl = await uploadImageFile(imageFile, user.id)
+        console.log("Image uploaded:", imageUrl)
+        setUploadProgress(60)
+      }
+
+      // Create track record in database
+      console.log("Saving to database...")
       const trackData = {
-        id: Date.now().toString(),
-        user_id: user.id,
         title: formData.title,
         artist: formData.artist,
         genre: formData.genre,
         email: formData.email,
         description: formData.description,
-        file_url: audioPreview || "",
-        image_url: imagePreview || null,
+        file_url: audioUrl,
+        image_url: imageUrl || undefined,
         file_name: audioFile.name,
         file_size: audioFile.size,
-        status: "pending" as const,
-        created_at: new Date().toISOString(),
+        user_id: user.id,
       }
 
-      // Store in localStorage for demo
-      const existingSubmissions = JSON.parse(localStorage.getItem("userSubmissions") || "[]")
-      existingSubmissions.push(trackData)
-      localStorage.setItem("userSubmissions", JSON.stringify(existingSubmissions))
+      const submissionId = await submitTrack(trackData)
+      console.log("Submission saved with ID:", submissionId)
 
       setUploadProgress(100)
       setSubmitStatus("success")
@@ -229,8 +239,13 @@ export default function SubmitPage() {
       }, 2000)
     } catch (error) {
       console.error("Submission error:", error)
-      setErrorMessage(error instanceof Error ? error.message : "Failed to submit track")
+      setErrorMessage(
+        error instanceof Error 
+          ? `Failed to submit track: ${error.message}` 
+          : "Failed to submit track. Please try again."
+      )
       setSubmitStatus("error")
+      setUploadProgress(0)
     } finally {
       setIsSubmitting(false)
     }
