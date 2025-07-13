@@ -138,25 +138,63 @@ export default function AuthNavbar() {
       setUser(null)
       setProfile(null)
       
-      // Sign out from Supabase
+      // Sign out from Supabase with global scope
       const { error } = await supabaseClient.auth.signOut({ scope: 'global' })
       
       if (error) {
         console.error("Error signing out:", error)
       }
       
-      // Clear any localStorage/sessionStorage related to auth
+      // Aggressively clear all auth-related storage
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('supabase.auth.token')
+        // Clear all Supabase auth keys
+        const keysToRemove = [
+          'supabase.auth.token',
+          'sb-izeozsebupuihhitwwql-auth-token',
+          'sb-auth-token',
+          'supabase.session',
+          'supabase.user'
+        ]
+        
+        keysToRemove.forEach(key => {
+          localStorage.removeItem(key)
+          sessionStorage.removeItem(key)
+        })
+        
+        // Clear all localStorage items that contain 'supabase' or 'auth'
+        Object.keys(localStorage).forEach(key => {
+          if (key.includes('supabase') || key.includes('auth')) {
+            localStorage.removeItem(key)
+          }
+        })
+        
+        // Clear session storage completely
         sessionStorage.clear()
         
-        // Force a hard reload to clear all state
-        window.location.href = "/"
+        // Clear any auth cookies (though Supabase mainly uses localStorage)
+        document.cookie.split(";").forEach(cookie => {
+          const eqPos = cookie.indexOf("=")
+          const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim()
+          if (name.includes('supabase') || name.includes('auth')) {
+            document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`
+          }
+        })
+        
+        // Force a hard reload to clear all state and prevent caching
+        setTimeout(() => {
+          window.location.replace("/")
+        }, 100)
       } else {
         router.push("/")
       }
     } catch (error) {
       console.error("Error signing out:", error)
+      // Even if sign out fails, clear local data and redirect
+      if (typeof window !== 'undefined') {
+        localStorage.clear()
+        sessionStorage.clear()
+        window.location.replace("/")
+      }
     } finally {
       setLoading(false)
     }
