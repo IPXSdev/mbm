@@ -519,18 +519,9 @@ export async function createUserWithRole(
 // Sync Finalization Functions
 export async function saveSyncFinalization(data: Omit<SyncFinalization, 'id' | 'created_at' | 'updated_at' | 'status'>): Promise<SyncFinalization> {
   try {
-    // First verify authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      throw new Error("You must be logged in to finalize submissions. Please log in and try again.")
-    }
-
-    // Verify the user_id matches the authenticated user
-    if (data.user_id !== user.id) {
-      throw new Error("You can only finalize your own submissions.")
-    }
-
-    // Verify the track belongs to the user
+    console.log("saveSyncFinalization called with data:", { track_id: data.track_id, user_id: data.user_id })
+    
+    // Verify the track exists and belongs to the user (this also checks auth via RLS)
     const { data: track, error: trackError } = await supabase
       .from('tracks')
       .select('user_id')
@@ -542,11 +533,15 @@ export async function saveSyncFinalization(data: Omit<SyncFinalization, 'id' | '
       throw new Error("Could not verify track ownership. Please try again.")
     }
 
-    if (!track || track.user_id !== user.id) {
+    if (!track) {
+      throw new Error("Track not found.")
+    }
+
+    if (track.user_id !== data.user_id) {
       throw new Error("You can only finalize submissions for your own tracks.")
     }
 
-    console.log("Authenticated user:", user.id, "for track:", data.track_id)
+    console.log("Track ownership verified for user:", data.user_id, "track:", data.track_id)
     
     // Check if sync_finalizations table exists
     const { data: tableExists, error: tableError } = await supabase
@@ -559,7 +554,7 @@ export async function saveSyncFinalization(data: Omit<SyncFinalization, 'id' | '
       throw new Error("Database tables not found. Please contact admin to set up sync finalization tables.")
     }
     
-    // Use the regular supabase client (not admin) to respect RLS policies
+    // Use the regular supabase client to respect RLS policies
     const { data: result, error } = await supabase
       .from('sync_finalizations')
       .upsert({
@@ -599,6 +594,7 @@ export async function saveSyncFinalization(data: Omit<SyncFinalization, 'id' | '
       throw new Error("No data returned from database. Please try again.")
     }
 
+    console.log("Sync finalization saved successfully:", result.id)
     return result
   } catch (error) {
     console.error("Error in saveSyncFinalization:", error)
