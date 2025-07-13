@@ -140,8 +140,8 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
       <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b p-6 flex justify-between items-center">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Finalize Submission</h2>
-            <p className="text-gray-600 mt-1">"{track.title}" by {track.artist}</p>
+            <h2 className="text-2xl font-bold text-blue-900">Finalize Submission</h2>
+            <p className="text-blue-700 mt-1">"{track.title}" by {track.artist}</p>
           </div>
           <button 
             onClick={onClose}
@@ -154,12 +154,12 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
         <form onSubmit={handleSubmit} className="p-6 space-y-8">
           {/* PRO Information */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
+            <h3 className="text-lg font-semibold text-blue-900 border-b pb-2">
               Performance Rights Organization (PRO)
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="proPlan">Your PRO</Label>
+                <Label htmlFor="proPlan" className="text-blue-800">Your PRO</Label>
                 <Select value={proPlan} onValueChange={setProPlan}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select your PRO" />
@@ -172,7 +172,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                 </Select>
               </div>
               <div>
-                <Label htmlFor="proNumber">PRO Member Number</Label>
+                <Label htmlFor="proNumber" className="text-blue-800">PRO Member Number</Label>
                 <Input
                   id="proNumber"
                   value={proNumber}
@@ -185,12 +185,12 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
 
           {/* Publisher Information */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
+            <h3 className="text-lg font-semibold text-blue-900 border-b pb-2">
               Publisher Information
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="publisherName">Publisher Name</Label>
+                <Label htmlFor="publisherName" className="text-blue-800">Publisher Name</Label>
                 <Input
                   id="publisherName"
                   value={publisherName}
@@ -199,7 +199,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                 />
               </div>
               <div>
-                <Label htmlFor="publisherPRO">Publisher PRO</Label>
+                <Label htmlFor="publisherPRO" className="text-blue-800">Publisher PRO</Label>
                 <Select value={publisherPRO} onValueChange={setPublisherPRO}>
                   <SelectTrigger>
                     <SelectValue placeholder="Publisher's PRO" />
@@ -212,7 +212,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                 </Select>
               </div>
               <div>
-                <Label htmlFor="publisherNumber">Publisher PRO Number</Label>
+                <Label htmlFor="publisherNumber" className="text-blue-800">Publisher PRO Number</Label>
                 <Input
                   id="publisherNumber"
                   value={publisherNumber}
@@ -225,12 +225,12 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
 
           {/* Rights & Ownership */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
+            <h3 className="text-lg font-semibold text-blue-900 border-b pb-2">
               Rights & Ownership
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="copyrightOwner">Copyright Owner</Label>
+                <Label htmlFor="copyrightOwner" className="text-blue-800">Copyright Owner</Label>
                 <Input
                   id="copyrightOwner"
                   value={copyrightOwner}
@@ -240,7 +240,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                 />
               </div>
               <div>
-                <Label htmlFor="masterOwner">Master Recording Owner</Label>
+                <Label htmlFor="masterOwner" className="text-blue-800">Master Recording Owner</Label>
                 <Input
                   id="masterOwner"
                   value={masterOwner}
@@ -250,7 +250,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                 />
               </div>
               <div>
-                <Label htmlFor="territoryRights">Territory Rights</Label>
+                <Label htmlFor="territoryRights" className="text-blue-800">Territory Rights</Label>
                 <Select value={territoryRights} onValueChange={setTerritoryRights}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select territory" />
@@ -269,12 +269,12 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
 
           {/* Track Details */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
+            <h3 className="text-lg font-semibold text-blue-900 border-b pb-2">
               Track Details
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <Label htmlFor="isrc">ISRC Code</Label>
+                <Label htmlFor="isrc" className="text-blue-800">ISRC Code</Label>
                 <Input
                   id="isrc"
                   value={isrc}
@@ -283,7 +283,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                 />
               </div>
               <div>
-                <Label htmlFor="upc">UPC/EAN</Label>
+                <Label htmlFor="upc" className="text-blue-800">UPC/EAN</Label>
                 <Input
                   id="upc"
                   value={upc}
@@ -292,7 +292,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                 />
               </div>
               <div>
-                <Label htmlFor="duration">Duration</Label>
+                <Label htmlFor="duration" className="text-blue-800">Duration</Label>
                 <Input
                   id="duration"
                   value={duration}
@@ -302,7 +302,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                 />
               </div>
               <div>
-                <Label htmlFor="bpm">BPM</Label>
+                <Label htmlFor="bpm" className="text-blue-800">BPM</Label>
                 <Input
                   id="bpm"
                   type="number"
@@ -312,7 +312,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                 />
               </div>
               <div>
-                <Label htmlFor="key">Key</Label>
+                <Label htmlFor="key" className="text-blue-800">Key</Label>
                 <Input
                   id="key"
                   value={key}
@@ -328,7 +328,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                   onChange={e => setInstrumentalAvailable(e.target.checked)}
                   className="rounded"
                 />
-                <Label htmlFor="instrumentalAvailable">Instrumental Available</Label>
+                <Label htmlFor="instrumentalAvailable" className="text-blue-800">Instrumental Available</Label>
               </div>
             </div>
           </div>
@@ -336,7 +336,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
           {/* Contributors */}
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
+              <h3 className="text-lg font-semibold text-blue-900 border-b pb-2">
                 Contributors & Credits
               </h3>
               <Button
@@ -354,7 +354,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
             {contributors.map((contributor, index) => (
               <div key={contributor.id} className="border rounded-lg p-4 space-y-3">
                 <div className="flex justify-between items-center">
-                  <h4 className="font-medium">Contributor {index + 1}</h4>
+                  <h4 className="font-medium text-blue-800">Contributor {index + 1}</h4>
                   {contributors.length > 1 && (
                     <Button
                       type="button"
@@ -369,7 +369,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                   <div>
-                    <Label>Name</Label>
+                    <Label className="text-blue-800">Name</Label>
                     <Input
                       value={contributor.name}
                       onChange={e => updateContributor(contributor.id, "name", e.target.value)}
@@ -378,7 +378,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                     />
                   </div>
                   <div>
-                    <Label>Role</Label>
+                    <Label className="text-blue-800">Role</Label>
                     <Select 
                       value={contributor.role} 
                       onValueChange={(value) => updateContributor(contributor.id, "role", value)}
@@ -394,7 +394,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                     </Select>
                   </div>
                   <div>
-                    <Label>Percentage %</Label>
+                    <Label className="text-blue-800">Percentage %</Label>
                     <Input
                       type="number"
                       min="0"
@@ -405,7 +405,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                     />
                   </div>
                   <div>
-                    <Label>PRO</Label>
+                    <Label className="text-blue-800">PRO</Label>
                     <Select 
                       value={contributor.proPlan} 
                       onValueChange={(value) => updateContributor(contributor.id, "proPlan", value)}
@@ -427,11 +427,11 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
 
           {/* Lyrics & Notes */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
+            <h3 className="text-lg font-semibold text-blue-900 border-b pb-2">
               Additional Information
             </h3>
             <div>
-              <Label htmlFor="lyrics">Lyrics (if applicable)</Label>
+              <Label htmlFor="lyrics" className="text-blue-800">Lyrics (if applicable)</Label>
               <Textarea
                 id="lyrics"
                 value={lyrics}
@@ -441,7 +441,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
               />
             </div>
             <div>
-              <Label htmlFor="additionalNotes">Additional Notes</Label>
+              <Label htmlFor="additionalNotes" className="text-blue-800">Additional Notes</Label>
               <Textarea
                 id="additionalNotes"
                 value={additionalNotes}
