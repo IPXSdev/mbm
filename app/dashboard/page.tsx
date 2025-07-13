@@ -50,6 +50,7 @@ export default function DashboardPage() {
   const [chatMessages, setChatMessages] = useState<any[]>([])
   const [newMessage, setNewMessage] = useState("")
   const [sendingMessage, setSendingMessage] = useState(false)
+  const [chatSessionsStatus, setChatSessionsStatus] = useState<Record<string, string>>({})
   const router = useRouter()
 
   useEffect(() => {
@@ -164,7 +165,11 @@ export default function DashboardPage() {
       }
 
       console.log("Found tracks in database:", submissions)
-      setSubmittedTracks(submissions || [])
+      const tracks = submissions || []
+      setSubmittedTracks(tracks)
+      
+      // Check chat session status for all tracks
+      await checkChatSessionsStatus(tracks)
     } catch (error) {
       console.error("Error loading submissions:", error)
       setSubmittedTracks([])
@@ -173,7 +178,22 @@ export default function DashboardPage() {
     }
   }
 
-
+  // Check chat session status for all user tracks
+  const checkChatSessionsStatus = async (tracks: SubmittedTrack[]) => {
+    const statusMap: Record<string, string> = {}
+    
+    for (const track of tracks) {
+      try {
+        const session = await getChatSession(track.id)
+        statusMap[track.id] = session ? session.status : "no_session"
+      } catch (error) {
+        console.error(`Error checking chat status for track ${track.id}:`, error)
+        statusMap[track.id] = "no_session"
+      }
+    }
+    
+    setChatSessionsStatus(statusMap)
+  }
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -217,14 +237,15 @@ export default function DashboardPage() {
   // Chat functionality
   const openChatModal = async (track: SubmittedTrack) => {
     try {
+      // Check if there's an active chat session
+      const chatSession = await getChatSession(track.id)
+      if (!chatSession || chatSession.status !== 'open') {
+        setError("No active chat session found. Admin has not initiated chat for this track.")
+        return
+      }
+      
       setSelectedTrackForChat(track)
       setShowChatModal(true)
-      
-      // Get or create chat session
-      let chatSession = await getChatSession(track.id)
-      if (!chatSession && user) {
-        chatSession = await createChatSession(track.id, user.id)
-      }
       
       // Load existing messages
       const messages = await getSyncMessages(track.id)
@@ -535,21 +556,24 @@ export default function DashboardPage() {
                               >
                                 📋 Finalize Submission
                               </Button>
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                className="border-purple-300 text-purple-600 hover:bg-purple-50"
-                                onClick={() => openChatModal(track)}
-                              >
-                                <MessageCircle className="w-4 h-4 mr-2" />
-                                Chat with Admin
-                              </Button>
+                              {/* Only show chat button if admin has started a session */}
+                              {chatSessionsStatus[track.id] === 'open' && (
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  className="border-purple-300 text-purple-600 hover:bg-purple-50"
+                                  onClick={() => openChatModal(track)}
+                                >
+                                  <MessageCircle className="w-4 h-4 mr-2" />
+                                  Chat Active
+                                </Button>
+                              )}
                             </div>
                           </div>
                         )}
 
-                        {/* Chat button for under review tracks */}
-                        {track.status === "under_review" && (
+                        {/* Chat button for under review tracks - only if admin started chat */}
+                        {track.status === "under_review" && chatSessionsStatus[track.id] === 'open' && (
                           <div className="mt-3">
                             <Button 
                               size="sm" 
@@ -560,18 +584,9 @@ export default function DashboardPage() {
                               <MessageCircle className="w-4 h-4 mr-2" />
                               Chat with Admin
                             </Button>
-                          </div>
-                        )}
-                        {track.status === "under_review" && (
-                          <div className="flex flex-col gap-2">
-                            <Button 
-                              variant="outline" 
-                              onClick={() => openChatModal(track)}
-                              className="w-full"
-                            >
-                              <MessageCircle className="mr-2 h-4 w-4" />
-                              {chatMessages.length > 0 ? "Continue Chat" : "Contact Support"}
-                            </Button>
+                            <Badge variant="outline" className="ml-2 bg-green-100 text-green-800 border-green-200">
+                              Active
+                            </Badge>
                           </div>
                         )}
                       </div>

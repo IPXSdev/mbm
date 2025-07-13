@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { getTracks, updateTrackStatus, checkSyncFinalizationStatus, getPendingSyncNotifications, getChatSession, createChatSession, sendSyncMessage, getSyncMessages, getCurrentUser } from "@/lib/db"
+import { getTracks, updateTrackStatus, checkSyncFinalizationStatus, getPendingSyncNotifications, getChatSession, createChatSession, sendSyncMessage, getSyncMessages, getCurrentUser, closeChatSession } from "@/lib/db"
 import dynamic from "next/dynamic"
 
 const ViewFinalizedSubmission = dynamic(() => import("@/components/view-finalized-submission"), { ssr: false })
@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Music, RefreshCw, Star, CheckCircle, XCircle, Clock, AlertTriangle, MessageCircle, Send, X } from "lucide-react"
+import { supabase } from "@/lib/supabase-client"
 
 export default function AdminDashboard() {
   const [tracks, setTracks] = useState<any[]>([])
@@ -185,17 +186,19 @@ export default function AdminDashboard() {
       setSelectedTrackForChat(track)
       setShowChatModal(true)
       
-      // Get current admin user
-      const admin = await getCurrentUser()
-      setCurrentAdmin(admin)
-      
-      // Get or create chat session
-      let chatSession = await getChatSession(track.id)
-      if (!chatSession) {
-        chatSession = await createChatSession(track.id, track.user_id, admin?.id)
+      // Get current admin user via Supabase auth directly
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      if (authError || !user) {
+        setError("Authentication required to access chat")
+        return
       }
       
-      // Load existing messages
+      setCurrentAdmin(user)
+      
+      // Get existing chat session (don't auto-create)
+      const chatSession = await getChatSession(track.id)
+      
+      // Load existing messages if session exists
       const messages = await getSyncMessages(track.id)
       setChatMessages(messages)
     } catch (error) {
@@ -232,6 +235,65 @@ export default function AdminDashboard() {
     setChatMessages([])
     setNewMessage("")
     setCurrentAdmin(null)
+  }
+
+  // Chat session management functions
+  const startChatSession = async () => {
+    if (!selectedTrackForChat || !currentAdmin) return
+    
+    try {
+      // Create new chat session with admin as initiator
+      const chatSession = await createChatSession(
+        selectedTrackForChat.id, 
+        selectedTrackForChat.user_id, 
+        currentAdmin.id
+      )
+      
+      // Send first message if there's content
+      if (newMessage.trim()) {
+        await sendMessage()
+      } else {
+        // Send a default welcome message
+        const welcomeMessage = await sendSyncMessage(
+          selectedTrackForChat.id,
+          currentAdmin.id,
+          "admin",
+          "Hello! I'm here to help with your track submission. How can I assist you today?"
+        )
+        setChatMessages([welcomeMessage])
+      }
+    } catch (error) {
+      console.error("Error starting chat session:", error)
+      setError("Failed to start chat session")
+    }
+  }
+
+  const endChatSession = async () => {
+    if (!selectedTrackForChat) return
+    
+    try {
+      // Close the chat session in database
+      await closeChatSession(selectedTrackForChat.id)
+      
+      // Send final message
+      if (currentAdmin) {
+        const finalMessage = await sendSyncMessage(
+          selectedTrackForChat.id,
+          currentAdmin.id,
+          "admin",
+          "This chat session has been closed. Thank you for your time!"
+        )
+        setChatMessages(prev => [...prev, finalMessage])
+      }
+      
+      // Close modal after brief delay
+      setTimeout(() => {
+        closeChatModal()
+      }, 2000)
+    } catch (error) {
+      console.error("Error closing chat session:", error)
+      setError("Failed to close chat session")
+    }
   }
 
   useEffect(() => {
@@ -594,62 +656,88 @@ export default function AdminDashboard() {
         <Dialog open={showChatModal} onOpenChange={closeChatModal}>
           <DialogContent className="max-w-2xl p-6 mx-auto bg-gray-800 rounded-lg">
             <DialogHeader>
-              <DialogTitle className="text-white">
-                Chat for "{selectedTrackForChat.title}" by {selectedTrackForChat.artist}
+              <DialogTitle className="text-white flex items-center justify-between">
+                <span>Chat for "{selectedTrackForChat.title}" by {selectedTrackForChat.artist}</span>
+                <div className="flex gap-2">
+                  {chatMessages.length === 0 ? (
+                    <Button
+                      onClick={startChatSession}
+                      size="sm"
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      Start Chat
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={endChatSession}
+                      size="sm"
+                      variant="outline"
+                      className="border-red-400 text-red-400 hover:bg-red-600 hover:text-white"
+                    >
+                      End Chat
+                    </Button>
+                  )}
+                </div>
               </DialogTitle>
             </DialogHeader>
             
-            <ScrollArea className="h-80 mb-4">
-              <div className="space-y-4 p-2">
-                {chatMessages.length === 0 ? (
-                  <p className="text-gray-400 text-center py-8">
-                    No messages yet. Start the conversation!
-                  </p>
-                ) : (
-                  chatMessages.map((message) => (
-                    <div key={message.id} className={`flex gap-3 ${message.sender_role === "admin" ? "justify-end" : "justify-start"}`}>
-                      <div className={`max-w-xs rounded-lg px-4 py-2 text-sm ${
-                        message.sender_role === "admin" 
-                          ? "bg-blue-600 text-white" 
-                          : "bg-gray-700 text-gray-300"
-                      }`}>
-                        <p className="mb-1">{message.message}</p>
-                        <p className="text-xs opacity-70">
-                          {new Date(message.created_at).toLocaleString()}
-                        </p>
-                      </div>
-                    </div>
-                  ))
-                )}
+            {chatMessages.length === 0 ? (
+              <div className="text-center py-12">
+                <MessageCircle className="h-16 w-16 mx-auto mb-4 text-gray-400" />
+                <h3 className="text-lg font-medium mb-2 text-white">No Chat Session Active</h3>
+                <p className="text-gray-400 mb-4">
+                  Click "Start Chat" to begin a conversation with the user about this track.
+                </p>
               </div>
-            </ScrollArea>
-            
-            <div className="flex gap-2">
-              <Input
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault()
-                    sendMessage()
-                  }
-                }}
-                className="flex-1 bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-                placeholder="Type your message..."
-                disabled={sendingMessage}
-              />
-              <Button
-                onClick={sendMessage}
-                className="whitespace-nowrap bg-blue-600 hover:bg-blue-700"
-                disabled={sendingMessage || !newMessage.trim()}
-              >
-                {sendingMessage ? (
-                  <RefreshCw className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Send className="w-4 h-4" />
-                )}
-              </Button>
-            </div>
+            ) : (
+              <>
+                <ScrollArea className="h-80 mb-4">
+                  <div className="space-y-4 p-2">
+                    {chatMessages.map((message) => (
+                      <div key={message.id} className={`flex gap-3 ${message.sender_role === "admin" ? "justify-end" : "justify-start"}`}>
+                        <div className={`max-w-xs rounded-lg px-4 py-2 text-sm ${
+                          message.sender_role === "admin" 
+                            ? "bg-blue-600 text-white" 
+                            : "bg-gray-700 text-gray-300"
+                        }`}>
+                          <p className="mb-1">{message.message}</p>
+                          <p className="text-xs opacity-70">
+                            {message.sender_role === "admin" ? "Admin" : "User"} • {new Date(message.created_at).toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+                
+                <div className="flex gap-2">
+                  <Input
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault()
+                        sendMessage()
+                      }
+                    }}
+                    className="flex-1 bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+                    placeholder="Type your message..."
+                    disabled={sendingMessage}
+                  />
+                  <Button
+                    onClick={sendMessage}
+                    className="whitespace-nowrap bg-blue-600 hover:bg-blue-700"
+                    disabled={sendingMessage || !newMessage.trim()}
+                  >
+                    {sendingMessage ? (
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Send className="w-4 h-4" />
+                    )}
+                  </Button>
+                </div>
+              </>
+            )}
           </DialogContent>
         </Dialog>
       )}
