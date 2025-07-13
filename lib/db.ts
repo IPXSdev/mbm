@@ -519,10 +519,37 @@ export async function createUserWithRole(
 // Sync Finalization Functions
 export async function saveSyncFinalization(data: Omit<SyncFinalization, 'id' | 'created_at' | 'updated_at' | 'status'>): Promise<SyncFinalization> {
   try {
-    const client = supabaseAdmin || supabase
+    // First verify authentication
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      throw new Error("You must be logged in to finalize submissions. Please log in and try again.")
+    }
+
+    // Verify the user_id matches the authenticated user
+    if (data.user_id !== user.id) {
+      throw new Error("You can only finalize your own submissions.")
+    }
+
+    // Verify the track belongs to the user
+    const { data: track, error: trackError } = await supabase
+      .from('tracks')
+      .select('user_id')
+      .eq('id', data.track_id)
+      .single()
+
+    if (trackError) {
+      console.error("Error verifying track ownership:", trackError)
+      throw new Error("Could not verify track ownership. Please try again.")
+    }
+
+    if (!track || track.user_id !== user.id) {
+      throw new Error("You can only finalize submissions for your own tracks.")
+    }
+
+    console.log("Authenticated user:", user.id, "for track:", data.track_id)
     
-    // Check if sync_finalizations table exists and if user has access
-    const { data: tableExists, error: tableError } = await client
+    // Check if sync_finalizations table exists
+    const { data: tableExists, error: tableError } = await supabase
       .from('sync_finalizations')
       .select('id')
       .limit(1)
@@ -532,7 +559,8 @@ export async function saveSyncFinalization(data: Omit<SyncFinalization, 'id' | '
       throw new Error("Database tables not found. Please contact admin to set up sync finalization tables.")
     }
     
-    const { data: result, error } = await client
+    // Use the regular supabase client (not admin) to respect RLS policies
+    const { data: result, error } = await supabase
       .from('sync_finalizations')
       .upsert({
         ...data,
@@ -546,17 +574,29 @@ export async function saveSyncFinalization(data: Omit<SyncFinalization, 'id' | '
 
     if (error) {
       console.error("Error saving sync finalization:", error)
+      console.error("Error details:", {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint
+      })
       
       // Provide more specific error messages
       if (error.code === '23503') {
         throw new Error("Invalid track or user reference. Please refresh the page and try again.")
       } else if (error.code === '23505') {
         throw new Error("This track has already been finalized.")
-      } else if (error.code === '42501') {
-        throw new Error("You don't have permission to perform this action. Please ensure you're logged in.")
+      } else if (error.code === '42501' || error.message?.includes('permission')) {
+        throw new Error("You don't have permission to perform this action. Please ensure you're logged in and own this track.")
+      } else if (error.code === 'PGRST301' || error.message?.includes('RLS')) {
+        throw new Error("Database permission error. Please ensure you're logged in and own this track.")
       } else {
         throw new Error(`Database error: ${error.message}`)
       }
+    }
+
+    if (!result) {
+      throw new Error("No data returned from database. Please try again.")
     }
 
     return result
