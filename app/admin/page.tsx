@@ -242,12 +242,16 @@ export default function AdminDashboard() {
     if (!selectedTrackForChat || !currentAdmin) return
     
     try {
+      console.log("Starting chat session for track:", selectedTrackForChat.id, "user:", selectedTrackForChat.user_id, "admin:", currentAdmin.id)
+      
       // Create new chat session with admin as initiator
       const chatSession = await createChatSession(
         selectedTrackForChat.id, 
         selectedTrackForChat.user_id, 
         currentAdmin.id
       )
+      
+      console.log("Chat session created successfully:", chatSession)
       
       // Send first message if there's content
       if (newMessage.trim()) {
@@ -264,7 +268,7 @@ export default function AdminDashboard() {
       }
     } catch (error) {
       console.error("Error starting chat session:", error)
-      setError("Failed to start chat session")
+      setError(`Failed to start chat session: ${error.message || error}`)
     }
   }
 
