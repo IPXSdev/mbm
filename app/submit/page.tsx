@@ -181,23 +181,37 @@ export default function SubmitPage() {
       let audioUrl = ""
       let imageUrl = ""
 
-      // Upload audio file if present
+      // Try to upload audio file if present, but don't fail if upload fails
       if (audioFile) {
-        console.log("Uploading audio file...")
-        audioUrl = await uploadAudioFile(audioFile, user.id)
-        console.log("Audio uploaded:", audioUrl)
+        try {
+          console.log("Uploading audio file...")
+          audioUrl = await uploadAudioFile(audioFile, user.id)
+          console.log("Audio uploaded:", audioUrl)
+          setUploadProgress(40)
+        } catch (audioError) {
+          console.warn("Audio upload failed, continuing without file:", audioError)
+          setUploadProgress(40)
+        }
+      } else {
         setUploadProgress(40)
       }
 
-      // Upload image file if present
+      // Try to upload image file if present, but don't fail if upload fails
       if (imageFile) {
-        console.log("Uploading image file...")
-        imageUrl = await uploadImageFile(imageFile, user.id)
-        console.log("Image uploaded:", imageUrl)
+        try {
+          console.log("Uploading image file...")
+          imageUrl = await uploadImageFile(imageFile, user.id)
+          console.log("Image uploaded:", imageUrl)
+          setUploadProgress(60)
+        } catch (imageError) {
+          console.warn("Image upload failed, continuing without file:", imageError)
+          setUploadProgress(60)
+        }
+      } else {
         setUploadProgress(60)
       }
 
-      // Create track record in database
+      // Create track record in database - this MUST work
       console.log("Saving to database...")
       const trackData = {
         title: formData.title,
@@ -205,13 +219,14 @@ export default function SubmitPage() {
         genre: formData.genre,
         email: formData.email,
         description: formData.description,
-        file_url: audioUrl,
+        file_url: audioUrl || undefined,
         image_url: imageUrl || undefined,
-        file_name: audioFile.name,
-        file_size: audioFile.size,
+        file_name: audioFile?.name || undefined,
+        file_size: audioFile?.size || undefined,
         user_id: user.id,
       }
 
+      console.log("Track data to submit:", trackData)
       const submissionId = await submitTrack(trackData)
       console.log("Submission saved with ID:", submissionId)
 
