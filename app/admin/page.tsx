@@ -84,7 +84,7 @@ export default function AdminDashboard() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "approved": return <CheckCircle className="h-4 w-4 text-green-400" />
-      case "rejected": return <XCircle className="h-4 w-4 text-red-400" />
+      case "rejected": return <XCircle className="h-4 w-4 text-red-400" /> // Legacy status
       case "under_review": return <Clock className="h-4 w-4 text-yellow-400" />
       default: return <AlertTriangle className="h-4 w-4 text-gray-400" />
     }
@@ -93,7 +93,7 @@ export default function AdminDashboard() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "approved": return "bg-green-500/20 text-green-300"
-      case "rejected": return "bg-red-500/20 text-red-300"
+      case "rejected": return "bg-red-500/20 text-red-300" // Legacy status
       case "under_review": return "bg-yellow-500/20 text-yellow-300"
       default: return "bg-gray-500/20 text-gray-300"
     }
@@ -217,7 +217,6 @@ export default function AdminDashboard() {
                             <SelectItem value="pending">Pending</SelectItem>
                             <SelectItem value="under_review">Under Review</SelectItem>
                             <SelectItem value="approved">Approved</SelectItem>
-                            <SelectItem value="rejected">Rejected</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
