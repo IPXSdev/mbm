@@ -7,7 +7,7 @@ import { Menu, Music, User } from "lucide-react"
 import Image from "next/image"
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
 
-// Navigation items for the main menu
+// Navigation items for the main menu - Updated with About page
 const navigation = [
   { name: "Home", href: "/" },
   { name: "About", href: "/about" },
@@ -89,7 +89,7 @@ export default function Navbar() {
           <div className="w-full flex-1 md:w-auto md:flex-none">
             <Link href="/" className="flex items-center space-x-2 md:hidden">
               <Music className="h-6 w-6" />
-              <span className="font-bold">MBTM</span>
+              <span className="font-bold">MBTM v2</span>
             </Link>
           </div>
           <nav className="flex items-center space-x-2">
