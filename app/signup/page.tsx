@@ -114,12 +114,11 @@ export default function SignUpPage() {
       <section className="py-12 px-4 bg-gradient-to-r from-purple-900 to-black text-white">
         <div className="container mx-auto text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-4">
-            WHERE UNTOLD STORIES, RAW TRUTHS AND REAL CONVERSATIONS WITH EXECUTIVES, REDEFINE WHAT IT MEANS TO MOVE THE
-            CULTURE
+            JOIN AN EXCLUSIVE COMMUNITY OF MUSIC CREATORS AND INDUSTRY PROFESSIONALS
           </h2>
           <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto">
-            We're not just another music platform. We're your direct connection to the industry executives who decide
-            what music gets placed in your favorite shows and films.
+            Get your music heard by industry professionals and unlock opportunities for sync placements, collaborations, and career growth. 
+            Connect directly with the executives who decide what gets placed in your favorite shows and films.
           </p>
         </div>
       </section>
