@@ -109,23 +109,34 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl min-h-screen">
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-full max-w-md space-y-6">
-          {/* Encouraging Message */}
-          <div className="text-center space-y-3">
-            <h1 className="text-3xl font-bold text-white">🎵 Begin Your Musical Journey</h1>
-            <p className="text-gray-300 text-lg leading-relaxed">
-              Join an exclusive community of artists, producers, and creators. 
-              Get your music heard by industry professionals and unlock opportunities 
-              for sync placements, collaborations, and career growth.
-            </p>
-            <div className="flex justify-center space-x-6 text-sm text-yellow-400">
-              <span>✨ Industry Access</span>
-              <span>🎯 Sync Placements</span>
-              <span>🚀 Career Growth</span>
+    <div className="flex flex-col min-h-screen">
+      {/* Gradient Banner Section */}
+      <section className="py-12 px-4 bg-gradient-to-r from-purple-900 to-black text-white">
+        <div className="container mx-auto text-center">
+          <h2 className="text-2xl md:text-3xl font-bold mb-4">
+            WHERE UNTOLD STORIES, RAW TRUTHS AND REAL CONVERSATIONS WITH EXECUTIVES, REDEFINE WHAT IT MEANS TO MOVE THE
+            CULTURE
+          </h2>
+          <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto">
+            We're not just another music platform. We're your direct connection to the industry executives who decide
+            what music gets placed in your favorite shows and films.
+          </p>
+        </div>
+      </section>
+
+      {/* Signup Form Section */}
+      <div className="container mx-auto px-4 py-8 max-w-6xl flex-1">
+        <div className="flex items-center justify-center">
+          <div className="w-full max-w-md space-y-6">
+            {/* Additional encouraging elements */}
+            <div className="text-center space-y-3">
+              <h1 className="text-2xl font-bold text-white">🎵 Begin Your Musical Journey</h1>
+              <div className="flex justify-center space-x-6 text-sm text-yellow-400">
+                <span>✨ Industry Access</span>
+                <span>🎯 Sync Placements</span>
+                <span>🚀 Career Growth</span>
+              </div>
             </div>
-          </div>
 
           <Card className="w-full bg-zinc-900 border-gray-800 text-white">
             <CardHeader className="space-y-1">
@@ -243,6 +254,7 @@ export default function SignUpPage() {
           </form>
         </CardContent>
       </Card>
+          </div>
         </div>
       </div>
     </div>
