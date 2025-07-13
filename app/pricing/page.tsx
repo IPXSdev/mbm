@@ -144,6 +144,141 @@ export default function PricingPage() {
         })}
       </div>
 
+      {/* Additional Submission Packs */}
+      <div className="mb-12">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold mb-4">Need More Submissions?</h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Add extra monthly submission credits to your existing plan. Perfect for when inspiration strikes!
+          </p>
+        </div>
+        
+        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          {/* Pack 1 */}
+          <Card className="relative overflow-hidden border-2 border-blue-200 hover:border-blue-400 transition-colors">
+            <CardHeader className="text-center">
+              <Badge variant="secondary" className="w-fit mx-auto mb-2 bg-blue-100 text-blue-800">
+                PACK 1
+              </Badge>
+              <div className="flex justify-center mb-4">
+                <div className="p-3 rounded-full bg-blue-100">
+                  <Zap className="h-8 w-8 text-blue-600" />
+                </div>
+              </div>
+              <CardTitle className="text-xl">Extra Submissions</CardTitle>
+              <CardDescription>Boost your monthly submissions</CardDescription>
+              <div className="mt-4">
+                <span className="text-3xl font-bold text-blue-600">$10</span>
+                <span className="text-muted-foreground">/month</span>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <Button className="w-full bg-blue-600 hover:bg-blue-700" size="lg">
+                Add Pack 1
+              </Button>
+              
+              <div className="space-y-3">
+                <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">
+                  What You Get
+                </h4>
+                <ul className="space-y-2">
+                  <li className="flex items-start gap-3">
+                    <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm"><strong>+2 additional monthly submissions</strong></span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Same A&R review process</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Professional feedback on all tracks</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Add to any existing plan</span>
+                  </li>
+                </ul>
+              </div>
+              
+              <div className="bg-blue-50 p-3 rounded-lg">
+                <p className="text-sm text-blue-800">
+                  <strong>Perfect for:</strong> Artists with multiple tracks ready for review
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Pack 2 */}
+          <Card className="relative overflow-hidden border-2 border-purple-200 hover:border-purple-400 transition-colors">
+            <div className="absolute top-0 left-0 right-0 bg-purple-600 text-white text-center py-1 text-sm font-medium">
+              Best Value
+            </div>
+            <CardHeader className="text-center pt-8">
+              <Badge variant="secondary" className="w-fit mx-auto mb-2 bg-purple-100 text-purple-800">
+                PACK 2
+              </Badge>
+              <div className="flex justify-center mb-4">
+                <div className="p-3 rounded-full bg-purple-100">
+                  <Crown className="h-8 w-8 text-purple-600" />
+                </div>
+              </div>
+              <CardTitle className="text-xl">Power Pack</CardTitle>
+              <CardDescription>Maximum submission power</CardDescription>
+              <div className="mt-4">
+                <span className="text-3xl font-bold text-purple-600">$15</span>
+                <span className="text-muted-foreground">/month</span>
+              </div>
+              <div className="text-xs text-green-600 font-medium">
+                Save $5 vs. individual submissions
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <Button className="w-full bg-purple-600 hover:bg-purple-700" size="lg">
+                Add Pack 2
+              </Button>
+              
+              <div className="space-y-3">
+                <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">
+                  What You Get
+                </h4>
+                <ul className="space-y-2">
+                  <li className="flex items-start gap-3">
+                    <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm"><strong>+4 additional monthly submissions</strong></span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Priority review queue</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Detailed A&R feedback</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Best value per submission</span>
+                  </li>
+                </ul>
+              </div>
+              
+              <div className="bg-purple-50 p-3 rounded-lg">
+                <p className="text-sm text-purple-800">
+                  <strong>Perfect for:</strong> Prolific artists and serious music creators
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        
+        <div className="text-center mt-8">
+          <p className="text-sm text-muted-foreground max-w-xl mx-auto">
+            Submission packs can be added to any existing plan and renew monthly. 
+            Cancel anytime through your dashboard.
+          </p>
+        </div>
+      </div>
+
       {/* Success Stories Preview */}
       <div className="bg-muted p-8 rounded-lg mb-12">
         <h2 className="text-2xl font-bold text-center mb-6">Recent Placements</h2>
