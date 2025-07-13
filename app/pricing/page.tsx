@@ -149,7 +149,7 @@ export default function PricingPage() {
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold mb-4">Need More Submissions?</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Add extra monthly submission credits to your existing plan. Perfect for when inspiration strikes!
+            Purchase additional submission credits that roll over until used. Perfect for when inspiration strikes!
           </p>
         </div>
         
@@ -166,10 +166,10 @@ export default function PricingPage() {
                 </div>
               </div>
               <CardTitle className="text-xl">Extra Submissions</CardTitle>
-              <CardDescription>Boost your monthly submissions</CardDescription>
+              <CardDescription>One-time credit purchase</CardDescription>
               <div className="mt-4">
                 <span className="text-3xl font-bold text-blue-600">$10</span>
-                <span className="text-muted-foreground">/month</span>
+                <span className="text-muted-foreground"> one-time</span>
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -184,7 +184,11 @@ export default function PricingPage() {
                 <ul className="space-y-2">
                   <li className="flex items-start gap-3">
                     <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm"><strong>+2 additional monthly submissions</strong></span>
+                    <span className="text-sm"><strong>+2 submission credits</strong></span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Credits roll over until used</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
@@ -192,18 +196,14 @@ export default function PricingPage() {
                   </li>
                   <li className="flex items-start gap-3">
                     <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm">Professional feedback on all tracks</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm">Add to any existing plan</span>
+                    <span className="text-sm">Purchase anytime</span>
                   </li>
                 </ul>
               </div>
               
               <div className="bg-blue-50 p-3 rounded-lg">
                 <p className="text-sm text-blue-800">
-                  <strong>Perfect for:</strong> Artists with multiple tracks ready for review
+                  <strong>Perfect for:</strong> Artists who want extra credits that never expire
                 </p>
               </div>
             </CardContent>
@@ -224,13 +224,13 @@ export default function PricingPage() {
                 </div>
               </div>
               <CardTitle className="text-xl">Power Pack</CardTitle>
-              <CardDescription>Maximum submission power</CardDescription>
+              <CardDescription>Maximum submission credits</CardDescription>
               <div className="mt-4">
                 <span className="text-3xl font-bold text-purple-600">$15</span>
-                <span className="text-muted-foreground">/month</span>
+                <span className="text-muted-foreground"> one-time</span>
               </div>
               <div className="text-xs text-green-600 font-medium">
-                Save $5 vs. individual submissions
+                Save $5 vs. buying separately
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -245,7 +245,11 @@ export default function PricingPage() {
                 <ul className="space-y-2">
                   <li className="flex items-start gap-3">
                     <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm"><strong>+4 additional monthly submissions</strong></span>
+                    <span className="text-sm"><strong>+4 submission credits</strong></span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Credits never expire</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
@@ -253,18 +257,14 @@ export default function PricingPage() {
                   </li>
                   <li className="flex items-start gap-3">
                     <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm">Detailed A&R feedback</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm">Best value per submission</span>
+                    <span className="text-sm">Best value per credit</span>
                   </li>
                 </ul>
               </div>
               
               <div className="bg-purple-50 p-3 rounded-lg">
                 <p className="text-sm text-purple-800">
-                  <strong>Perfect for:</strong> Prolific artists and serious music creators
+                  <strong>Perfect for:</strong> Prolific artists who want a stockpile of credits
                 </p>
               </div>
             </CardContent>
@@ -273,8 +273,8 @@ export default function PricingPage() {
         
         <div className="text-center mt-8">
           <p className="text-sm text-muted-foreground max-w-xl mx-auto">
-            Submission packs can be added to any existing plan and renew monthly. 
-            Cancel anytime through your dashboard.
+            Submission credits are added to your account instantly and never expire. 
+            Use them anytime, even after your subscription ends.
           </p>
         </div>
       </div>
