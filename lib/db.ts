@@ -521,23 +521,41 @@ export async function saveSyncFinalization(data: Omit<SyncFinalization, 'id' | '
   try {
     console.log("saveSyncFinalization called with data:", { track_id: data.track_id, user_id: data.user_id })
     
+    // First check current auth status for debugging
+    const { data: { user: currentUser }, error: currentAuthError } = await supabase.auth.getUser()
+    console.log("Current auth user in saveSyncFinalization:", currentUser?.id, "Error:", currentAuthError)
+    
     // Verify the track exists and belongs to the user (this also checks auth via RLS)
+    console.log("Checking track ownership for track:", data.track_id, "user:", data.user_id)
     const { data: track, error: trackError } = await supabase
       .from('tracks')
-      .select('user_id')
+      .select('id, user_id, title, artist')
       .eq('id', data.track_id)
       .single()
 
+    console.log("Track query result:", track, "Error:", trackError)
+
     if (trackError) {
       console.error("Error verifying track ownership:", trackError)
-      throw new Error("Could not verify track ownership. Please try again.")
+      
+      // More specific error handling
+      if (trackError.code === 'PGRST116') {
+        throw new Error("Track not found. Please refresh the page and try again.")
+      } else if (trackError.code === '42501' || trackError.message?.includes('permission')) {
+        throw new Error("Permission denied accessing track. Please ensure you're logged in and own this track.")
+      } else {
+        throw new Error(`Database error checking track: ${trackError.message}`)
+      }
     }
 
     if (!track) {
-      throw new Error("Track not found.")
+      throw new Error("Track not found. Please refresh the page and try again.")
     }
 
+    console.log("Track found:", track.title, "by", track.artist, "owned by:", track.user_id)
+
     if (track.user_id !== data.user_id) {
+      console.error("Track ownership mismatch. Track user_id:", track.user_id, "Data user_id:", data.user_id)
       throw new Error("You can only finalize submissions for your own tracks.")
     }
 
@@ -553,6 +571,8 @@ export async function saveSyncFinalization(data: Omit<SyncFinalization, 'id' | '
     if (tableError && tableError.code === '42P01') {
       throw new Error("Database tables not found. Please contact admin to set up sync finalization tables.")
     }
+    
+    console.log("Attempting to save sync finalization...")
     
     // Use the regular supabase client to respect RLS policies
     const { data: result, error } = await supabase
