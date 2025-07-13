@@ -2,7 +2,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { getTracks, updateTrackStatus } from "@/lib/db"
+import { getTracks, updateTrackStatus, checkSyncFinalizationStatus, getPendingSyncNotifications } from "@/lib/db"
 import dynamic from "next/dynamic"
 
 const ViewFinalizedSubmission = dynamic(() => import("@/components/view-finalized-submission"), { ssr: false })
@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { Music, RefreshCw, Star, CheckCircle, XCircle, Clock, AlertTriangle } from "lucide-react"
+import { Music, RefreshCw, Star, CheckCircle, XCircle, Clock, AlertTriangle, MessageCircle } from "lucide-react"
 
 export default function AdminDashboard() {
   const [tracks, setTracks] = useState<any[]>([])
@@ -25,6 +25,8 @@ export default function AdminDashboard() {
   const [reviewingTrack, setReviewingTrack] = useState<string | null>(null)
   const [showFinalizedModal, setShowFinalizedModal] = useState(false)
   const [selectedTrackForFinalized, setSelectedTrackForFinalized] = useState<any>(null)
+  const [syncStatusMap, setSyncStatusMap] = useState<Record<string, string>>({})
+  const [pendingNotifications, setPendingNotifications] = useState<any[]>([])
   const [reviewData, setReviewData] = useState<{
     rating: number
     status: string
@@ -58,11 +60,43 @@ export default function AdminDashboard() {
       console.log("Admin dashboard: Tracks fetched successfully:", data)
       setTracks(data)
       applyMoodFilter(data, selectedMood)
+      
+      // Check sync status for approved tracks
+      await checkSyncStatusForTracks(data)
+      
+      // Get pending notifications
+      await fetchPendingNotifications()
     } catch (err: any) {
       console.error("Admin dashboard: Error fetching tracks:", err)
       setError("Failed to load submissions.")
     } finally {
       setLoading(false)
+    }
+  }
+
+  const checkSyncStatusForTracks = async (trackData: any[]) => {
+    const statusMap: Record<string, string> = {}
+    const approvedTracks = trackData.filter(track => track.status === "approved")
+    
+    for (const track of approvedTracks) {
+      try {
+        const status = await checkSyncFinalizationStatus(track.id)
+        statusMap[track.id] = status
+      } catch (error) {
+        console.error(`Error checking sync status for track ${track.id}:`, error)
+        statusMap[track.id] = "not_started"
+      }
+    }
+    
+    setSyncStatusMap(statusMap)
+  }
+
+  const fetchPendingNotifications = async () => {
+    try {
+      const notifications = await getPendingSyncNotifications()
+      setPendingNotifications(notifications)
+    } catch (error) {
+      console.error("Error fetching pending notifications:", error)
     }
   }
 
@@ -166,6 +200,28 @@ export default function AdminDashboard() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Notifications Section */}
+      {pendingNotifications.length > 0 && (
+        <Alert className="bg-blue-500/20 border-blue-500/50 mb-6">
+          <CheckCircle className="h-4 w-4" />
+          <AlertDescription className="text-white">
+            <strong>{pendingNotifications.length} New Sync Finalization{pendingNotifications.length !== 1 ? 's' : ''}</strong>
+            <div className="mt-2 space-y-1">
+              {pendingNotifications.slice(0, 3).map(notification => (
+                <div key={notification.trackId} className="text-sm">
+                  • "{notification.trackTitle}" by {notification.artistName}
+                </div>
+              ))}
+              {pendingNotifications.length > 3 && (
+                <div className="text-sm text-blue-200">
+                  + {pendingNotifications.length - 3} more...
+                </div>
+              )}
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
+      
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold text-white">Platform Uploads</h1>
@@ -391,16 +447,60 @@ export default function AdminDashboard() {
                     </Button>
                     
                     {track.status === "approved" && (
-                      <Button
-                        onClick={() => {
-                          setSelectedTrackForFinalized(track)
-                          setShowFinalizedModal(true)
-                        }}
-                        variant="outline"
-                        className="bg-blue-600/20 border-blue-400/40 text-blue-300 hover:bg-blue-600/30"
-                      >
-                        📋 View Sync Details
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          onClick={() => {
+                            setSelectedTrackForFinalized(track)
+                            setShowFinalizedModal(true)
+                          }}
+                          variant="outline"
+                          disabled={syncStatusMap[track.id] === "not_started"}
+                          className={`${
+                            syncStatusMap[track.id] === "completed" 
+                              ? "bg-green-600/20 border-green-400/40 text-green-300 hover:bg-green-600/30"
+                              : syncStatusMap[track.id] === "requires_updates"
+                              ? "bg-yellow-600/20 border-yellow-400/40 text-yellow-300 hover:bg-yellow-600/30"
+                              : "bg-gray-600/20 border-gray-400/40 text-gray-400 cursor-not-allowed"
+                          }`}
+                        >
+                          {syncStatusMap[track.id] === "completed" && "📋 View Sync Details"}
+                          {syncStatusMap[track.id] === "requires_updates" && "⚠️ Sync Updates Required"}
+                          {syncStatusMap[track.id] === "not_started" && "⏳ Awaiting Sync Details"}
+                        </Button>
+                        
+                        {/* Status Indicator */}
+                        {syncStatusMap[track.id] === "completed" && (
+                          <Badge variant="outline" className="bg-green-500/20 text-green-400 border-green-400/40">
+                            <CheckCircle className="w-3 h-3 mr-1" />
+                            Finalized
+                          </Badge>
+                        )}
+                        {syncStatusMap[track.id] === "requires_updates" && (
+                          <Badge variant="outline" className="bg-yellow-500/20 text-yellow-400 border-yellow-400/40">
+                            <AlertTriangle className="w-3 h-3 mr-1" />
+                            Needs Update
+                          </Badge>
+                        )}
+                        {syncStatusMap[track.id] === "not_started" && (
+                          <Badge variant="outline" className="bg-gray-500/20 text-gray-400 border-gray-400/40">
+                            <Clock className="w-3 h-3 mr-1" />
+                            Pending
+                          </Badge>
+                        )}
+                        
+                        {/* Chat Button - Only show for approved tracks */}
+                        <Button
+                          onClick={() => {
+                            // TODO: Open chat modal
+                            console.log("Open chat for track:", track.id)
+                          }}
+                          variant="outline"
+                          size="sm"
+                          className="bg-purple-600/20 border-purple-400/40 text-purple-300 hover:bg-purple-600/30"
+                        >
+                          <MessageCircle className="w-4 h-4" />
+                        </Button>
+                      </div>
                     )}
                   </div>
                   

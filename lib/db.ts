@@ -1,4 +1,3 @@
-
 import { createClient } from "@supabase/supabase-js"
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -60,6 +59,57 @@ export interface Track {
   updated_at: string
   mood?: string
   image_url?: string
+}
+
+// Sync Finalization Types
+export interface SyncFinalization {
+  id: string
+  track_id: string
+  user_id: string
+  first_name: string
+  middle_name?: string
+  last_name: string
+  email: string
+  contact_number: string
+  pro_plan: string
+  pro_number: string
+  publisher_name: string
+  publisher_pro: string
+  publisher_number: string
+  copyright_owner: string
+  master_owner: string
+  isrc?: string
+  upc?: string
+  territory_rights: string
+  duration: string
+  bpm?: string
+  key?: string
+  lyrics?: string
+  instrumental_available: boolean
+  additional_notes?: string
+  contributors: any[] // JSON array
+  status: "pending" | "completed" | "requires_updates"
+  created_at: string
+  updated_at: string
+}
+
+export interface SyncMessage {
+  id: string
+  track_id: string
+  sender_id: string
+  sender_role: "user" | "admin"
+  message: string
+  created_at: string
+}
+
+export interface SyncChatSession {
+  id: string
+  track_id: string
+  user_id: string
+  admin_id?: string
+  status: "open" | "closed"
+  created_at: string
+  updated_at: string
 }
 
 // Get current user from session
@@ -170,7 +220,7 @@ export async function getTracks(sortBy: "rating" | "newest" = "rating"): Promise
     }
 
     // Sort based on the sortBy parameter
-    const sortedData = (data || []).sort((a, b) => {
+    const sortedData = (data || []).sort((a: any, b: any) => {
       if (sortBy === "newest") {
         // Sort by creation date (newest first)
         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
@@ -447,5 +497,227 @@ export async function createUserWithRole(
   } catch (error) {
     console.error("Error creating user with role:", error)
     throw error
+  }
+}
+
+// Sync Finalization Functions
+export async function saveSyncFinalization(data: Omit<SyncFinalization, 'id' | 'created_at' | 'updated_at' | 'status'>): Promise<SyncFinalization> {
+  try {
+    const client = supabaseAdmin || supabase
+    
+    const { data: result, error } = await client
+      .from('sync_finalizations')
+      .upsert({
+        ...data,
+        status: 'completed',
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'track_id'
+      })
+      .select()
+      .single()
+
+    if (error) {
+      console.error("Error saving sync finalization:", error)
+      throw error
+    }
+
+    return result
+  } catch (error) {
+    console.error("Error in saveSyncFinalization:", error)
+    throw error
+  }
+}
+
+export async function getSyncFinalization(trackId: string): Promise<SyncFinalization | null> {
+  try {
+    const client = supabaseAdmin || supabase
+    
+    const { data, error } = await client
+      .from('sync_finalizations')
+      .select('*')
+      .eq('track_id', trackId)
+      .single()
+
+    if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
+      console.error("Error getting sync finalization:", error)
+      throw error
+    }
+
+    return data || null
+  } catch (error) {
+    console.error("Error in getSyncFinalization:", error)
+    return null
+  }
+}
+
+export async function checkSyncFinalizationStatus(trackId: string): Promise<"not_started" | "completed" | "requires_updates"> {
+  try {
+    const finalization = await getSyncFinalization(trackId)
+    if (!finalization) {
+      return "not_started"
+    }
+    return finalization.status as "completed" | "requires_updates"
+  } catch (error) {
+    console.error("Error checking sync finalization status:", error)
+    return "not_started"
+  }
+}
+
+// Chat/Messaging Functions
+export async function createChatSession(trackId: string, userId: string, adminId?: string): Promise<SyncChatSession> {
+  try {
+    const client = supabaseAdmin || supabase
+    
+    const { data, error } = await client
+      .from('sync_chat_sessions')
+      .upsert({
+        track_id: trackId,
+        user_id: userId,
+        admin_id: adminId,
+        status: 'open',
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'track_id'
+      })
+      .select()
+      .single()
+
+    if (error) {
+      console.error("Error creating chat session:", error)
+      throw error
+    }
+
+    return data
+  } catch (error) {
+    console.error("Error in createChatSession:", error)
+    throw error
+  }
+}
+
+export async function getChatSession(trackId: string): Promise<SyncChatSession | null> {
+  try {
+    const client = supabaseAdmin || supabase
+    
+    const { data, error } = await client
+      .from('sync_chat_sessions')
+      .select('*')
+      .eq('track_id', trackId)
+      .single()
+
+    if (error && error.code !== 'PGRST116') {
+      console.error("Error getting chat session:", error)
+      throw error
+    }
+
+    return data || null
+  } catch (error) {
+    console.error("Error in getChatSession:", error)
+    return null
+  }
+}
+
+export async function sendSyncMessage(trackId: string, senderId: string, senderRole: "user" | "admin", message: string): Promise<SyncMessage> {
+  try {
+    const client = supabaseAdmin || supabase
+    
+    const { data, error } = await client
+      .from('sync_messages')
+      .insert({
+        track_id: trackId,
+        sender_id: senderId,
+        sender_role: senderRole,
+        message: message
+      })
+      .select()
+      .single()
+
+    if (error) {
+      console.error("Error sending sync message:", error)
+      throw error
+    }
+
+    return data
+  } catch (error) {
+    console.error("Error in sendSyncMessage:", error)
+    throw error
+  }
+}
+
+export async function getSyncMessages(trackId: string): Promise<SyncMessage[]> {
+  try {
+    const client = supabaseAdmin || supabase
+    
+    const { data, error } = await client
+      .from('sync_messages')
+      .select('*')
+      .eq('track_id', trackId)
+      .order('created_at', { ascending: true })
+
+    if (error) {
+      console.error("Error getting sync messages:", error)
+      throw error
+    }
+
+    return data || []
+  } catch (error) {
+    console.error("Error in getSyncMessages:", error)
+    return []
+  }
+}
+
+export async function closeChatSession(trackId: string): Promise<void> {
+  try {
+    const client = supabaseAdmin || supabase
+    
+    const { error } = await client
+      .from('sync_chat_sessions')
+      .update({ 
+        status: 'closed',
+        updated_at: new Date().toISOString()
+      })
+      .eq('track_id', trackId)
+
+    if (error) {
+      console.error("Error closing chat session:", error)
+      throw error
+    }
+  } catch (error) {
+    console.error("Error in closeChatSession:", error)
+    throw error
+  }
+}
+
+export async function getPendingSyncNotifications(): Promise<{ trackId: string, trackTitle: string, artistName: string, completedAt: string }[]> {
+  try {
+    const client = supabaseAdmin || supabase
+    
+    const { data, error } = await client
+      .from('sync_finalizations')
+      .select(`
+        track_id,
+        created_at,
+        tracks!inner (
+          title,
+          artist
+        )
+      `)
+      .eq('status', 'completed')
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error("Error getting pending sync notifications:", error)
+      throw error
+    }
+
+    return (data || []).map((item: any) => ({
+      trackId: item.track_id,
+      trackTitle: item.tracks.title,
+      artistName: item.tracks.artist,
+      completedAt: item.created_at
+    }))
+  } catch (error) {
+    console.error("Error in getPendingSyncNotifications:", error)
+    return []
   }
 }

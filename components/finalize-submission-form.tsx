@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Trash2 } from "lucide-react"
+import { saveSyncFinalization, getCurrentUser } from "@/lib/db"
 
 interface SubmittedTrack {
   id: string
@@ -167,37 +168,44 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
     setStatus(null)
 
     try {
-      // TODO: Submit to your API endpoint
+      // Get current user
+      const user = await getCurrentUser()
+      if (!user) {
+        throw new Error("User not authenticated")
+      }
+
+      // Prepare submission data
       const submissionData = {
-        trackId: track.id,
-        firstName,
-        middleName,
-        lastName,
-        email,
-        contactNumber,
-        proPlan,
-        proNumber,
-        publisherName,
-        publisherPRO,
-        publisherNumber,
-        copyrightOwner,
-        masterOwner,
-        isrc,
-        upc,
-        territoryRights,
-        duration,
-        bpm,
-        key,
-        lyrics,
-        instrumentalAvailable,
-        additionalNotes,
-        contributors
+        track_id: track.id,
+        user_id: user.id,
+        first_name: firstName,
+        middle_name: middleName || undefined,
+        last_name: lastName,
+        email: email,
+        contact_number: contactNumber,
+        pro_plan: proPlan,
+        pro_number: proNumber,
+        publisher_name: publisherName,
+        publisher_pro: publisherPRO,
+        publisher_number: publisherNumber,
+        copyright_owner: copyrightOwner,
+        master_owner: masterOwner,
+        isrc: isrc || undefined,
+        upc: upc || undefined,
+        territory_rights: territoryRights,
+        duration: duration,
+        bpm: bpm || undefined,
+        key: key || undefined,
+        lyrics: lyrics || undefined,
+        instrumental_available: instrumentalAvailable,
+        additional_notes: additionalNotes || undefined,
+        contributors: contributors
       }
 
       console.log("Finalizing submission:", submissionData)
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Save to database
+      await saveSyncFinalization(submissionData)
       
       setStatus("✅ Submission finalized successfully! Your track is now ready for sync licensing.")
       
@@ -209,7 +217,8 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
         onClose()
       }, 3000)
       
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Error finalizing submission:", error)
       setStatus("❌ Failed to finalize submission. Please try again.")
     } finally {
       setLoading(false)

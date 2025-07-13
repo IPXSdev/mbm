@@ -1,9 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
+import { getSyncFinalization } from "@/lib/db"
 
 interface SubmittedTrack {
   id: string
@@ -60,6 +61,81 @@ interface ViewFinalizedSubmissionProps {
 }
 
 export default function ViewFinalizedSubmission({ track, onClose }: ViewFinalizedSubmissionProps) {
+  const [loading, setLoading] = useState(true)
+  const [syncData, setSyncData] = useState<FinalizedSubmission | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const loadSyncData = async () => {
+      try {
+        setLoading(true)
+        const data = await getSyncFinalization(track.id)
+        if (data) {
+          // Convert database format to component format
+          const formattedData: FinalizedSubmission = {
+            trackId: data.track_id,
+            firstName: data.first_name,
+            middleName: data.middle_name,
+            lastName: data.last_name,
+            email: data.email,
+            contactNumber: data.contact_number,
+            proPlan: data.pro_plan,
+            proNumber: data.pro_number,
+            publisherName: data.publisher_name,
+            publisherPRO: data.publisher_pro,
+            publisherNumber: data.publisher_number,
+            copyrightOwner: data.copyright_owner,
+            masterOwner: data.master_owner,
+            isrc: data.isrc,
+            upc: data.upc,
+            territoryRights: data.territory_rights,
+            duration: data.duration,
+            bpm: data.bpm,
+            key: data.key,
+            lyrics: data.lyrics,
+            instrumentalAvailable: data.instrumental_available,
+            additionalNotes: data.additional_notes,
+            contributors: data.contributors || []
+          }
+          setSyncData(formattedData)
+        } else {
+          setError("No sync finalization data found for this track.")
+        }
+      } catch (err: any) {
+        console.error("Error loading sync data:", err)
+        setError("Failed to load sync finalization data.")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadSyncData()
+  }, [track.id])
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 p-4">
+        <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl p-8 text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading sync finalization details...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !syncData) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 p-4">
+        <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-8 text-center">
+          <h2 className="text-xl font-bold text-red-600 mb-4">Data Not Available</h2>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <Button onClick={onClose} className="w-full">
+            Close
+          </Button>
+        </div>
+      </div>
+    )
+  }
   const [loading, setLoading] = useState(false)
   
   // Mock data - replace with actual API call
@@ -105,7 +181,7 @@ export default function ViewFinalizedSubmission({ track, onClose }: ViewFinalize
     submittedAt: "2024-01-15T10:30:00Z"
   }
 
-  const fullName = [finalizedData.firstName, finalizedData.middleName, finalizedData.lastName]
+  const fullName = [syncData.firstName, syncData.middleName, syncData.lastName]
     .filter(Boolean)
     .join(" ")
 
