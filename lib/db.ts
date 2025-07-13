@@ -525,12 +525,15 @@ export async function saveSyncFinalization(data: Omit<SyncFinalization, 'id' | '
     // This is for admin review purposes only
     console.log("Saving sync finalization data for admin review...")
     
-    // Use service role key for direct database access without RLS restrictions
-    const client = supabaseAdmin || supabase
+    // For simple data entry, we need to use a client that bypasses RLS
+    // If we're server-side, use admin client; if client-side, we'll need RLS disabled
+    const client = (typeof window === 'undefined' && supabaseAdmin) ? supabaseAdmin : supabase
     
     // Since this is just data entry, we'll use a placeholder UUID for user_id
-    // or we could modify the table to make user_id nullable for these entries
     const placeholderUserId = crypto.randomUUID();
+    
+    console.log("Using client type:", typeof window === 'undefined' ? 'server-side admin' : 'client-side')
+    console.log("Attempting database insert with placeholder user_id:", placeholderUserId)
     
     const { data: result, error } = await client
       .from('sync_finalizations')
@@ -547,6 +550,12 @@ export async function saveSyncFinalization(data: Omit<SyncFinalization, 'id' | '
 
     if (error) {
       console.error("Error saving sync finalization:", error)
+      console.error("Error details:", {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint
+      })
       
       // Simple error messages for data entry form
       if (error.code === '23505') {
@@ -555,6 +564,8 @@ export async function saveSyncFinalization(data: Omit<SyncFinalization, 'id' | '
         throw new Error("Database table not found. Please contact admin.")
       } else if (error.code === '23503') {
         throw new Error("Invalid track reference. Please ensure the track exists.")
+      } else if (error.code === '42501' || error.message?.includes('row-level security') || error.message?.includes('RLS')) {
+        throw new Error("Database access restricted. Please contact admin to disable RLS for sync_finalizations table.")
       } else {
         throw new Error(`Unable to save sync finalization: ${error.message}`)
       }
