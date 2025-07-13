@@ -20,7 +20,7 @@ interface SubmittedTrack {
   title: string
   artist: string
   genre: string
-  status: "pending" | "approved" | "rejected"
+  status: "pending" | "approved" | "rejected" | "under_review"
   created_at: string
   image_url?: string
   file_url?: string
@@ -171,6 +171,8 @@ export default function DashboardPage() {
         return <CheckCircle className="h-4 w-4 text-green-500" />
       case "rejected":
         return <XCircle className="h-4 w-4 text-red-500" />
+      case "under_review":
+        return <Clock className="h-4 w-4 text-blue-500" />
       default:
         return <Clock className="h-4 w-4 text-yellow-500" />
     }
@@ -182,6 +184,8 @@ export default function DashboardPage() {
         return "bg-green-100 text-green-800 border-green-200"
       case "rejected":
         return "bg-red-100 text-red-800 border-red-200"
+      case "under_review":
+        return "bg-blue-100 text-blue-800 border-blue-200"
       default:
         return "bg-yellow-100 text-yellow-800 border-yellow-200"
     }
@@ -193,6 +197,8 @@ export default function DashboardPage() {
         return "Congratulations! Your track has been approved and is being considered for placements."
       case "rejected":
         return "This submission wasn't selected this time. Check the feedback below and feel free to submit again."
+      case "under_review":
+        return "Your track is under consideration by our A&R team. We'll notify you once we've made a decision."
       default:
         return "Your track is currently under review. We'll notify you once we've made a decision."
     }
@@ -353,8 +359,8 @@ export default function DashboardPage() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Under Consideration</span>
-                  <Badge className="bg-red-100 text-red-800">
-                    {submittedTracks.filter((t) => t.status === "rejected").length}
+                  <Badge className="bg-blue-100 text-blue-800">
+                    {submittedTracks.filter((t) => t.status === "under_review").length}
                   </Badge>
                 </div>
               </div>
@@ -424,7 +430,10 @@ export default function DashboardPage() {
                             <div className="flex items-center gap-2">
                               {getStatusIcon(track.status)}
                               <Badge className={`${getStatusColor(track.status)}`}>
-                                {track.status.charAt(0).toUpperCase() + track.status.slice(1)}
+                                {track.status === "under_review" 
+                                  ? "Under Consideration" 
+                                  : track.status.charAt(0).toUpperCase() + track.status.slice(1)
+                                }
                               </Badge>
                             </div>
                           </div>

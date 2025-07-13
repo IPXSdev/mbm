@@ -211,7 +211,7 @@ export default function AdminDashboard() {
                   <div className="flex items-center gap-2">
                     <Badge className={getStatusColor(track.status)}>
                       {getStatusIcon(track.status)}
-                      {track.status}
+                      {track.status === "under_review" ? "under consideration" : track.status}
                     </Badge>
                     {track.rating && (
                       <div className="flex items-center gap-1">
@@ -281,7 +281,7 @@ export default function AdminDashboard() {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="pending">Pending</SelectItem>
-                            <SelectItem value="under_review">Under Review</SelectItem>
+                            <SelectItem value="under_review">Under Consideration</SelectItem>
                             <SelectItem value="approved">Approved</SelectItem>
                           </SelectContent>
                         </Select>
