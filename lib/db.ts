@@ -296,7 +296,7 @@ export async function uploadAudioFile(file: File, userId: string): Promise<strin
     const fileName = `${userId}/${Date.now()}.${fileExt}`
 
     console.log("Attempting to upload audio file:", fileName)
-    const { data, error } = await supabase.storage.from("audio-files").upload(fileName, file)
+    const { data, error } = await supabase.storage.from("tracks").upload(fileName, file)
 
     if (error) {
       console.error("Audio upload error:", error)
@@ -310,7 +310,7 @@ export async function uploadAudioFile(file: File, userId: string): Promise<strin
 
     const {
       data: { publicUrl },
-    } = supabase.storage.from("audio-files").getPublicUrl(fileName)
+    } = supabase.storage.from("tracks").getPublicUrl(fileName)
 
     console.log("Audio uploaded successfully:", publicUrl)
     return publicUrl
