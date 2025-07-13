@@ -18,6 +18,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [selectedMood, setSelectedMood] = useState<string>("")
+  const [viewMode, setViewMode] = useState<"ranked" | "newest">("ranked")
   const [reviewingTrack, setReviewingTrack] = useState<string | null>(null)
   const [reviewData, setReviewData] = useState<{
     rating: number
@@ -41,15 +42,16 @@ export default function AdminDashboard() {
     "Inspirational",
   ]
 
-  const fetchTracks = async () => {
+  const fetchTracks = async (sortMode?: "rating" | "newest") => {
     try {
       setLoading(true)
       setError("")
       console.log("Admin dashboard: Fetching tracks...")
-      const data = await getTracks()
+      const sortBy = sortMode || viewMode
+      const data = await getTracks(sortBy)
       console.log("Admin dashboard: Tracks fetched successfully:", data)
       setTracks(data)
-      setFilteredTracks(data)
+      applyMoodFilter(data, selectedMood)
     } catch (err: any) {
       console.error("Admin dashboard: Error fetching tracks:", err)
       setError("Failed to load submissions.")
@@ -58,14 +60,23 @@ export default function AdminDashboard() {
     }
   }
 
-  const handleMoodFilter = (mood: string) => {
-    setSelectedMood(mood)
+  const applyMoodFilter = (trackData: any[], mood: string) => {
     if (mood === "") {
-      setFilteredTracks(tracks)
+      setFilteredTracks(trackData)
     } else {
-      const filtered = tracks.filter(track => track.mood === mood)
+      const filtered = trackData.filter(track => track.mood === mood)
       setFilteredTracks(filtered)
     }
+  }
+
+  const handleMoodFilter = (mood: string) => {
+    setSelectedMood(mood)
+    applyMoodFilter(tracks, mood)
+  }
+
+  const handleViewModeChange = (mode: "ranked" | "newest") => {
+    setViewMode(mode)
+    fetchTracks(mode)
   }
 
   const handleReview = async (trackId: string) => {
@@ -126,7 +137,7 @@ export default function AdminDashboard() {
   }, [])
 
   useEffect(() => {
-    handleMoodFilter(selectedMood)
+    applyMoodFilter(tracks, selectedMood)
   }, [tracks, selectedMood])
 
   if (loading) {
@@ -151,12 +162,45 @@ export default function AdminDashboard() {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold text-white">Platform Uploads</h1>
-          <p className="text-gray-400 text-sm mt-1">Submissions are ranked by star rating (highest first)</p>
+          <p className="text-gray-400 text-sm mt-1">
+            {viewMode === "ranked" 
+              ? "Submissions are ranked by star rating (highest first)" 
+              : "Submissions are ordered by newest first"
+            }
+          </p>
         </div>
-        <Button onClick={fetchTracks} variant="outline" disabled={loading}>
-          <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-          Refresh
-        </Button>
+        <div className="flex items-center gap-4">
+          {/* View Mode Toggle */}
+          <div className="flex items-center gap-2">
+            <span className="text-gray-300 text-sm">View:</span>
+            <div className="flex rounded-lg bg-white/10 p-1">
+              <button
+                onClick={() => handleViewModeChange("ranked")}
+                className={`px-3 py-1 rounded-md text-sm transition-all ${
+                  viewMode === "ranked"
+                    ? "bg-blue-600 text-white"
+                    : "text-gray-300 hover:text-white hover:bg-white/10"
+                }`}
+              >
+                ⭐ Ranked
+              </button>
+              <button
+                onClick={() => handleViewModeChange("newest")}
+                className={`px-3 py-1 rounded-md text-sm transition-all ${
+                  viewMode === "newest"
+                    ? "bg-blue-600 text-white"
+                    : "text-gray-300 hover:text-white hover:bg-white/10"
+                }`}
+              >
+                🕒 Newest
+              </button>
+            </div>
+          </div>
+          <Button onClick={() => fetchTracks()} variant="outline" disabled={loading}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+        </div>
       </div>
       
       {/* Mood Filter Section */}

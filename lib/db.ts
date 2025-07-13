@@ -160,26 +160,31 @@ export async function updateUserRole(userId: string, role: "user" | "admin" | "m
 }
 
 // Get all tracks/submissions
-export async function getTracks(): Promise<Track[]> {
+export async function getTracks(sortBy: "rating" | "newest" = "rating"): Promise<Track[]> {
   try {
-    // Get all submissions and sort them by rating (highest first), then by creation date
+    // Get all submissions and sort them based on the sortBy parameter
     const { data, error } = await supabase.from("submissions").select("*")
 
     if (error) {
       throw error
     }
 
-    // Sort by rating (highest first), then by creation date (newest first) for same ratings
+    // Sort based on the sortBy parameter
     const sortedData = (data || []).sort((a, b) => {
-      // First sort by rating (5 stars first, then 4, etc.)
-      if (a.rating !== b.rating) {
-        const ratingA = a.rating || 0
-        const ratingB = b.rating || 0
-        return ratingB - ratingA
+      if (sortBy === "newest") {
+        // Sort by creation date (newest first)
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      } else {
+        // Sort by rating (highest first), then by creation date (newest first) for same ratings
+        if (a.rating !== b.rating) {
+          const ratingA = a.rating || 0
+          const ratingB = b.rating || 0
+          return ratingB - ratingA
+        }
+        
+        // If ratings are equal, sort by creation date (newest first)
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       }
-      
-      // If ratings are equal, sort by creation date (newest first)
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     })
 
     return sortedData
