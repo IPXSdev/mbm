@@ -205,6 +205,7 @@ export default function AuthNavbar() {
 
   const navItems = [
     { href: "/", label: "Home" },
+    { href: "/about", label: "About" },
     { href: "/podcast", label: "Podcast" },
     { href: "/placements", label: "Placements" },
     { href: "/pricing", label: "Pricing" },
