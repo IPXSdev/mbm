@@ -14,8 +14,10 @@ import { Music, RefreshCw, Star, CheckCircle, XCircle, Clock, AlertTriangle } fr
 
 export default function AdminDashboard() {
   const [tracks, setTracks] = useState<any[]>([])
+  const [filteredTracks, setFilteredTracks] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [selectedMood, setSelectedMood] = useState<string>("")
   const [reviewingTrack, setReviewingTrack] = useState<string | null>(null)
   const [reviewData, setReviewData] = useState<{
     rating: number
@@ -29,6 +31,18 @@ export default function AdminDashboard() {
     notes: ""
   })
 
+  const moods = [
+    "Action/Fight",
+    "Sad",
+    "Break Up",
+    "Afro Beats",
+    "Dance",
+    "Sex",
+    "Vulnerable",
+    "House",
+    "Inspirational",
+  ]
+
   const fetchTracks = async () => {
     try {
       setLoading(true)
@@ -37,11 +51,22 @@ export default function AdminDashboard() {
       const data = await getTracks()
       console.log("Admin dashboard: Tracks fetched successfully:", data)
       setTracks(data)
+      setFilteredTracks(data)
     } catch (err: any) {
       console.error("Admin dashboard: Error fetching tracks:", err)
       setError("Failed to load submissions.")
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleMoodFilter = (mood: string) => {
+    setSelectedMood(mood)
+    if (mood === "") {
+      setFilteredTracks(tracks)
+    } else {
+      const filtered = tracks.filter(track => track.mood === mood)
+      setFilteredTracks(filtered)
     }
   }
 
@@ -103,6 +128,10 @@ export default function AdminDashboard() {
     fetchTracks()
   }, [])
 
+  useEffect(() => {
+    handleMoodFilter(selectedMood)
+  }, [tracks, selectedMood])
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8 text-center">
@@ -129,14 +158,49 @@ export default function AdminDashboard() {
           Refresh
         </Button>
       </div>
-      {tracks.length === 0 ? (
+      
+      {/* Mood Filter Section */}
+      <div className="mb-6">
+        <h3 className="text-white font-semibold mb-3">Filter by Mood</h3>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => handleMoodFilter("")}
+            className={`px-3 py-2 rounded-full text-sm transition-all ${
+              selectedMood === ""
+                ? "bg-blue-600 text-white border-2 border-blue-400"
+                : "bg-white/10 text-gray-300 border-2 border-white/20 hover:bg-white/20 hover:border-white/30"
+            }`}
+          >
+            All Moods ({tracks.length})
+          </button>
+          {moods.map((mood) => {
+            const count = tracks.filter(track => track.mood === mood).length
+            return (
+              <button
+                key={mood}
+                onClick={() => handleMoodFilter(mood)}
+                className={`px-3 py-2 rounded-full text-sm transition-all ${
+                  selectedMood === mood
+                    ? "bg-blue-600 text-white border-2 border-blue-400"
+                    : "bg-white/10 text-gray-300 border-2 border-white/20 hover:bg-white/20 hover:border-white/30"
+                }`}
+              >
+                {mood} ({count})
+              </button>
+            )
+          })}
+        </div>
+      </div>
+      {filteredTracks.length === 0 ? (
         <div className="text-center py-8">
-          <p className="text-gray-300 mb-4">No submissions yet.</p>
+          <p className="text-gray-300 mb-4">
+            {selectedMood ? `No submissions found for "${selectedMood}" mood.` : "No submissions yet."}
+          </p>
           <p className="text-gray-400 text-sm">Check the browser console for debugging info.</p>
         </div>
       ) : (
         <div className="grid gap-6">
-          {tracks.map((track) => (
+          {filteredTracks.map((track) => (
             <Card key={track.id} className="bg-white/10 border-white/20">
               <CardHeader>
                 <div className="flex justify-between items-start">
@@ -177,10 +241,12 @@ export default function AdminDashboard() {
                   )}
                 </div>
 
-                {track.description && (
+                {track.mood && (
                   <div>
-                    <p className="text-gray-400 text-sm mb-1">Description:</p>
-                    <p className="text-gray-300 text-sm">{track.description}</p>
+                    <p className="text-gray-400 text-sm mb-1">Track Mood:</p>
+                    <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30">
+                      {track.mood}
+                    </Badge>
                   </div>
                 )}
 

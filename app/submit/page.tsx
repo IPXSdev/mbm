@@ -33,7 +33,7 @@ export default function SubmitPage() {
     artist: "",
     genre: "",
     email: "",
-    description: "",
+    mood: "",
   })
 
   const genres = [
@@ -53,6 +53,18 @@ export default function SubmitPage() {
     "Alternative",
     "Indie",
     "Other",
+  ]
+
+  const moods = [
+    "Action/Fight",
+    "Sad",
+    "Break Up",
+    "Afro Beats",
+    "Dance",
+    "Sex",
+    "Vulnerable",
+    "House",
+    "Inspirational",
   ]
 
   // Check authentication
@@ -137,8 +149,8 @@ export default function SubmitPage() {
       return
     }
 
-    if (!formData.title || !formData.artist || !formData.genre || !formData.email) {
-      setErrorMessage("Please fill in all required fields")
+    if (!formData.title || !formData.artist || !formData.genre || !formData.email || !formData.mood) {
+      setErrorMessage("Please fill in all required fields including track mood")
       return
     }
 
@@ -177,7 +189,7 @@ export default function SubmitPage() {
         artist: formData.artist,
         genre: formData.genre,
         email: formData.email,
-        description: formData.description,
+        mood: formData.mood,
         file_url: audioUrl || undefined,
         image_url: imageUrl, // Always use default image
         file_name: audioFile?.name || undefined,
@@ -199,7 +211,7 @@ export default function SubmitPage() {
           artist: "",
           genre: "",
           email: user.email || "",
-          description: "",
+          mood: "",
         })
         setAudioFile(null)
         setAudioPreview(null)
@@ -336,17 +348,28 @@ export default function SubmitPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="description" className="text-white">
-                    Description
+                  <Label className="text-white">
+                    Track Mood *
                   </Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => handleInputChange("description", e.target.value)}
-                    placeholder="Tell us about your track..."
-                    className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-                    rows={3}
-                  />
+                  <div className="grid grid-cols-3 gap-2">
+                    {moods.map((mood) => (
+                      <button
+                        key={mood}
+                        type="button"
+                        onClick={() => handleInputChange("mood", mood)}
+                        className={`px-3 py-2 rounded-full text-sm transition-all ${
+                          formData.mood === mood
+                            ? "bg-blue-600 text-white border-2 border-blue-400"
+                            : "bg-white/10 text-gray-300 border-2 border-white/20 hover:bg-white/20 hover:border-white/30"
+                        }`}
+                      >
+                        {mood}
+                      </button>
+                    ))}
+                  </div>
+                  {!formData.mood && (
+                    <p className="text-gray-400 text-sm">Please select a mood that best describes your track</p>
+                  )}
                 </div>
 
                 {/* File Uploads */}

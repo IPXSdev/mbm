@@ -59,7 +59,7 @@ export interface Track {
   reviewed_at?: string
   created_at: string
   updated_at: string
-  description?: string
+  mood?: string
   image_url?: string
 }
 
@@ -256,7 +256,7 @@ export async function submitTrack(trackData: {
   artist: string
   email: string
   genre: string
-  description?: string
+  mood?: string
   file_url?: string
   file_name?: string
   file_size?: number
