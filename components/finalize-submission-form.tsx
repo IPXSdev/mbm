@@ -169,6 +169,23 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
     setStatus(null)
 
     try {
+      console.log("Form submission started...")
+      console.log("Form values:", {
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        email: email.trim(),
+        contactNumber: contactNumber.trim(),
+        proPlan: proPlan,
+        proNumber: proNumber.trim(),
+        publisherName: publisherName.trim(),
+        publisherPRO: publisherPRO,
+        publisherNumber: publisherNumber.trim(),
+        copyrightOwner: copyrightOwner.trim(),
+        masterOwner: masterOwner.trim(),
+        territoryRights: territoryRights.trim(),
+        duration: duration.trim()
+      })
+
       // Validate required fields
       if (!firstName.trim()) {
         throw new Error("First name is required")
@@ -182,8 +199,8 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
       if (!contactNumber.trim()) {
         throw new Error("Contact number is required")
       }
-      if (!proPlan) {
-        throw new Error("PRO plan is required")
+      if (!proPlan || proPlan.trim() === "") {
+        throw new Error("PRO plan is required - please select one from the dropdown (ASCAP, BMI, SESAC, Other, or None)")
       }
       if (!proNumber.trim()) {
         throw new Error("PRO number is required")
@@ -191,8 +208,8 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
       if (!publisherName.trim()) {
         throw new Error("Publisher name is required")
       }
-      if (!publisherPRO) {
-        throw new Error("Publisher PRO is required")
+      if (!publisherPRO || publisherPRO.trim() === "") {
+        throw new Error("Publisher PRO is required - please select one from the dropdown")
       }
       if (!publisherNumber.trim()) {
         throw new Error("Publisher number is required")
