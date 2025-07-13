@@ -40,7 +40,6 @@ export default function DashboardPage() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [isMasterAdmin, setIsMasterAdmin] = useState(false)
   const [showGrantModal, setShowGrantModal] = useState(false)
-  const [adminPrivilegeMode, setAdminPrivilegeMode] = useState<"grant" | "revoke">("grant")
   const router = useRouter()
 
   useEffect(() => {
@@ -286,36 +285,9 @@ export default function DashboardPage() {
             </Button>
           )}
           {isMasterAdmin && (
-            <div className="space-y-3">
-              <h3 className="text-lg font-semibold">Admin Privileges</h3>
-              <div className="flex items-center space-x-4">
-                <div className="flex bg-gray-800 rounded-lg p-1">
-                  <button
-                    onClick={() => setAdminPrivilegeMode("grant")}
-                    className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                      adminPrivilegeMode === "grant"
-                        ? "bg-blue-600 text-white"
-                        : "text-gray-400 hover:text-white"
-                    }`}
-                  >
-                    🔓 Grant Access
-                  </button>
-                  <button
-                    onClick={() => setAdminPrivilegeMode("revoke")}
-                    className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                      adminPrivilegeMode === "revoke"
-                        ? "bg-red-600 text-white"
-                        : "text-gray-400 hover:text-white"
-                    }`}
-                  >
-                    🔒 Revoke Access
-                  </button>
-                </div>
-                <Button variant="outline" onClick={() => setShowGrantModal(true)}>
-                  {adminPrivilegeMode === "grant" ? "Grant Admin Access" : "Revoke Admin Access"}
-                </Button>
-              </div>
-            </div>
+            <Button variant="outline" onClick={() => setShowGrantModal(true)}>
+              Admin Privileges
+            </Button>
           )}
           {submittedTracks.length > 0 && (
             <Button variant="outline" asChild>
@@ -332,7 +304,7 @@ export default function DashboardPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
             <div className="bg-gray-900 p-6 rounded-lg shadow-lg w-full max-w-md relative">
               <button className="absolute top-2 right-2 text-gray-400 hover:text-yellow-400" onClick={() => setShowGrantModal(false)}>&times;</button>
-              <GrantAdminForm mode={adminPrivilegeMode} />
+              <GrantAdminForm />
             </div>
           </div>
         )}
