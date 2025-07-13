@@ -310,17 +310,20 @@ export async function uploadAudioFile(file: File, userId: string): Promise<strin
     const fileExt = file.name.split(".").pop()
     const fileName = `${userId}/${Date.now()}.${fileExt}`
 
-    console.log("Attempting to upload audio file:", fileName)
-    const { data, error } = await supabase.storage.from("tracks").upload(fileName, file)
+    console.log("Attempting to upload audio file:", fileName, "Type:", file.type, "Size:", file.size)
+    
+    const { data, error } = await supabase.storage.from("tracks").upload(fileName, file, {
+      cacheControl: '3600',
+      upsert: false
+    })
 
     if (error) {
       console.error("Audio upload error:", error)
-      // If bucket doesn't exist, create a fallback URL
-      if (error.message.includes("Bucket not found")) {
-        console.warn("Audio bucket not found, using fallback")
-        return `fallback-audio-${Date.now()}`
-      }
       throw error
+    }
+
+    if (!data) {
+      throw new Error("Upload returned no data")
     }
 
     const {
@@ -331,8 +334,7 @@ export async function uploadAudioFile(file: File, userId: string): Promise<strin
     return publicUrl
   } catch (error) {
     console.error("Error uploading audio file:", error)
-    // Return a fallback instead of throwing
-    return `fallback-audio-${Date.now()}`
+    throw error // Don't use fallback, throw the real error
   }
 }
 
@@ -342,17 +344,20 @@ export async function uploadImageFile(file: File, userId: string): Promise<strin
     const fileExt = file.name.split(".").pop()
     const fileName = `${userId}/${Date.now()}.${fileExt}`
 
-    console.log("Attempting to upload image file:", fileName)
-    const { data, error } = await supabase.storage.from("images").upload(fileName, file)
+    console.log("Attempting to upload image file:", fileName, "Type:", file.type, "Size:", file.size)
+    
+    const { data, error } = await supabase.storage.from("images").upload(fileName, file, {
+      cacheControl: '3600',
+      upsert: false
+    })
 
     if (error) {
       console.error("Image upload error:", error)
-      // If bucket doesn't exist, create a fallback URL
-      if (error.message.includes("Bucket not found")) {
-        console.warn("Image bucket not found, using fallback")
-        return `fallback-image-${Date.now()}`
-      }
       throw error
+    }
+
+    if (!data) {
+      throw new Error("Upload returned no data")
     }
 
     const {
@@ -363,8 +368,7 @@ export async function uploadImageFile(file: File, userId: string): Promise<strin
     return publicUrl
   } catch (error) {
     console.error("Error uploading image file:", error)
-    // Return a fallback instead of throwing
-    return `fallback-image-${Date.now()}`
+    throw error // Don't use fallback, throw the real error
   }
 }
 

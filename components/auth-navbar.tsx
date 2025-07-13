@@ -133,10 +133,28 @@ export default function AuthNavbar() {
   const handleSignOut = async () => {
     try {
       setLoading(true)
-      await supabaseClient.auth.signOut()
+      
+      // Clear local state immediately
       setUser(null)
       setProfile(null)
-      router.push("/")
+      
+      // Sign out from Supabase
+      const { error } = await supabaseClient.auth.signOut({ scope: 'global' })
+      
+      if (error) {
+        console.error("Error signing out:", error)
+      }
+      
+      // Clear any localStorage/sessionStorage related to auth
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('supabase.auth.token')
+        sessionStorage.clear()
+        
+        // Force a hard reload to clear all state
+        window.location.href = "/"
+      } else {
+        router.push("/")
+      }
     } catch (error) {
       console.error("Error signing out:", error)
     } finally {
