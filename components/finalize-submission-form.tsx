@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -41,6 +41,9 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
   const [loading, setLoading] = useState(false)
   const [status, setStatus] = useState<string | null>(null)
   
+  // Generate storage key for this specific track
+  const storageKey = `finalize-form-${track.id}`
+  
   // Main submission info
   const [firstName, setFirstName] = useState("")
   const [middleName, setMiddleName] = useState("")
@@ -67,6 +70,74 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
   // Contributors
   const [contributors, setContributors] = useState<Contributor[]>([
     { id: "1", name: "", role: "Producer", percentage: 0, proPlan: "" }
+  ])
+
+  // Load saved data on component mount
+  useEffect(() => {
+    const savedData = localStorage.getItem(storageKey)
+    if (savedData) {
+      try {
+        const data = JSON.parse(savedData)
+        setFirstName(data.firstName || "")
+        setMiddleName(data.middleName || "")
+        setLastName(data.lastName || "")
+        setEmail(data.email || "")
+        setContactNumber(data.contactNumber || "")
+        setProPlan(data.proPlan || "")
+        setProNumber(data.proNumber || "")
+        setPublisherName(data.publisherName || "")
+        setPublisherPRO(data.publisherPRO || "")
+        setPublisherNumber(data.publisherNumber || "")
+        setCopyrightOwner(data.copyrightOwner || "")
+        setMasterOwner(data.masterOwner || "")
+        setIsrc(data.isrc || "")
+        setUpc(data.upc || "")
+        setTerritoryRights(data.territoryRights || "")
+        setDuration(data.duration || "")
+        setBpm(data.bpm || "")
+        setKey(data.key || "")
+        setLyrics(data.lyrics || "")
+        setInstrumentalAvailable(data.instrumentalAvailable || false)
+        setAdditionalNotes(data.additionalNotes || "")
+        setContributors(data.contributors || [{ id: "1", name: "", role: "Producer", percentage: 0, proPlan: "" }])
+      } catch (error) {
+        console.error("Error loading saved form data:", error)
+      }
+    }
+  }, [storageKey])
+
+  // Save data to localStorage whenever form data changes
+  useEffect(() => {
+    const formData = {
+      firstName,
+      middleName,
+      lastName,
+      email,
+      contactNumber,
+      proPlan,
+      proNumber,
+      publisherName,
+      publisherPRO,
+      publisherNumber,
+      copyrightOwner,
+      masterOwner,
+      isrc,
+      upc,
+      territoryRights,
+      duration,
+      bpm,
+      key,
+      lyrics,
+      instrumentalAvailable,
+      additionalNotes,
+      contributors
+    }
+    localStorage.setItem(storageKey, JSON.stringify(formData))
+  }, [
+    firstName, middleName, lastName, email, contactNumber, proPlan, proNumber,
+    publisherName, publisherPRO, publisherNumber, copyrightOwner, masterOwner,
+    isrc, upc, territoryRights, duration, bpm, key, lyrics, instrumentalAvailable,
+    additionalNotes, contributors, storageKey
   ])
 
   const addContributor = () => {
@@ -129,6 +200,9 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
       await new Promise(resolve => setTimeout(resolve, 2000))
       
       setStatus("✅ Submission finalized successfully! Your track is now ready for sync licensing.")
+      
+      // Clear saved form data after successful submission
+      localStorage.removeItem(storageKey)
       
       // Auto-close after success
       setTimeout(() => {
@@ -526,7 +600,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
 
           {status && (
             <div className="p-4 rounded-lg bg-gray-50 border">
-              <p className="text-sm">{status}</p>
+              <p className="text-sm text-blue-700">{status}</p>
             </div>
           )}
 
