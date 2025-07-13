@@ -16,44 +16,95 @@ export default function PodcastPage() {
         </p>
       </div>
 
-      {/* Coming Soon Section */}
+      {/* Latest Episodes */}
       <div className="mb-12">
-        <Card className="overflow-hidden bg-gradient-to-r from-purple-900 to-black text-white">
-          <CardContent className="p-8">
-            <div className="grid md:grid-cols-2 gap-8 items-center">
-              <div>
-                <Badge className="bg-white text-black mb-4">Coming Soon</Badge>
-                <h2 className="text-3xl font-bold mb-4">Launch Date: July 4, 2025</h2>
-                <p className="text-xl mb-6">
-                  Get ready for unfiltered conversations with the executives who decide what music gets placed in your
-                  favorite shows and films.
-                </p>
-                <div className="flex items-center gap-4 text-sm mb-6">
-                  <div className="flex items-center gap-1">
-                    <Calendar className="h-4 w-4" />
-                    Weekly Episodes
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    45-60 Minutes
-                  </div>
-                </div>
-                <Button size="lg" className="bg-white text-black hover:bg-gray-200">
-                  Get Notified
-                </Button>
-              </div>
-              <div>
-                <Image
-                  src="/images/podcast-coming-soon.png"
-                  alt="Podcast Coming Soon"
-                  width={400}
-                  height={600}
-                  className="w-full h-auto rounded-lg"
-                />
-              </div>
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold mb-4">Latest Episodes</h2>
+          <p className="text-muted-foreground">
+            Watch the latest episodes featuring raw conversations with industry executives
+          </p>
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-8 mb-8">
+          {/* Episode 1 */}
+          <Card className="overflow-hidden">
+            <div className="aspect-video">
+              <iframe
+                width="100%"
+                height="100%"
+                src="https://www.youtube.com/embed/s_fqfPiJmb0"
+                title="The Man Behind The Music Podcast - Episode 1"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                className="w-full h-full"
+              ></iframe>
             </div>
-          </CardContent>
-        </Card>
+            <CardContent className="p-6">
+              <Badge className="mb-3 bg-purple-600">Episode 1</Badge>
+              <h3 className="text-xl font-bold mb-2">Series Premiere</h3>
+              <p className="text-muted-foreground mb-4">
+                The inaugural episode of The Man Behind The Music Podcast launches with exclusive industry insights and behind-the-scenes conversations.
+              </p>
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <Calendar className="h-4 w-4" />
+                  July 2025
+                </div>
+                <div className="flex items-center gap-1">
+                  <Play className="h-4 w-4" />
+                  Watch on YouTube
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Episode 2 */}
+          <Card className="overflow-hidden">
+            <div className="aspect-video">
+              <iframe
+                width="100%"
+                height="100%"
+                src="https://www.youtube.com/embed/VLeqmbdnAUs"
+                title="The Man Behind The Music Podcast - Episode 2"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                className="w-full h-full"
+              ></iframe>
+            </div>
+            <CardContent className="p-6">
+              <Badge className="mb-3 bg-purple-600">Episode 2</Badge>
+              <h3 className="text-xl font-bold mb-2">Industry Deep Dive</h3>
+              <p className="text-muted-foreground mb-4">
+                Continuing the series with more exclusive content and unfiltered conversations about the music placement industry.
+              </p>
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <Calendar className="h-4 w-4" />
+                  July 2025
+                </div>
+                <div className="flex items-center gap-1">
+                  <Play className="h-4 w-4" />
+                  Watch on YouTube
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* YouTube Channel CTA */}
+        <div className="text-center">
+          <Card className="inline-block p-6 bg-gradient-to-r from-red-600 to-red-800 text-white">
+            <h3 className="text-xl font-bold mb-2">Subscribe to Our YouTube Channel</h3>
+            <p className="mb-4">Get notified when new episodes drop</p>
+            <Button size="lg" className="bg-white text-red-600 hover:bg-gray-100" asChild>
+              <Link href="https://www.youtube.com/@Themanbehindthemusicpodcast" target="_blank" rel="noopener noreferrer">
+                Subscribe on YouTube
+              </Link>
+            </Button>
+          </Card>
+        </div>
       </div>
 
       {/* Featured Guest Preview */}
@@ -142,14 +193,16 @@ export default function PodcastPage() {
       <div className="text-center mt-12">
         <h2 className="text-2xl font-bold mb-4">Don't Miss Out</h2>
         <p className="text-muted-foreground mb-6">
-          Be the first to know when new episodes drop and get exclusive behind-the-scenes content
+          Subscribe to get exclusive behind-the-scenes content and be notified when new episodes drop
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button size="lg" asChild>
             <Link href="/pricing">Subscribe for Early Access</Link>
           </Button>
           <Button size="lg" variant="outline" asChild>
-            <Link href="/">Follow @THEMANBEHINDTHEMUSIC</Link>
+            <Link href="https://www.youtube.com/@Themanbehindthemusicpodcast" target="_blank" rel="noopener noreferrer">
+              Follow on YouTube
+            </Link>
           </Button>
         </div>
       </div>
