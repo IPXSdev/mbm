@@ -307,68 +307,70 @@ export async function createTrack(trackData: {
 // Upload audio file
 export async function uploadAudioFile(file: File, userId: string): Promise<string> {
   try {
-    const fileExt = file.name.split(".").pop()
-    const fileName = `${userId}/${Date.now()}.${fileExt}`
-
-    console.log("Attempting to upload audio file:", fileName, "Type:", file.type, "Size:", file.size)
+    console.log("Attempting to upload audio file:", file.name, "Type:", file.type, "Size:", file.size)
     
-    const { data, error } = await supabase.storage.from("tracks").upload(fileName, file, {
-      cacheControl: '3600',
-      upsert: false
+    // Use the API endpoint to upload with service role
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('bucket', 'tracks')
+    formData.append('userId', userId)
+
+    const response = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData
     })
 
-    if (error) {
-      console.error("Audio upload error:", error)
-      throw error
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(`Upload failed: ${errorData.error} - ${errorData.details}`)
     }
 
-    if (!data) {
-      throw new Error("Upload returned no data")
+    const result = await response.json()
+    
+    if (!result.success) {
+      throw new Error(`Upload failed: ${result.error}`)
     }
 
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from("tracks").getPublicUrl(fileName)
-
-    console.log("Audio uploaded successfully:", publicUrl)
-    return publicUrl
+    console.log("Audio uploaded successfully:", result.url)
+    return result.url
   } catch (error) {
     console.error("Error uploading audio file:", error)
-    throw error // Don't use fallback, throw the real error
+    throw error
   }
 }
 
 // Upload image file
 export async function uploadImageFile(file: File, userId: string): Promise<string> {
   try {
-    const fileExt = file.name.split(".").pop()
-    const fileName = `${userId}/${Date.now()}.${fileExt}`
-
-    console.log("Attempting to upload image file:", fileName, "Type:", file.type, "Size:", file.size)
+    console.log("Attempting to upload image file:", file.name, "Type:", file.type, "Size:", file.size)
     
-    const { data, error } = await supabase.storage.from("images").upload(fileName, file, {
-      cacheControl: '3600',
-      upsert: false
+    // Use the API endpoint to upload with service role
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('bucket', 'images')
+    formData.append('userId', userId)
+
+    const response = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData
     })
 
-    if (error) {
-      console.error("Image upload error:", error)
-      throw error
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(`Upload failed: ${errorData.error} - ${errorData.details}`)
     }
 
-    if (!data) {
-      throw new Error("Upload returned no data")
+    const result = await response.json()
+    
+    if (!result.success) {
+      throw new Error(`Upload failed: ${result.error}`)
     }
 
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from("images").getPublicUrl(fileName)
-
-    console.log("Image uploaded successfully:", publicUrl)
-    return publicUrl
+    console.log("Image uploaded successfully:", result.url)
+    return result.url
   } catch (error) {
     console.error("Error uploading image file:", error)
-    throw error // Don't use fallback, throw the real error
+    throw error
   }
 }
 
