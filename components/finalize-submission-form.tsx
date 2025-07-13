@@ -42,6 +42,11 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
   const [status, setStatus] = useState<string | null>(null)
   
   // Main submission info
+  const [firstName, setFirstName] = useState("")
+  const [middleName, setMiddleName] = useState("")
+  const [lastName, setLastName] = useState("")
+  const [email, setEmail] = useState("")
+  const [contactNumber, setContactNumber] = useState("")
   const [proPlan, setProPlan] = useState("")
   const [proNumber, setProNumber] = useState("")
   const [publisherName, setPublisherName] = useState("")
@@ -94,6 +99,11 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
       // TODO: Submit to your API endpoint
       const submissionData = {
         trackId: track.id,
+        firstName,
+        middleName,
+        lastName,
+        email,
+        contactNumber,
         proPlan,
         proNumber,
         publisherName,
@@ -152,6 +162,68 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-8">
+          {/* Contact Information */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-blue-900 border-b pb-2">
+              Contact Information
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="firstName" className="text-blue-800">First Name</Label>
+                <Input
+                  id="firstName"
+                  value={firstName}
+                  onChange={e => setFirstName(e.target.value)}
+                  placeholder="First name"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="middleName" className="text-blue-800">Middle Name</Label>
+                <Input
+                  id="middleName"
+                  value={middleName}
+                  onChange={e => setMiddleName(e.target.value)}
+                  placeholder="Middle name (optional)"
+                />
+              </div>
+              <div>
+                <Label htmlFor="lastName" className="text-blue-800">Last Name</Label>
+                <Input
+                  id="lastName"
+                  value={lastName}
+                  onChange={e => setLastName(e.target.value)}
+                  placeholder="Last name"
+                  required
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="email" className="text-blue-800">Email Address</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="your.email@example.com"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="contactNumber" className="text-blue-800">Best Contact Number</Label>
+                <Input
+                  id="contactNumber"
+                  type="tel"
+                  value={contactNumber}
+                  onChange={e => setContactNumber(e.target.value)}
+                  placeholder="(555) 123-4567"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
           {/* PRO Information */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-blue-900 border-b pb-2">

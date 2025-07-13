@@ -3,6 +3,9 @@
 
 import { useEffect, useState } from "react"
 import { getTracks, updateTrackStatus } from "@/lib/db"
+import dynamic from "next/dynamic"
+
+const ViewFinalizedSubmission = dynamic(() => import("@/components/view-finalized-submission"), { ssr: false })
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -20,6 +23,8 @@ export default function AdminDashboard() {
   const [selectedMood, setSelectedMood] = useState<string>("")
   const [viewMode, setViewMode] = useState<"ranked" | "newest">("ranked")
   const [reviewingTrack, setReviewingTrack] = useState<string | null>(null)
+  const [showFinalizedModal, setShowFinalizedModal] = useState(false)
+  const [selectedTrackForFinalized, setSelectedTrackForFinalized] = useState<any>(null)
   const [reviewData, setReviewData] = useState<{
     rating: number
     status: string
@@ -47,8 +52,9 @@ export default function AdminDashboard() {
       setLoading(true)
       setError("")
       console.log("Admin dashboard: Fetching tracks...")
-      const sortBy = sortMode || viewMode
-      const data = await getTracks(sortBy)
+      // Map viewMode to valid sortBy values
+      const mappedSortBy = sortMode || (viewMode === "ranked" ? "rating" : "newest")
+      const data = await getTracks(mappedSortBy)
       console.log("Admin dashboard: Tracks fetched successfully:", data)
       setTracks(data)
       applyMoodFilter(data, selectedMood)
@@ -76,7 +82,8 @@ export default function AdminDashboard() {
 
   const handleViewModeChange = (mode: "ranked" | "newest") => {
     setViewMode(mode)
-    fetchTracks(mode)
+    const sortBy = mode === "ranked" ? "rating" : "newest"
+    fetchTracks(sortBy)
   }
 
   const handleReview = async (trackId: string) => {
@@ -371,16 +378,31 @@ export default function AdminDashboard() {
                 )}
 
                 <div className="flex justify-between items-center pt-4 border-t border-white/20">
-                  <Button
-                    onClick={() => handleReview(track.id)}
-                    variant={reviewingTrack === track.id ? "default" : "outline"}
-                    className={reviewingTrack === track.id ? 
-                      "bg-green-600 hover:bg-green-700 text-white" : 
-                      "bg-white/10 border-white/20 text-white hover:bg-white/20"
-                    }
-                  >
-                    {reviewingTrack === track.id ? "Save Review" : "Review"}
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => handleReview(track.id)}
+                      variant={reviewingTrack === track.id ? "default" : "outline"}
+                      className={reviewingTrack === track.id ? 
+                        "bg-green-600 hover:bg-green-700 text-white" : 
+                        "bg-white/10 border-white/20 text-white hover:bg-white/20"
+                      }
+                    >
+                      {reviewingTrack === track.id ? "Save Review" : "Review"}
+                    </Button>
+                    
+                    {track.status === "approved" && (
+                      <Button
+                        onClick={() => {
+                          setSelectedTrackForFinalized(track)
+                          setShowFinalizedModal(true)
+                        }}
+                        variant="outline"
+                        className="bg-blue-600/20 border-blue-400/40 text-blue-300 hover:bg-blue-600/30"
+                      >
+                        📋 View Sync Details
+                      </Button>
+                    )}
+                  </div>
                   
                   {reviewingTrack === track.id && (
                     <Button
@@ -396,6 +418,17 @@ export default function AdminDashboard() {
             </Card>
           ))}
         </div>
+      )}
+      
+      {/* View Finalized Submission Modal */}
+      {showFinalizedModal && selectedTrackForFinalized && (
+        <ViewFinalizedSubmission
+          track={selectedTrackForFinalized}
+          onClose={() => {
+            setShowFinalizedModal(false)
+            setSelectedTrackForFinalized(null)
+          }}
+        />
       )}
     </div>
   )
