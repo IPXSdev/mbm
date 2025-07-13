@@ -2,6 +2,7 @@
 "use client"
 import dynamic from "next/dynamic"
 const GrantAdminForm = dynamic(() => import("../admin-portal/users/grant-admin"), { ssr: false })
+const FinalizeSubmissionForm = dynamic(() => import("@/components/finalize-submission-form"), { ssr: false })
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -40,6 +41,8 @@ export default function DashboardPage() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [isMasterAdmin, setIsMasterAdmin] = useState(false)
   const [showGrantModal, setShowGrantModal] = useState(false)
+  const [showFinalizeModal, setShowFinalizeModal] = useState(false)
+  const [selectedTrackForFinalize, setSelectedTrackForFinalize] = useState<SubmittedTrack | null>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -464,6 +467,16 @@ export default function DashboardPage() {
                               🎉 <strong>Great news!</strong> Your track is now in our active catalog and being pitched
                               for placement opportunities.
                             </p>
+                            <Button 
+                              size="sm" 
+                              className="mt-3 bg-green-600 hover:bg-green-700 text-white"
+                              onClick={() => {
+                                setSelectedTrackForFinalize(track)
+                                setShowFinalizeModal(true)
+                              }}
+                            >
+                              📋 Finalize Submission
+                            </Button>
                           </div>
                         )}
                       </div>
@@ -475,6 +488,17 @@ export default function DashboardPage() {
           </Card>
         </div>
       </div>
+
+      {/* Finalize Submission Modal */}
+      {showFinalizeModal && selectedTrackForFinalize && (
+        <FinalizeSubmissionForm
+          track={selectedTrackForFinalize}
+          onClose={() => {
+            setShowFinalizeModal(false)
+            setSelectedTrackForFinalize(null)
+          }}
+        />
+      )}
     </div>
   )
 }
