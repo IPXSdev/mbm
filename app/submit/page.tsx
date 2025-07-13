@@ -407,16 +407,6 @@ export default function SubmitPage() {
                       </div>
                     )}
                   </div>
-
-                  {/* Info about default cover image */}
-                  <div className="space-y-2">
-                    <Label className="text-white">Cover Image</Label>
-                    <div className="border-2 border-dashed border-white/20 rounded-lg p-6 text-center">
-                      <ImageIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                      <p className="text-white mb-2">Default music note image will be used</p>
-                      <p className="text-sm text-gray-400">All submissions use the same cover image</p>
-                    </div>
-                  </div>
                 </div>
 
                 {/* Upload Progress */}
