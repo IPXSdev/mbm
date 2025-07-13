@@ -67,25 +67,29 @@ export default function AboutPage() {
                   />
                 </div>
                 <div className="p-8 flex flex-col justify-center">
-                  <Badge className="w-fit mb-4 bg-purple-600">Industry Legend</Badge>
-                  <h3 className="text-3xl font-bold mb-4">Big Tank</h3>
+                  <Badge className="w-fit mb-4 bg-purple-600">Producer | Music Supervisor | Executive</Badge>
+                  <h3 className="text-3xl font-bold mb-4">Big Tank (Derryck Thornton)</h3>
                   <p className="text-muted-foreground mb-6 text-lg leading-relaxed">
-                    [Please provide Big Tank's bio - I'll update this with the content you share. This placeholder 
-                    shows the layout where his professional background, achievements, and role in the music industry 
-                    will be displayed.]
+                    Derryck "Big Tank" Thornton is a dynamic force in the entertainment industry—an influential producer, 
+                    music supervisor, and composer who seamlessly blends visionary artistry with strategic leadership. 
+                    With an extraordinary career spanning music, television, and film, Big Tank has crafted unforgettable 
+                    soundtracks and shaped the sonic identity of culturally iconic projects. He has collaborated with 
+                    music's most influential artists including Rihanna, Missy Elliott, Ne-Yo, Christina Aguilera, and 
+                    Queen Latifah, while serving as music supervisor for major hits like BMF, Power Saga, Raising Kanan, 
+                    and many more across Starz, Apple TV+, Netflix, and other platforms.
                   </p>
                   <div className="space-y-2 text-sm">
                     <p className="flex items-center gap-2">
                       <span className="w-2 h-2 bg-purple-600 rounded-full"></span>
-                      A&R Executive
+                      Former Senior VP at Sony Music
                     </p>
                     <p className="flex items-center gap-2">
                       <span className="w-2 h-2 bg-purple-600 rounded-full"></span>
-                      Music Placement Specialist
+                      Music Supervisor: BMF, Power, Raising Kanan
                     </p>
                     <p className="flex items-center gap-2">
                       <span className="w-2 h-2 bg-purple-600 rounded-full"></span>
-                      Industry Heavyweight
+                      Producer for Rihanna, Missy Elliott, Ne-Yo
                     </p>
                   </div>
                 </div>
@@ -98,25 +102,29 @@ export default function AboutPage() {
             <CardContent className="p-0">
               <div className="grid lg:grid-cols-2 gap-0">
                 <div className="order-2 lg:order-1 p-8 flex flex-col justify-center">
-                  <Badge className="w-fit mb-4 bg-blue-600">Legendary Producer</Badge>
-                  <h3 className="text-3xl font-bold mb-4">Rockwilder</h3>
+                  <Badge className="w-fit mb-4 bg-blue-600">Grammy-Winning Producer | Creative Visionary</Badge>
+                  <h3 className="text-3xl font-bold mb-4">Rockwilder (Dana Stinson)</h3>
                   <p className="text-muted-foreground mb-6 text-lg leading-relaxed">
-                    [Please provide Rockwilder's bio - I'll update this with the content you share. This placeholder 
-                    shows the layout where his legendary production career, hit records, and industry influence 
-                    will be displayed.]
+                    Dana "Rockwilder" Stinson is a Grammy Award-winning music producer and creative force whose signature 
+                    sound has shaped the sonic identity of hip-hop, R&B, and pop for over two decades. Known for blending 
+                    hard-hitting beats with soulful melodies and cutting-edge innovation, Rockwilder is the mastermind behind 
+                    some of the most iconic records in modern music, including "Lady Marmalade," "Da Rockwilder," and "Do It." 
+                    He has worked with industry legends including Jay-Z, Eminem, Dr. Dre, Busta Rhymes, Mary J. Blige, Janet 
+                    Jackson, and Christina Aguilera, delivering chart-topping hits across genres while also composing film scores 
+                    like the cult-classic "How High."
                   </p>
                   <div className="space-y-2 text-sm">
                     <p className="flex items-center gap-2">
                       <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
-                      Grammy-Winning Producer
+                      Grammy Award-Winning Producer
                     </p>
                     <p className="flex items-center gap-2">
                       <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
-                      Hit-Making Machine
+                      Produced for Jay-Z, Eminem, Dr. Dre
                     </p>
                     <p className="flex items-center gap-2">
                       <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
-                      Industry Veteran
+                      "Lady Marmalade" & Iconic Hit Creator
                     </p>
                   </div>
                 </div>
@@ -147,25 +155,29 @@ export default function AboutPage() {
                   />
                 </div>
                 <div className="p-8 flex flex-col justify-center">
-                  <Badge className="w-fit mb-4 bg-green-600">Music Executive</Badge>
-                  <h3 className="text-3xl font-bold mb-4">Mr. Porter</h3>
+                  <Badge className="w-fit mb-4 bg-green-600">Music Executive & Producer</Badge>
+                  <h3 className="text-3xl font-bold mb-4">Mr. Porter (Denaun)</h3>
                   <p className="text-muted-foreground mb-6 text-lg leading-relaxed">
-                    [Please provide Mr. Porter's bio - I'll update this with the content you share. This placeholder 
-                    shows the layout where his executive experience, industry connections, and role in music 
-                    supervision will be displayed.]
+                    Denaun Porter, professionally known as Mr. Porter, is a multi-platinum Grammy-nominated producer, 
+                    songwriter, and music executive. As a core member of D12 and longtime collaborator with Eminem, 
+                    he has been instrumental in shaping the sound of Detroit hip-hop for over two decades. Beyond his 
+                    work as an artist, Porter has established himself as a powerhouse producer, working with industry 
+                    giants and developing emerging talent. His keen ear for placement-ready music and deep industry 
+                    connections make him an invaluable asset in connecting independent artists with major opportunities 
+                    in TV, film, and media.
                   </p>
                   <div className="space-y-2 text-sm">
                     <p className="flex items-center gap-2">
                       <span className="w-2 h-2 bg-green-600 rounded-full"></span>
-                      Music Executive
+                      Grammy-Nominated Producer
                     </p>
                     <p className="flex items-center gap-2">
                       <span className="w-2 h-2 bg-green-600 rounded-full"></span>
-                      Industry Connector
+                      D12 Member & Eminem Collaborator
                     </p>
                     <p className="flex items-center gap-2">
                       <span className="w-2 h-2 bg-green-600 rounded-full"></span>
-                      Placement Expert
+                      Multi-Platinum Artist & Executive
                     </p>
                   </div>
                 </div>
