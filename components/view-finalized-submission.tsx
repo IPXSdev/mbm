@@ -22,39 +22,6 @@ interface SubmittedTrack {
   image_count?: number
 }
 
-interface FinalizedSubmission {
-  trackId: string
-  firstName: string
-  middleName?: string
-  lastName: string
-  email: string
-  contactNumber: string
-  proPlan: string
-  proNumber: string
-  publisherName: string
-  publisherPRO: string
-  publisherNumber: string
-  copyrightOwner: string
-  masterOwner: string
-  isrc?: string
-  upc?: string
-  territoryRights: string
-  duration: string
-  bpm?: string
-  key?: string
-  lyrics?: string
-  instrumentalAvailable: boolean
-  additionalNotes?: string
-  contributors: Array<{
-    id: string
-    name: string
-    role: string
-    percentage: number
-    proPlan: string
-  }>
-  submittedAt: string
-}
-
 interface ViewFinalizedSubmissionProps {
   track: SubmittedTrack
   onClose: () => void
@@ -62,7 +29,7 @@ interface ViewFinalizedSubmissionProps {
 
 export default function ViewFinalizedSubmission({ track, onClose }: ViewFinalizedSubmissionProps) {
   const [loading, setLoading] = useState(true)
-  const [syncData, setSyncData] = useState<FinalizedSubmission | null>(null)
+  const [syncData, setSyncData] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -71,33 +38,7 @@ export default function ViewFinalizedSubmission({ track, onClose }: ViewFinalize
         setLoading(true)
         const data = await getSyncFinalization(track.id)
         if (data) {
-          // Convert database format to component format
-          const formattedData: FinalizedSubmission = {
-            trackId: data.track_id,
-            firstName: data.first_name,
-            middleName: data.middle_name,
-            lastName: data.last_name,
-            email: data.email,
-            contactNumber: data.contact_number,
-            proPlan: data.pro_plan,
-            proNumber: data.pro_number,
-            publisherName: data.publisher_name,
-            publisherPRO: data.publisher_pro,
-            publisherNumber: data.publisher_number,
-            copyrightOwner: data.copyright_owner,
-            masterOwner: data.master_owner,
-            isrc: data.isrc,
-            upc: data.upc,
-            territoryRights: data.territory_rights,
-            duration: data.duration,
-            bpm: data.bpm,
-            key: data.key,
-            lyrics: data.lyrics,
-            instrumentalAvailable: data.instrumental_available,
-            additionalNotes: data.additional_notes,
-            contributors: data.contributors || []
-          }
-          setSyncData(formattedData)
+          setSyncData(data)
         } else {
           setError("No sync finalization data found for this track.")
         }
@@ -136,52 +77,8 @@ export default function ViewFinalizedSubmission({ track, onClose }: ViewFinalize
       </div>
     )
   }
-  const [loading, setLoading] = useState(false)
-  
-  // Mock data - replace with actual API call
-  const finalizedData: FinalizedSubmission = {
-    trackId: track.id,
-    firstName: "John",
-    middleName: "Michael",
-    lastName: "Smith",
-    email: "john.smith@example.com",
-    contactNumber: "(555) 123-4567",
-    proPlan: "ASCAP",
-    proNumber: "123456789",
-    publisherName: "Smith Music Publishing",
-    publisherPRO: "ASCAP",
-    publisherNumber: "987654321",
-    copyrightOwner: "John Smith",
-    masterOwner: "John Smith",
-    isrc: "USRC17607839",
-    upc: "123456789012",
-    territoryRights: "Worldwide",
-    duration: "3:45",
-    bpm: "120",
-    key: "C Major",
-    lyrics: "Sample lyrics content...",
-    instrumentalAvailable: true,
-    additionalNotes: "Additional notes about the track...",
-    contributors: [
-      {
-        id: "1",
-        name: "John Smith",
-        role: "Producer",
-        percentage: 50,
-        proPlan: "ASCAP"
-      },
-      {
-        id: "2", 
-        name: "Jane Doe",
-        role: "Songwriter",
-        percentage: 50,
-        proPlan: "BMI"
-      }
-    ],
-    submittedAt: "2024-01-15T10:30:00Z"
-  }
 
-  const fullName = [syncData.firstName, syncData.middleName, syncData.lastName]
+  const fullName = [syncData.first_name, syncData.middle_name, syncData.last_name]
     .filter(Boolean)
     .join(" ")
 
@@ -190,11 +87,11 @@ export default function ViewFinalizedSubmission({ track, onClose }: ViewFinalize
       <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b p-6 flex justify-between items-center">
           <div>
-            <h2 className="text-2xl font-bold text-blue-900">Finalized Submission Details</h2>
+            <h2 className="text-2xl font-bold text-blue-900">Sync Finalization Details</h2>
             <p className="text-blue-700 mt-1">"{track.title}" by {track.artist}</p>
-            <p className="text-sm text-gray-600">
-              Submitted: {new Date(finalizedData.submittedAt).toLocaleDateString()}
-            </p>
+            <Badge variant="outline" className="mt-2 bg-green-100 text-green-800">
+              Finalized for Sync Licensing
+            </Badge>
           </div>
           <button 
             onClick={onClose}
@@ -210,18 +107,18 @@ export default function ViewFinalizedSubmission({ track, onClose }: ViewFinalize
             <h3 className="text-lg font-semibold text-blue-900 border-b pb-2">
               Contact Information
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label className="text-blue-800">Full Name</Label>
-                <p className="text-gray-900 font-medium">{fullName}</p>
+                <p className="text-gray-900">{fullName}</p>
               </div>
               <div>
-                <Label className="text-blue-800">Email Address</Label>
-                <p className="text-gray-900">{finalizedData.email}</p>
+                <Label className="text-blue-800">Email</Label>
+                <p className="text-gray-900">{syncData.email}</p>
               </div>
               <div>
                 <Label className="text-blue-800">Contact Number</Label>
-                <p className="text-gray-900">{finalizedData.contactNumber}</p>
+                <p className="text-gray-900">{syncData.contact_number}</p>
               </div>
             </div>
           </div>
@@ -229,16 +126,16 @@ export default function ViewFinalizedSubmission({ track, onClose }: ViewFinalize
           {/* PRO Information */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-blue-900 border-b pb-2">
-              Performance Rights Organization (PRO)
+              PRO Information
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label className="text-blue-800">PRO</Label>
-                <p className="text-gray-900">{finalizedData.proPlan}</p>
+                <Label className="text-blue-800">PRO Plan</Label>
+                <p className="text-gray-900">{syncData.pro_plan}</p>
               </div>
               <div>
-                <Label className="text-blue-800">PRO Member Number</Label>
-                <p className="text-gray-900">{finalizedData.proNumber}</p>
+                <Label className="text-blue-800">PRO Number</Label>
+                <p className="text-gray-900">{syncData.pro_number}</p>
               </div>
             </div>
           </div>
@@ -248,128 +145,130 @@ export default function ViewFinalizedSubmission({ track, onClose }: ViewFinalize
             <h3 className="text-lg font-semibold text-blue-900 border-b pb-2">
               Publisher Information
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <Label className="text-blue-800">Publisher Name</Label>
-                <p className="text-gray-900">{finalizedData.publisherName}</p>
+                <p className="text-gray-900">{syncData.publisher_name}</p>
               </div>
               <div>
                 <Label className="text-blue-800">Publisher PRO</Label>
-                <p className="text-gray-900">{finalizedData.publisherPRO}</p>
+                <p className="text-gray-900">{syncData.publisher_pro}</p>
               </div>
               <div>
-                <Label className="text-blue-800">Publisher PRO Number</Label>
-                <p className="text-gray-900">{finalizedData.publisherNumber}</p>
+                <Label className="text-blue-800">Publisher Number</Label>
+                <p className="text-gray-900">{syncData.publisher_number}</p>
               </div>
             </div>
           </div>
 
-          {/* Rights & Ownership */}
+          {/* Rights and Ownership */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-blue-900 border-b pb-2">
-              Rights & Ownership
+              Rights and Ownership
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <Label className="text-blue-800">Copyright Owner</Label>
-                <p className="text-gray-900">{finalizedData.copyrightOwner}</p>
+                <p className="text-gray-900">{syncData.copyright_owner}</p>
               </div>
               <div>
-                <Label className="text-blue-800">Master Recording Owner</Label>
-                <p className="text-gray-900">{finalizedData.masterOwner}</p>
+                <Label className="text-blue-800">Master Owner</Label>
+                <p className="text-gray-900">{syncData.master_owner}</p>
               </div>
               <div>
                 <Label className="text-blue-800">Territory Rights</Label>
-                <p className="text-gray-900">{finalizedData.territoryRights}</p>
+                <p className="text-gray-900">{syncData.territory_rights}</p>
               </div>
             </div>
           </div>
 
-          {/* Track Details */}
+          {/* Track Metadata */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-blue-900 border-b pb-2">
-              Track Details
+              Track Metadata
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
               <div>
                 <Label className="text-blue-800">Duration</Label>
-                <p className="text-gray-900">{finalizedData.duration}</p>
+                <p className="text-gray-900">{syncData.duration}</p>
               </div>
               <div>
                 <Label className="text-blue-800">BPM</Label>
-                <p className="text-gray-900">{finalizedData.bpm || "Not specified"}</p>
+                <p className="text-gray-900">{syncData.bpm || "Not specified"}</p>
               </div>
               <div>
                 <Label className="text-blue-800">Key</Label>
-                <p className="text-gray-900">{finalizedData.key || "Not specified"}</p>
+                <p className="text-gray-900">{syncData.key || "Not specified"}</p>
               </div>
               <div>
                 <Label className="text-blue-800">ISRC</Label>
-                <p className="text-gray-900">{finalizedData.isrc || "Not provided"}</p>
+                <p className="text-gray-900">{syncData.isrc || "Not provided"}</p>
               </div>
               <div>
-                <Label className="text-blue-800">UPC/EAN</Label>
-                <p className="text-gray-900">{finalizedData.upc || "Not provided"}</p>
+                <Label className="text-blue-800">UPC</Label>
+                <p className="text-gray-900">{syncData.upc || "Not provided"}</p>
               </div>
               <div>
                 <Label className="text-blue-800">Instrumental Available</Label>
-                <Badge variant={finalizedData.instrumentalAvailable ? "default" : "secondary"}>
-                  {finalizedData.instrumentalAvailable ? "Yes" : "No"}
+                <Badge variant={syncData.instrumental_available ? "default" : "secondary"}>
+                  {syncData.instrumental_available ? "Yes" : "No"}
                 </Badge>
               </div>
             </div>
           </div>
 
           {/* Contributors */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-blue-900 border-b pb-2">
-              Contributors & Credits
-            </h3>
-            <div className="space-y-3">
-              {finalizedData.contributors.map((contributor, index) => (
-                <div key={contributor.id} className="border rounded-lg p-4 bg-gray-50">
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div>
-                      <Label className="text-blue-800">Name</Label>
-                      <p className="text-gray-900">{contributor.name}</p>
-                    </div>
-                    <div>
-                      <Label className="text-blue-800">Role</Label>
-                      <p className="text-gray-900">{contributor.role}</p>
-                    </div>
-                    <div>
-                      <Label className="text-blue-800">Percentage</Label>
-                      <p className="text-gray-900">{contributor.percentage}%</p>
-                    </div>
-                    <div>
-                      <Label className="text-blue-800">PRO</Label>
-                      <p className="text-gray-900">{contributor.proPlan}</p>
+          {syncData.contributors && syncData.contributors.length > 0 && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-blue-900 border-b pb-2">
+                Contributors ({syncData.contributors.length})
+              </h3>
+              <div className="space-y-3">
+                {syncData.contributors.map((contributor: any, index: number) => (
+                  <div key={contributor.id || index} className="bg-gray-50 p-4 rounded-lg">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div>
+                        <Label className="text-blue-800">Name</Label>
+                        <p className="text-gray-900">{contributor.name}</p>
+                      </div>
+                      <div>
+                        <Label className="text-blue-800">Role</Label>
+                        <p className="text-gray-900">{contributor.role}</p>
+                      </div>
+                      <div>
+                        <Label className="text-blue-800">Percentage</Label>
+                        <p className="text-gray-900">{contributor.percentage}%</p>
+                      </div>
+                      <div>
+                        <Label className="text-blue-800">PRO Plan</Label>
+                        <p className="text-gray-900">{contributor.proPlan}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Lyrics & Notes */}
-          {(finalizedData.lyrics || finalizedData.additionalNotes) && (
+          {/* Additional Information */}
+          {(syncData.lyrics || syncData.additional_notes) && (
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-blue-900 border-b pb-2">
                 Additional Information
               </h3>
-              {finalizedData.lyrics && (
+              {syncData.lyrics && (
                 <div>
                   <Label className="text-blue-800">Lyrics</Label>
                   <div className="bg-gray-50 p-4 rounded-lg mt-2">
-                    <p className="text-gray-900 whitespace-pre-line">{finalizedData.lyrics}</p>
+                    <p className="text-gray-900 whitespace-pre-line">{syncData.lyrics}</p>
                   </div>
                 </div>
               )}
-              {finalizedData.additionalNotes && (
+              {syncData.additional_notes && (
                 <div>
                   <Label className="text-blue-800">Additional Notes</Label>
                   <div className="bg-gray-50 p-4 rounded-lg mt-2">
-                    <p className="text-gray-900">{finalizedData.additionalNotes}</p>
+                    <p className="text-gray-900">{syncData.additional_notes}</p>
                   </div>
                 </div>
               )}
