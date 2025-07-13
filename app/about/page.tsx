@@ -147,7 +147,7 @@ export default function AboutPage() {
               <div className="grid lg:grid-cols-2 gap-0">
                 <div className="aspect-square lg:aspect-auto">
                   <Image
-                    src="/images/mr-porter.jpg"
+                    src="/images/mr-porter.png"
                     alt="Mr. Porter"
                     width={600}
                     height={600}
