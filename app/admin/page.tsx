@@ -151,8 +151,17 @@ export default function AdminDashboard() {
                     </Badge>
                     {track.rating && (
                       <div className="flex items-center gap-1">
-                        <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                        <span className="text-white">{track.rating}</span>
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star 
+                            key={star}
+                            className={`h-4 w-4 ${
+                              star <= track.rating 
+                                ? 'text-yellow-400 fill-current' 
+                                : 'text-gray-400'
+                            }`}
+                          />
+                        ))}
+                        <span className="text-white text-sm ml-1">{track.rating}/5</span>
                       </div>
                     )}
                   </div>
@@ -229,16 +238,30 @@ export default function AdminDashboard() {
                     </div>
 
                     <div>
-                      <label className="text-gray-300 text-sm mb-1 block">Rating (1-10)</label>
-                      <Input
-                        type="number"
-                        min="0"
-                        max="10"
-                        value={reviewData.rating}
-                        onChange={(e) => setReviewData(prev => ({ ...prev, rating: parseInt(e.target.value) || 0 }))}
-                        className="bg-white/10 border-white/20 text-white"
-                        placeholder="Rate from 1-10"
-                      />
+                      <label className="text-gray-300 text-sm mb-1 block">Rating</label>
+                      <div className="flex items-center gap-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            key={star}
+                            type="button"
+                            onClick={() => setReviewData(prev => ({ ...prev, rating: star }))}
+                            className="p-1 hover:scale-110 transition-transform"
+                          >
+                            <Star 
+                              className={`h-6 w-6 ${
+                                star <= reviewData.rating 
+                                  ? 'text-yellow-400 fill-current' 
+                                  : 'text-gray-400'
+                              }`}
+                            />
+                          </button>
+                        ))}
+                        {reviewData.rating > 0 && (
+                          <span className="text-gray-300 text-sm ml-2">
+                            {reviewData.rating} star{reviewData.rating !== 1 ? 's' : ''}
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     <div>
