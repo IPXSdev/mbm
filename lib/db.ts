@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js"
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 // Create a Supabase client with service role key for admin operations (server-side only)
 const supabaseAdmin = typeof window === 'undefined' 
@@ -14,8 +15,22 @@ const supabaseAdmin = typeof window === 'undefined'
     })
   : null
 
-// Create a regular Supabase client for user operations
-const supabase = createClient(supabaseUrl, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+// Create a single Supabase client for user operations (avoid multiple instances)
+let supabase: any = null
+if (typeof window !== 'undefined') {
+  if (!supabase) {
+    supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true,
+      },
+    })
+  }
+} else {
+  // Server-side: create a fresh instance each time
+  supabase = createClient(supabaseUrl, supabaseAnonKey)
+}
 
 export interface User {
   id: string
@@ -117,7 +132,7 @@ export async function getAllUsers(): Promise<User[]> {
       throw error
     }
 
-    return data.map((profile) => ({
+    return data.map((profile: any) => ({
       id: profile.id,
       email: profile.email,
       name: profile.name,

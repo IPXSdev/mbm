@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import type { User } from "@supabase/supabase-js"
-import { createClient } from "@/lib/supabase-client"
+import { createClient } from "@supabase/supabase-js"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { VisuallyHidden } from "@/components/ui/visually-hidden"
@@ -25,14 +25,30 @@ interface Profile {
   role: "user" | "admin" | "master_admin"
 }
 
+// Use the same client configuration as db.ts to avoid multiple instances
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+
+let supabaseClient: any = null
+if (typeof window !== 'undefined' && !supabaseClient) {
+  supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true,
+    },
+  })
+}
+
 export default function AuthNavbar() {
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
-  const supabase = createClient()
 
   useEffect(() => {
+    if (!supabaseClient) return
+
     let mounted = true
     let timeoutId: NodeJS.Timeout
     
@@ -40,7 +56,7 @@ export default function AuthNavbar() {
       try {
         const {
           data: { user },
-        } = await supabase.auth.getUser()
+        } = await supabaseClient.auth.getUser()
         
         if (!mounted) return
         
@@ -48,7 +64,7 @@ export default function AuthNavbar() {
 
         if (user) {
           try {
-            const { data: profileData } = await supabase.from("profiles").select("*").eq("id", user.id).single()
+            const { data: profileData } = await supabaseClient.from("profiles").select("*").eq("id", user.id).single()
             if (mounted) {
               setProfile(profileData)
             }
@@ -81,14 +97,14 @@ export default function AuthNavbar() {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+    } = supabaseClient.auth.onAuthStateChange(async (event: any, session: any) => {
       if (!mounted) return
       
       setUser(session?.user ?? null)
 
       if (session?.user) {
         try {
-          const { data: profileData } = await supabase.from("profiles").select("*").eq("id", session.user.id).single()
+          const { data: profileData } = await supabaseClient.from("profiles").select("*").eq("id", session.user.id).single()
           if (mounted) {
             setProfile(profileData)
           }
@@ -112,14 +128,20 @@ export default function AuthNavbar() {
       clearTimeout(timeoutId)
       subscription.unsubscribe()
     }
-  }, [supabase])
+  }, [])
 
   const handleSignOut = async () => {
-    setLoading(true)
-    setUser(null)
-    setProfile(null)
-    await supabase.auth.signOut()
-    router.push("/")
+    try {
+      setLoading(true)
+      await supabaseClient.auth.signOut()
+      setUser(null)
+      setProfile(null)
+      router.push("/")
+    } catch (error) {
+      console.error("Error signing out:", error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const isAdmin = profile?.role === "admin" || profile?.role === "master_admin" || (user?.email?.toLowerCase() === "2668harris@gmail.com")

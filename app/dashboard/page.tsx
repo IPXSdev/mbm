@@ -10,8 +10,8 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Music, Upload, User, CheckCircle, Clock, XCircle } from "lucide-react"
 import Link from "next/link"
-import { supabase } from "@/lib/auth-client"
-import { getProfileRole } from "@/lib/get-profile-role"
+import { supabase } from "@/lib/supabase-client"
+import { getCurrentUser } from "@/lib/db"
 import { useRouter } from "next/navigation"
 import type { AuthChangeEvent, Session } from "@supabase/supabase-js"
 
@@ -75,7 +75,8 @@ export default function DashboardPage() {
           setUser(session.user)
           setError(null)
           // Check admin role
-          getProfileRole(session.user.id || "", session.user.email || "").then((role) => {
+          getCurrentUser().then((currentUser) => {
+            const role = currentUser?.role
             setIsAdmin(role === "admin" || role === "master_admin" || (session.user.email?.toLowerCase() === "2668harris@gmail.com"));
             setIsMasterAdmin(role === "master_admin" || (session.user.email?.toLowerCase() === "2668harris@gmail.com"));
           })
@@ -111,7 +112,8 @@ export default function DashboardPage() {
         setUser(session.user)
         setError(null)
         setLoading(false)
-        getProfileRole(session.user.id || "", session.user.email || "").then((role) => {
+        getCurrentUser().then((currentUser) => {
+          const role = currentUser?.role
           setIsAdmin(role === "admin" || role === "master_admin" || (session.user.email?.toLowerCase() === "2668harris@gmail.com"));
           setIsMasterAdmin(role === "master_admin" || (session.user.email?.toLowerCase() === "2668harris@gmail.com"));
         })
@@ -138,12 +140,21 @@ export default function DashboardPage() {
       setLoadingTracks(true)
       console.log("Loading submissions for user:", userId)
 
-      // Check localStorage for submissions
-      const localSubmissions = JSON.parse(localStorage.getItem("userSubmissions") || "[]")
-      const userSubmissions = localSubmissions.filter((track: any) => track.user_id === userId)
+      // Load submissions from database instead of localStorage
+      const { data: submissions, error } = await supabase
+        .from("submissions")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
 
-      console.log("Found tracks in localStorage:", userSubmissions)
-      setSubmittedTracks(userSubmissions)
+      if (error) {
+        console.error("Error loading submissions from database:", error)
+        setSubmittedTracks([])
+        return
+      }
+
+      console.log("Found tracks in database:", submissions)
+      setSubmittedTracks(submissions || [])
     } catch (error) {
       console.error("Error loading submissions:", error)
       setSubmittedTracks([])
