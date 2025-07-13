@@ -213,14 +213,10 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
 
       console.log("Validation passed - preparing data for admin review...")
 
-      // Simple data entry - create a basic user ID for data tracking
-      // This is just for data organization, not authentication
-      const submissionUserId = email.trim().toLowerCase().replace('@', '_at_').replace(/[^a-z0-9_]/g, '_')
-
       // Prepare submission data for admin review
       const submissionData = {
         track_id: track.id,
-        user_id: submissionUserId, // Simple identifier for data organization
+        // user_id will be generated in the database function
         first_name: firstName.trim(),
         middle_name: middleName.trim() || undefined,
         last_name: lastName.trim(),

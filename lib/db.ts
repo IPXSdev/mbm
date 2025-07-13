@@ -519,7 +519,7 @@ export async function createUserWithRole(
 // Sync Finalization Functions
 export async function saveSyncFinalization(data: Omit<SyncFinalization, 'id' | 'created_at' | 'updated_at' | 'status'>): Promise<SyncFinalization> {
   try {
-    console.log("saveSyncFinalization called with simplified data entry:", { track_id: data.track_id, user_id: data.user_id })
+    console.log("saveSyncFinalization called with simplified data entry:", { track_id: data.track_id, user_email: data.email })
     
     // Simple data entry - no authentication or ownership verification
     // This is for admin review purposes only
@@ -528,10 +528,15 @@ export async function saveSyncFinalization(data: Omit<SyncFinalization, 'id' | '
     // Use service role key for direct database access without RLS restrictions
     const client = supabaseAdmin || supabase
     
+    // Since this is just data entry, we'll use a placeholder UUID for user_id
+    // or we could modify the table to make user_id nullable for these entries
+    const placeholderUserId = crypto.randomUUID();
+    
     const { data: result, error } = await client
       .from('sync_finalizations')
       .upsert({
         ...data,
+        user_id: placeholderUserId, // Use a generated UUID since this is just data entry
         status: 'pending_admin_review', // Mark for admin review instead of completed
         updated_at: new Date().toISOString()
       }, {
@@ -548,6 +553,8 @@ export async function saveSyncFinalization(data: Omit<SyncFinalization, 'id' | '
         throw new Error("This track has already been submitted for sync finalization.")
       } else if (error.code === '42P01') {
         throw new Error("Database table not found. Please contact admin.")
+      } else if (error.code === '23503') {
+        throw new Error("Invalid track reference. Please ensure the track exists.")
       } else {
         throw new Error(`Unable to save sync finalization: ${error.message}`)
       }
