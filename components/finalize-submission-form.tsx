@@ -316,7 +316,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <Label htmlFor="firstName" className="text-blue-800">First Name</Label>
+                <Label htmlFor="firstName" className="text-blue-800">First Name *</Label>
                 <Input
                   id="firstName"
                   value={firstName}
@@ -335,7 +335,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                 />
               </div>
               <div>
-                <Label htmlFor="lastName" className="text-blue-800">Last Name</Label>
+                <Label htmlFor="lastName" className="text-blue-800">Last Name *</Label>
                 <Input
                   id="lastName"
                   value={lastName}
@@ -347,7 +347,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="email" className="text-blue-800">Email Address</Label>
+                <Label htmlFor="email" className="text-blue-800">Email Address *</Label>
                 <Input
                   id="email"
                   type="email"
@@ -358,7 +358,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                 />
               </div>
               <div>
-                <Label htmlFor="contactNumber" className="text-blue-800">Best Contact Number</Label>
+                <Label htmlFor="contactNumber" className="text-blue-800">Best Contact Number *</Label>
                 <Input
                   id="contactNumber"
                   type="tel"
@@ -378,7 +378,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="proPlan" className="text-blue-800">Your PRO</Label>
+                <Label htmlFor="proPlan" className="text-blue-800">Your PRO *</Label>
                 <Select value={proPlan} onValueChange={setProPlan}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select your PRO" />
@@ -391,7 +391,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                 </Select>
               </div>
               <div>
-                <Label htmlFor="proNumber" className="text-blue-800">PRO Member Number</Label>
+                <Label htmlFor="proNumber" className="text-blue-800">PRO Member Number *</Label>
                 <Input
                   id="proNumber"
                   value={proNumber}
@@ -409,7 +409,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="publisherName" className="text-blue-800">Publisher Name</Label>
+                <Label htmlFor="publisherName" className="text-blue-800">Publisher Name *</Label>
                 <Input
                   id="publisherName"
                   value={publisherName}
@@ -418,7 +418,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                 />
               </div>
               <div>
-                <Label htmlFor="publisherPRO" className="text-blue-800">Publisher PRO</Label>
+                <Label htmlFor="publisherPRO" className="text-blue-800">Publisher PRO *</Label>
                 <Select value={publisherPRO} onValueChange={setPublisherPRO}>
                   <SelectTrigger>
                     <SelectValue placeholder="Publisher's PRO" />
@@ -431,7 +431,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                 </Select>
               </div>
               <div>
-                <Label htmlFor="publisherNumber" className="text-blue-800">Publisher PRO Number</Label>
+                <Label htmlFor="publisherNumber" className="text-blue-800">Publisher PRO Number *</Label>
                 <Input
                   id="publisherNumber"
                   value={publisherNumber}
@@ -449,7 +449,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="copyrightOwner" className="text-blue-800">Copyright Owner</Label>
+                <Label htmlFor="copyrightOwner" className="text-blue-800">Copyright Owner *</Label>
                 <Input
                   id="copyrightOwner"
                   value={copyrightOwner}
@@ -459,7 +459,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                 />
               </div>
               <div>
-                <Label htmlFor="masterOwner" className="text-blue-800">Master Recording Owner</Label>
+                <Label htmlFor="masterOwner" className="text-blue-800">Master Recording Owner *</Label>
                 <Input
                   id="masterOwner"
                   value={masterOwner}
@@ -469,7 +469,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                 />
               </div>
               <div>
-                <Label htmlFor="territoryRights" className="text-blue-800">Territory Rights</Label>
+                <Label htmlFor="territoryRights" className="text-blue-800">Territory Rights *</Label>
                 <Select value={territoryRights} onValueChange={setTerritoryRights}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select territory" />
@@ -511,7 +511,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                 />
               </div>
               <div>
-                <Label htmlFor="duration" className="text-blue-800">Duration</Label>
+                <Label htmlFor="duration" className="text-blue-800">Duration *</Label>
                 <Input
                   id="duration"
                   value={duration}
