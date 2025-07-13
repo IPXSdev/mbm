@@ -7,8 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Trash2 } from "lucide-react"
-import { saveSyncFinalization, getCurrentUser } from "@/lib/db"
-import { supabase } from "@/lib/supabase-client"
+import { saveSyncFinalization } from "@/lib/db"
 
 interface SubmittedTrack {
   id: string
@@ -169,22 +168,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
     setStatus(null)
 
     try {
-      console.log("Form submission started...")
-      console.log("Form values:", {
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-        email: email.trim(),
-        contactNumber: contactNumber.trim(),
-        proPlan: proPlan,
-        proNumber: proNumber.trim(),
-        publisherName: publisherName.trim(),
-        publisherPRO: publisherPRO,
-        publisherNumber: publisherNumber.trim(),
-        copyrightOwner: copyrightOwner.trim(),
-        masterOwner: masterOwner.trim(),
-        territoryRights: territoryRights.trim(),
-        duration: duration.trim()
-      })
+      console.log("Form submission started - simple data entry mode...")
 
       // Validate required fields
       if (!firstName.trim()) {
@@ -227,37 +211,16 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
         throw new Error("Duration is required")
       }
 
-      // Check authentication with multiple methods
-      console.log("Checking authentication...")
-      
-      // Method 1: Direct auth check
-      const { data: { user: authUser }, error: authError } = await supabase.auth.getUser()
-      console.log("Auth user:", authUser, "Error:", authError)
-      
-      // Method 2: Our getCurrentUser function
-      const user = await getCurrentUser()
-      console.log("getCurrentUser result:", user)
-      
-      // Use auth user if available
-      const finalUser = user || (authUser ? {
-        id: authUser.id,
-        email: authUser.email || "",
-        name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || "User",
-        role: "user",
-        created_at: authUser.created_at || new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      } : null)
-      
-      if (!finalUser) {
-        throw new Error("Authentication failed. Please log out and log back in.")
-      }
+      console.log("Validation passed - preparing data for admin review...")
 
-      console.log("Using user:", finalUser)
+      // Simple data entry - create a basic user ID for data tracking
+      // This is just for data organization, not authentication
+      const submissionUserId = email.trim().toLowerCase().replace('@', '_at_').replace(/[^a-z0-9_]/g, '_')
 
-      // Prepare submission data
+      // Prepare submission data for admin review
       const submissionData = {
         track_id: track.id,
-        user_id: finalUser.id,
+        user_id: submissionUserId, // Simple identifier for data organization
         first_name: firstName.trim(),
         middle_name: middleName.trim() || undefined,
         last_name: lastName.trim(),
@@ -282,12 +245,12 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
         contributors: contributors
       }
 
-      console.log("Finalizing submission:", submissionData)
+      console.log("Saving sync finalization data for admin review...")
       
-      // Save to database
+      // Save to database for admin review
       await saveSyncFinalization(submissionData)
       
-      setStatus("✅ Submission finalized successfully! Your track is now ready for sync licensing.")
+      setStatus("✅ Sync finalization data saved successfully! An admin will review your submission.")
       
       // Clear saved form data after successful submission
       localStorage.removeItem(storageKey)
@@ -299,7 +262,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
       
     } catch (error: any) {
       console.error("Error finalizing submission:", error)
-      const errorMessage = error.message || "Failed to finalize submission. Please try again."
+      const errorMessage = error.message || "Failed to save sync finalization data. Please try again."
       setStatus(`❌ ${errorMessage}`)
     } finally {
       setLoading(false)
