@@ -13,7 +13,7 @@ import { Progress } from "@/components/ui/progress"
 import { Upload, Music, ImageIcon, CheckCircle, AlertCircle, Play, Pause } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase-client"
-import { submitTrack, uploadAudioFile, uploadImageFile } from "@/lib/db"
+import { submitTrack, uploadAudioFile } from "@/lib/db"
 
 export default function SubmitPage() {
   const router = useRouter()
@@ -22,9 +22,7 @@ export default function SubmitPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [audioFile, setAudioFile] = useState<File | null>(null)
-  const [imageFile, setImageFile] = useState<File | null>(null)
   const [audioPreview, setAudioPreview] = useState<string | null>(null)
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null)
   const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle")
@@ -112,31 +110,6 @@ export default function SubmitPage() {
     }
   }
 
-  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      // Validate file type
-      const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"]
-      if (!validTypes.includes(file.type)) {
-        setErrorMessage("Please upload a valid image file (JPEG, PNG, WebP)")
-        return
-      }
-
-      // Validate file size (10MB limit)
-      if (file.size > 10 * 1024 * 1024) {
-        setErrorMessage("Image file must be less than 10MB")
-        return
-      }
-
-      setImageFile(file)
-      setErrorMessage("")
-
-      // Create preview URL
-      const url = URL.createObjectURL(file)
-      setImagePreview(url)
-    }
-  }
-
   const toggleAudioPreview = () => {
     if (!audioElement) return
 
@@ -179,7 +152,8 @@ export default function SubmitPage() {
       setUploadProgress(10)
 
       let audioUrl = ""
-      let imageUrl = ""
+      // Use a default music note image for all submissions
+      const imageUrl = "/placeholder-logo.png" // Default music note image
 
       // Try to upload audio file if present, but don't fail if upload fails
       if (audioFile) {
@@ -187,28 +161,13 @@ export default function SubmitPage() {
           console.log("Uploading audio file...")
           audioUrl = await uploadAudioFile(audioFile, user.id)
           console.log("Audio uploaded:", audioUrl)
-          setUploadProgress(40)
+          setUploadProgress(70)
         } catch (audioError) {
           console.warn("Audio upload failed, continuing without file:", audioError)
-          setUploadProgress(40)
+          setUploadProgress(70)
         }
       } else {
-        setUploadProgress(40)
-      }
-
-      // Try to upload image file if present, but don't fail if upload fails
-      if (imageFile) {
-        try {
-          console.log("Uploading image file...")
-          imageUrl = await uploadImageFile(imageFile, user.id)
-          console.log("Image uploaded:", imageUrl)
-          setUploadProgress(60)
-        } catch (imageError) {
-          console.warn("Image upload failed, continuing without file:", imageError)
-          setUploadProgress(60)
-        }
-      } else {
-        setUploadProgress(60)
+        setUploadProgress(70)
       }
 
       // Create track record in database - this MUST work
@@ -220,7 +179,7 @@ export default function SubmitPage() {
         email: formData.email,
         description: formData.description,
         file_url: audioUrl || undefined,
-        image_url: imageUrl || undefined,
+        image_url: imageUrl, // Always use default image
         file_name: audioFile?.name || undefined,
         file_size: audioFile?.size || undefined,
         user_id: user.id,
@@ -243,9 +202,7 @@ export default function SubmitPage() {
           description: "",
         })
         setAudioFile(null)
-        setImageFile(null)
         setAudioPreview(null)
-        setImagePreview(null)
         setUploadProgress(0)
         setSubmitStatus("idle")
 
@@ -428,33 +385,14 @@ export default function SubmitPage() {
                     )}
                   </div>
 
-                  {/* Image File Upload */}
+                  {/* Info about default cover image */}
                   <div className="space-y-2">
-                    <Label className="text-white">Cover Image (Optional)</Label>
+                    <Label className="text-white">Cover Image</Label>
                     <div className="border-2 border-dashed border-white/20 rounded-lg p-6 text-center">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageFileChange}
-                        className="hidden"
-                        id="image-upload"
-                      />
-                      <label htmlFor="image-upload" className="cursor-pointer">
-                        <ImageIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                        <p className="text-white mb-2">{imageFile ? imageFile.name : "Click to upload cover image"}</p>
-                        <p className="text-sm text-gray-400">JPEG, PNG, WebP (max 10MB)</p>
-                      </label>
+                      <ImageIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                      <p className="text-white mb-2">Default music note image will be used</p>
+                      <p className="text-sm text-gray-400">All submissions use the same cover image</p>
                     </div>
-
-                    {imagePreview && (
-                      <div className="mt-2">
-                        <img
-                          src={imagePreview || "/placeholder.svg"}
-                          alt="Cover preview"
-                          className="w-32 h-32 object-cover rounded-lg mx-auto"
-                        />
-                      </div>
-                    )}
                   </div>
                 </div>
 
