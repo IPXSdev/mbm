@@ -1,6 +1,10 @@
 import { createClient } from "@/lib/auth"
 import { type NextRequest, NextResponse } from "next/server"
 
+// Configure for static export
+export const dynamic = 'force-static'
+export const revalidate = false
+
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get("code")
