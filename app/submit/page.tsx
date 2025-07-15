@@ -97,8 +97,11 @@ export default function SubmitPage() {
     const file = e.target.files?.[0]
     if (file) {
       // Validate file type
-      const validTypes = ["audio/mpeg", "audio/wav", "audio/mp3", "audio/m4a", "audio/aac"]
-      if (!validTypes.includes(file.type)) {
+      const validTypes = ["audio/mpeg", "audio/wav", "audio/mp3", "audio/m4a", "audio/aac", "audio/mp4", "audio/x-m4a", "audio/mpeg3", "audio/x-mpeg-3", ""]
+      const fileName = file.name.toLowerCase()
+      const validExtensions = [".mp3", ".wav", ".m4a", ".aac"]
+      const hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext))
+      if (!validTypes.includes(file.type) && !hasValidExtension) {
         setErrorMessage("Please upload a valid audio file (MP3, WAV, M4A, AAC)")
         return
       }
@@ -380,7 +383,7 @@ export default function SubmitPage() {
                     <div className="border-2 border-dashed border-white/20 rounded-lg p-6 text-center">
                       <input
                         type="file"
-                        accept="audio/*"
+                        accept=".mp3,.wav,.m4a,.aac,audio/mpeg,audio/wav,audio/mp4,audio/m4a,audio/aac"
                         onChange={handleAudioFileChange}
                         className="hidden"
                         id="audio-upload"
@@ -388,7 +391,8 @@ export default function SubmitPage() {
                       <label htmlFor="audio-upload" className="cursor-pointer">
                         <Music className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                         <p className="text-white mb-2">{audioFile ? audioFile.name : "Click to upload audio file"}</p>
-                        <p className="text-sm text-gray-400">MP3, WAV, M4A, AAC (max 50MB)</p>
+                        <p className="text-sm text-gray-400">Accepts MP3, WAV, M4A, AAC files (max 50MB)</p>
+                        <p className="text-xs text-gray-500 mt-1">Mobile tip: If files appear grayed out, try renaming with .mp3 extension</p>
                       </label>
                     </div>
 
