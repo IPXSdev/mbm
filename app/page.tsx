@@ -53,11 +53,11 @@ export default function HomePage() {
             height={400}
             className="mx-auto mb-8 w-full max-w-4xl h-auto"
           />
-          <h1 className="text-3xl md:text-5xl font-bold mb-6">GET YOUR MUSIC PLACED IN PREMIUM MEDIA</h1>
-          <p className="text-xl md:text-2xl mb-4 text-gray-200">
+          <h1 className="text-3xl md:text-5xl font-bold mb-4">GET YOUR MUSIC PLACED IN PREMIUM MEDIA</h1>
+          <p className="text-xl md:text-2xl mb-3 text-gray-200">
             Connect directly with A&Rs. Get your music tested for sync opportunities.
           </p>
-          <p className="text-lg md:text-xl mb-8 text-gray-300">
+          <p className="text-lg md:text-xl mb-6 text-gray-300">
             Join the platform where indie artists get real placement opportunities in premium entertainment content.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
