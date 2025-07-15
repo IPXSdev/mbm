@@ -30,7 +30,7 @@ const plans = [
       "Your music will be played for A&Rs",
       "Music matched against premium content scenes to test sync fit",
       "Reviewed in deep-dive breakdowns with the hosts",
-      "Be eligible for placement opportunities & more",
+      "Be eligible for sync opportunities & more",
     ],
     limitations: [],
     popular: true,
@@ -65,7 +65,7 @@ export default function PricingPage() {
       <div className="text-center mb-12">
         <h1 className="text-3xl md:text-4xl font-bold mb-4">Choose Your Path to Placement</h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          Get your music in front of A&Rs and tested for sync opportunities in major TV shows and films
+          Get your music in front of A&Rs and tested for sync opportunities in premium entertainment productions
         </p>
       </div>
 
@@ -83,7 +83,7 @@ export default function PricingPage() {
             Mr. Porter
           </Badge>
         </div>
-        <p className="mt-4 text-gray-300">The same A&Rs who decide what music gets placed in your favorite shows</p>
+        <p className="mt-4 text-gray-300">The same A&Rs who decide what music gets placed in premium entertainment content</p>
       </div>
 
       {/* Pricing Cards */}
@@ -350,7 +350,7 @@ export default function PricingPage() {
             <CardContent className="p-4 text-center">
               <Headphones className="h-8 w-8 mx-auto mb-2 text-purple-600" />
               <h3 className="font-semibold">Artist Name</h3>
-              <p className="text-sm text-muted-foreground">Sync placement in major film</p>
+              <p className="text-sm text-muted-foreground">Sync opportunities in premium content</p>
             </CardContent>
           </Card>
         </div>
@@ -367,7 +367,7 @@ export default function PricingPage() {
             <CardContent>
               <p className="text-muted-foreground">
                 Your submitted music goes directly to our team of industry A&Rs who review it for placement
-                opportunities. They provide professional feedback and test your music against actual TV/film scenes to
+                opportunities. They provide professional feedback and test your music against premium content scenes to
                 find sync opportunities.
               </p>
             </CardContent>
@@ -375,12 +375,12 @@ export default function PricingPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">What shows and films do you work with?</CardTitle>
+              <CardTitle className="text-lg">What content do you provide sync opportunities for?</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                We work with major productions including BMF, the Power Universe, and other high-profile TV shows and
-                films. Our A&R team has direct connections with music supervisors across the industry.
+                We work with major productions including BMF, the Power Universe, and other high-profile entertainment productions and
+                entertainment content. Our A&R team has direct connections with music supervisors across the industry.
               </p>
             </CardContent>
           </Card>
