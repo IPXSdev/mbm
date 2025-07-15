@@ -26,7 +26,7 @@ export async function submitTrack(formData: FormData) {
   // Upload audio file
   const audioFileName = `${user.id}/${Date.now()}-${audioFile.name}`
   const { data: audioUpload, error: audioError } = await supabase.storage
-    .from("tracks")
+    .from("submissions")
     .upload(audioFileName, audioFile)
 
   if (audioError) {
@@ -52,7 +52,7 @@ export async function submitTrack(formData: FormData) {
 
   // Create track record
   const { data: track, error: dbError } = await supabase
-    .from("tracks")
+    .from("submissions")
     .insert({
       title,
       artist,
@@ -61,6 +61,9 @@ export async function submitTrack(formData: FormData) {
       file_url: audioUrlData.publicUrl,
       image_url: imageUrl,
       user_id: user.id,
+      email,
+      file_name: audioFile.name,
+      file_size: audioFile.size,
       status: "pending",
     })
     .select()
@@ -81,7 +84,7 @@ export async function updateTrackStatus(trackId: string, status: string, adminNo
   const supabase = await createClient()
 
   const { error } = await supabase
-    .from("tracks")
+    .from("submissions")
     .update({
       status,
       admin_notes: adminNotes,
