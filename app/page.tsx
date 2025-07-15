@@ -51,13 +51,13 @@ export default function HomePage() {
             alt="The Man Behind The Music"
             width={800}
             height={400}
-            className="mx-auto mb-8 w-full max-w-4xl h-auto"
+            className="mx-auto mb-4 w-full max-w-4xl h-auto"
           />
-          <h1 className="text-3xl md:text-5xl font-bold mb-4">GET YOUR MUSIC PLACED IN PREMIUM MEDIA</h1>
-          <p className="text-xl md:text-2xl mb-3 text-gray-200">
+          <h1 className="text-3xl md:text-5xl font-bold mb-2">GET YOUR MUSIC PLACED IN PREMIUM MEDIA</h1>
+          <p className="text-xl md:text-2xl mb-1 text-gray-200">
             Connect directly with A&Rs. Get your music tested for sync opportunities.
           </p>
-          <p className="text-lg md:text-xl mb-6 text-gray-300">
+          <p className="text-lg md:text-xl mb-3 text-gray-300">
             Join the platform where indie artists get real placement opportunities in premium entertainment content.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
