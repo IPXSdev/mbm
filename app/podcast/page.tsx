@@ -125,7 +125,7 @@ export default function PodcastPage() {
                 <h3 className="text-2xl font-bold mb-4">Big Tank</h3>
                 <p className="text-muted-foreground mb-6">
                   One of the most influential A&Rs in the industry, Big Tank has been behind some of the biggest
-                  placements in TV and film. Get the inside scoop on what he looks for in music and how artists can get
+                  placements in entertainment media. Get the inside scoop on what he looks for in music and how artists can get
                   their tracks noticed.
                 </p>
                 <div className="space-y-2 text-sm text-muted-foreground">

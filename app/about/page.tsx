@@ -23,7 +23,7 @@ export default function AboutPage() {
               <h2 className="text-3xl font-bold mb-6">Our Mission</h2>
               <p className="text-xl mb-6 max-w-4xl mx-auto leading-relaxed">
                 We're changing the game for indie artists & creators by providing direct access to the industry 
-                executives who decide what music gets placed in your favorite TV shows and films. No gatekeepers, 
+                executives who decide what music gets placed in your favorite premium entertainment content. No gatekeepers, 
                 no middlemen – just real opportunities for real artists.
               </p>
               <div className="grid md:grid-cols-3 gap-6 mt-8">
@@ -72,7 +72,7 @@ export default function AboutPage() {
                   <p className="text-muted-foreground mb-6 text-lg leading-relaxed">
                     Derryck "Big Tank" Thornton is a dynamic force in the entertainment industry—an influential producer, 
                     music supervisor, and composer who seamlessly blends visionary artistry with strategic leadership. 
-                    With an extraordinary career spanning music, television, and film, Big Tank has crafted unforgettable 
+                    With an extraordinary career spanning music, entertainment media, Big Tank has crafted unforgettable 
                     soundtracks and shaped the sonic identity of culturally iconic projects. He has collaborated with 
                     music's most influential artists including Rihanna, Missy Elliott, Ne-Yo, Christina Aguilera, and 
                     Queen Latifah, while serving as music supervisor for major hits like BMF, Power Saga, Raising Kanan, 

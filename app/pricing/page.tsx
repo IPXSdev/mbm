@@ -28,7 +28,7 @@ const plans = [
       "Submit 1 song per month for pro feedback",
       "Get extended behind-the-scenes access",
       "Your music will be played for A&Rs",
-      "Music matched against film & TV scenes to test sync fit",
+      "Music matched against premium content scenes to test sync fit",
       "Reviewed in deep-dive breakdowns with the hosts",
       "Be eligible for placement opportunities & more",
     ],

@@ -118,7 +118,7 @@ export default function SignUpPage() {
           </h2>
           <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto">
             Get your music heard by industry professionals and unlock opportunities for sync placements, collaborations, and career growth. 
-            Connect directly with the executives who decide what gets placed in your favorite shows and films.
+            Connect directly with the executives who decide what gets placed in your favorite premium media content.
           </p>
         </div>
       </section>
