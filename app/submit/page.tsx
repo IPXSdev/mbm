@@ -193,7 +193,7 @@ export default function SubmitPage() {
         genre: formData.genre,
         email: formData.email,
         mood: formData.mood,
-        file_url: audioUrl || undefined,
+        file_url: audioUrl && audioUrl.trim() !== "" ? audioUrl : null,
         image_url: imageUrl, // Always use default image
         file_name: audioFile?.name || undefined,
         file_size: audioFile?.size || undefined,
