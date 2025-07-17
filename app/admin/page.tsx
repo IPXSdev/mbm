@@ -17,9 +17,8 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Music, RefreshCw, Star, CheckCircle, XCircle, Clock, AlertTriangle, MessageCircle, Send, X } from "lucide-react"
 import { createClient } from "@/lib/supabase-client"
 
-const supabase = createClient()
-
 export default function AdminDashboard() {
+  const supabase = createClient()
   const [tracks, setTracks] = useState<any[]>([])
   const [filteredTracks, setFilteredTracks] = useState<any[]>([])
   const [loading, setLoading] = useState(true)

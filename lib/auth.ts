@@ -1,10 +1,25 @@
 import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
 
-export async function createClient() {
-  const cookieStore = await cookies()
+function getConfig() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!url || !key) {
+    console.error("Supabase environment variables not set")
+    return null
+  }
+  return { url, key }
+}
 
-  return createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+export async function createClient() {
+  const cfg = getConfig()
+  if (!cfg) {
+    return {} as any
+  }
+
+  const cookieStore = cookies()
+
+  return createServerClient(cfg.url, cfg.key, {
     cookies: {
       getAll() {
         return cookieStore.getAll()
@@ -24,6 +39,10 @@ export async function createClient() {
 
 export async function getUser() {
   const supabase = await createClient()
+  if (!supabase.auth) {
+    return null
+  }
+
   const {
     data: { user },
     error,

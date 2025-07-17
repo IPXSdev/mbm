@@ -14,8 +14,6 @@ import { Input } from "@/components/ui/input"
 import { Music, Upload, User, CheckCircle, Clock, XCircle, MessageCircle, Send, RefreshCw } from "lucide-react"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase-client"
-
-const supabase = createClient()
 import { getCurrentUser, getChatSession, createChatSession, sendSyncMessage, getSyncMessages } from "@/lib/db"
 import { useRouter } from "next/navigation"
 import type { AuthChangeEvent, Session } from "@supabase/supabase-js"
@@ -37,6 +35,7 @@ interface SubmittedTrack {
 }
 
 export default function DashboardPage() {
+  const supabase = createClient()
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
