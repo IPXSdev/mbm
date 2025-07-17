@@ -1,19 +1,30 @@
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Play, Upload, Headphones, Star, Tv, Users, Settings } from "lucide-react"
-import Link from "next/link"
-import Image from "next/image"
-import { SubscriptionButtons } from "@/components/pricing-buttons"
-import { SubmissionPackButton } from "@/components/submission-pack-buttons"
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/auth-client";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Play, Upload, Headphones, Star, Tv, Users, Settings } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
+import { SubscriptionButtons } from "@/components/pricing-buttons";
+import { SubmissionPackButton } from "@/components/submission-pack-buttons";
 
-// Check if environment variables are configured (server-side safe)
 function isSupabaseConfigured() {
-  return !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+  return !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 }
 
 export default function HomePage() {
-  const supabaseConfigured = isSupabaseConfigured()
+  const supabaseConfigured = isSupabaseConfigured();
+  const [userId, setUserId] = useState<string | undefined>(undefined);
+  const router = useRouter();
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      setUserId(data?.user?.id);
+    });
+  }, []);
 
   return (
     <div className="flex flex-col">
@@ -88,12 +99,10 @@ export default function HomePage() {
       <section className="py-16 px-4 bg-gradient-to-r from-purple-900 to-black text-white">
         <div className="container mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
-            WHERE UNTOLD STORIES, RAW TRUTHS AND REAL CONVERSATIONS WITH EXECUTIVES, REDEFINE WHAT IT MEANS TO MOVE THE
-            CULTURE
+            WHERE UNTOLD STORIES, RAW TRUTHS AND REAL CONVERSATIONS WITH EXECUTIVES, REDEFINE WHAT IT MEANS TO MOVE THE CULTURE
           </h2>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            We're not just another music platform. We're your direct connection to the industry executives who decide
-            what music gets placed in entertainment content you love.
+            We're not just another music platform. We're your direct connection to the industry executives who decide what music gets placed in entertainment content you love.
           </p>
         </div>
       </section>
@@ -268,11 +277,11 @@ export default function HomePage() {
             {supabaseConfigured ? (
               <div className="flex flex-col gap-2 items-center">
                 {/* Subscription Plans */}
-                <SubscriptionButtons />
+                <SubscriptionButtons userId={userId} />
                 {/* Submission Packs */}
-<SubmissionPackButton packType="single" price="5" submissions={1} />
-<SubmissionPackButton packType="bundle_5" price="10" submissions={2} />
-<SubmissionPackButton packType="bundle_10" price="15" submissions={4} />
+                <SubmissionPackButton userId={userId} packType="single" price="5" submissions={1} />
+                <SubmissionPackButton userId={userId} packType="bundle_5" price="10" submissions={2} />
+                <SubmissionPackButton userId={userId} packType="bundle_10" price="15" submissions={4} />
               </div>
             ) : (
               <Button size="lg" className="bg-white text-black hover:bg-gray-200" asChild>
@@ -291,5 +300,5 @@ export default function HomePage() {
         </div>
       </section>
     </div>
-  )
+  );
 }
