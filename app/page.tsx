@@ -4,6 +4,8 @@ import { Badge } from "@/components/ui/badge"
 import { Play, Upload, Headphones, Star, Tv, Users, Settings } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
+import { SubscriptionButtons } from "@/components/pricing-buttons"
+import { SubmissionPackButton } from "@/components/submission-pack-buttons"
 
 // Check if environment variables are configured (server-side safe)
 function isSupabaseConfigured() {
@@ -255,7 +257,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* CTA Section with Stripe Checkout Buttons */}
       <section className="py-16 px-4 bg-gradient-to-r from-purple-900 to-black text-white">
         <div className="container mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Get Your Music Placed?</h2>
@@ -263,11 +265,20 @@ export default function HomePage() {
             Join thousands of indie artists who are getting real placement opportunities through our platform
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-white text-black hover:bg-gray-200" asChild>
-              <Link href={supabaseConfigured ? "/pricing" : "/setup"}>
-                {supabaseConfigured ? "View Subscription Plans" : "Complete Setup First"}
-              </Link>
-            </Button>
+            {supabaseConfigured ? (
+              <div className="flex flex-col gap-2 items-center">
+                {/* Subscription Plans */}
+                <SubscriptionButtons />
+                {/* Submission Packs */}
+<SubmissionPackButton packType="single" price="5" submissions={1} />
+<SubmissionPackButton packType="bundle_5" price="10" submissions={2} />
+<SubmissionPackButton packType="bundle_10" price="15" submissions={4} />
+              </div>
+            ) : (
+              <Button size="lg" className="bg-white text-black hover:bg-gray-200" asChild>
+                <Link href="/setup">Complete Setup First</Link>
+              </Button>
+            )}
             <Button
               size="lg"
               variant="outline"
