@@ -64,6 +64,18 @@ export default function SignUpPage() {
 
       if (data.user) {
         console.log("Sign up successful:", data.user.email)
+        // Create profile record for new user
+        const { error: profileError } = await supabase.from("profiles").upsert({
+          id: data.user.id,
+          email: data.user.email,
+          full_name: name.trim(),
+          role: "user",
+          updated_at: new Date().toISOString(),
+        })
+
+        if (profileError) {
+          console.error("Profile creation error:", profileError)
+        }
         setSuccess(true)
 
         // If user is immediately confirmed (no email verification required)
