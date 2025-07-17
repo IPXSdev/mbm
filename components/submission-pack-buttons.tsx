@@ -14,38 +14,63 @@ export function SubmissionPackButton({ userId, packType, price, submissions }: S
   const [loading, setLoading] = useState(false);
 
   const handlePurchase = async () => {
+    if (!userId) {
+      alert('Please log in to purchase');
+      return;
+    }
+
     setLoading(true);
     
     try {
-      // Placeholder for Stripe integration
-      alert(`Starting purchase of ${submissions} submission${submissions > 1 ? 's' : ''} for ${price}...`);
-      console.log(`Would create Stripe checkout for ${packType} pack`);
-      console.log(`User ID: ${userId}, Pack: ${packType}, Price: ${price}`);
+      console.log(`Creating Stripe checkout for ${packType} pack with user ID: ${userId}`);
       
-      // TODO: Replace with actual Stripe checkout
-      // const response = await fetch('/api/create-checkout-session', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ packType, userId, productType: 'submission_pack' })
-      // });
-      // const { url } = await response.json();
-      // window.location.href = url;
+      const response = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          planType: packType, 
+          userId,
+          productType: 'submission_pack'
+        })
+      });
+
+      const data = await response.json();
+      console.log('Stripe API response:', data);
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create checkout session');
+      }
+
+      if (data.url) {
+        console.log('Redirecting to Stripe checkout:', data.url);
+        window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL returned');
+      }
       
     } catch (error) {
       console.error('Purchase error:', error);
-      alert('Error starting purchase. Please try again.');
+      alert(`Error starting purchase: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Button
-      onClick={handlePurchase}
-      disabled={loading}
-      className="w-full"
-    >
-      {loading ? 'Processing...' : `Buy ${submissions} Submission${submissions > 1 ? 's' : ''} - ${price}`}
-    </Button>
+    <div className="space-y-2">
+      <Button
+        onClick={handlePurchase}
+        disabled={loading || !userId}
+        className="w-full"
+      >
+        {loading ? 'Processing...' : `Buy ${submissions} Submission${submissions > 1 ? 's' : ''} - ${price}`}
+      </Button>
+      
+      {!userId && (
+        <div className="text-sm text-red-600 text-center">
+          Please log in to purchase
+        </div>
+      )}
+    </div>
   );
 }
