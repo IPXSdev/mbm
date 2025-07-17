@@ -15,7 +15,9 @@ import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Music, RefreshCw, Star, CheckCircle, XCircle, Clock, AlertTriangle, MessageCircle, Send, X } from "lucide-react"
-import { supabase } from "@/lib/supabase-client"
+import { createClient } from "@/lib/supabase-client"
+
+const supabase = createClient()
 
 export default function AdminDashboard() {
   const [tracks, setTracks] = useState<any[]>([])

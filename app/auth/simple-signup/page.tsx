@@ -9,9 +9,10 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Music, AlertCircle, CheckCircle } from "lucide-react"
-import { supabase } from "@/lib/auth-client"
+import { createClient } from "@/lib/auth-client"
 
 export default function SimpleSignupPage() {
+  const supabase = createClient()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [name, setName] = useState("")

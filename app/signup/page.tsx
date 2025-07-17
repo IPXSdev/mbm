@@ -10,9 +10,10 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Eye, EyeOff, AlertCircle, Loader2, CheckCircle } from "lucide-react"
-import { supabase } from "@/lib/auth-client"
+import { createClient } from "@/lib/auth-client"
 
 export default function SignUpPage() {
+  const supabase = createClient()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
