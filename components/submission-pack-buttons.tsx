@@ -17,7 +17,6 @@ export function SubmissionPackButton({ userId, packType, price, submissions }: S
 
   const handlePurchase = async () => {
     if (!userId) {
-      // Redirect to signup with next param
       router.push(`/signup?next=${encodeURIComponent(window.location.pathname)}`);
       return;
     }
@@ -25,8 +24,6 @@ export function SubmissionPackButton({ userId, packType, price, submissions }: S
     setLoading(true);
 
     try {
-      console.log(`Creating Stripe checkout for ${packType} pack with user ID: ${userId}`);
-
       const response = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -38,21 +35,18 @@ export function SubmissionPackButton({ userId, packType, price, submissions }: S
       });
 
       const data = await response.json();
-      console.log('Stripe API response:', data);
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to create checkout session');
       }
 
       if (data.url) {
-        console.log('Redirecting to Stripe checkout:', data.url);
         window.location.href = data.url;
       } else {
         throw new Error('No checkout URL returned');
       }
 
     } catch (error) {
-      console.error('Purchase error:', error);
       alert(`Error starting purchase: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
@@ -68,6 +62,22 @@ export function SubmissionPackButton({ userId, packType, price, submissions }: S
       >
         {loading ? 'Processing...' : `Buy ${submissions} Submission${submissions > 1 ? 's' : ''} - ${price}`}
       </Button>
+
+      {!userId && (
+        <div className="flex flex-col items-center space-y-2 mt-2">
+          <span className="text-sm text-red-600 text-center">
+            Please <span className="font-semibold">login</span> or <span className="font-semibold">signup</span> to subscribe
+          </span>
+          <div className="flex space-x-2">
+            <Button variant="outline" onClick={() => router.push(`/login?next=${encodeURIComponent(window.location.pathname)}`)}>
+              Login
+            </Button>
+            <Button variant="outline" onClick={() => router.push(`/signup?next=${encodeURIComponent(window.location.pathname)}`)}>
+              Signup
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
