@@ -30,13 +30,26 @@ export default function SimpleSignupPage() {
         email,
         password,
         options: {
-          data: { name },
+          data: { full_name: name },
         },
       })
 
       if (error) {
         setError(error.message)
       } else {
+        if (data.user) {
+          const { error: profileError } = await supabase.from("profiles").upsert({
+            id: data.user.id,
+            email: data.user.email!,
+            full_name: name,
+            role: "user",
+            updated_at: new Date().toISOString(),
+          })
+
+          if (profileError) {
+            console.error("Profile creation error:", profileError)
+          }
+        }
         setMessage("Account created! Please check your email to verify your account.")
       }
     } catch (err: any) {

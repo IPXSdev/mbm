@@ -50,7 +50,11 @@ export default function LoginPage() {
         const { error: profileError } = await supabase.from("profiles").upsert({
           id: data.user.id,
           email: data.user.email,
-          name: data.user.user_metadata?.name || data.user.email?.split("@")[0] || "User",
+          full_name:
+            data.user.user_metadata?.full_name ||
+            data.user.user_metadata?.name ||
+            data.user.email?.split("@")[0] ||
+            "User",
           role: "user",
           updated_at: new Date().toISOString(),
         })

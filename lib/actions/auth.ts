@@ -18,7 +18,7 @@ export async function signUp(formData: FormData) {
     password,
     options: {
       data: {
-        name,
+        full_name: name,
       },
       emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/auth/callback`,
     },
@@ -36,7 +36,7 @@ export async function signUp(formData: FormData) {
     const { error: profileError } = await supabase.from("profiles").upsert({
       id: authData.user.id,
       email,
-      name,
+      full_name: name,
       role: "user",
     })
 
