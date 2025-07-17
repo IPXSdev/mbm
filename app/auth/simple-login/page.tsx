@@ -33,6 +33,23 @@ export default function SimpleLoginPage() {
       if (error) {
         setError(error.message)
       } else {
+        if (data.user) {
+          const { error: profileError } = await supabase.from("profiles").upsert({
+            id: data.user.id,
+            email: data.user.email!,
+            full_name:
+              data.user.user_metadata?.full_name ||
+              data.user.user_metadata?.name ||
+              data.user.email?.split("@")[0] ||
+              "User",
+            role: "user",
+            updated_at: new Date().toISOString(),
+          })
+
+          if (profileError) {
+            console.error("Profile creation error:", profileError)
+          }
+        }
         setMessage("Login successful! Redirecting...")
         setTimeout(() => {
           window.location.href = "/dashboard"
