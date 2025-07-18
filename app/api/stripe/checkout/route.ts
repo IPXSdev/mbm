@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { createClient } from '@/lib/auth';
+import { createClient } from '@/lib/supabase-client';
 
 let stripe: Stripe | null = null;
 const stripeSecret = process.env.STRIPE_SECRET_KEY;
@@ -38,8 +38,9 @@ export async function POST(req: NextRequest) {
     if (productType === 'subscription') {
       // Subscription plans
       const priceIds = {
-        creator: 'price_1QhxcQBNEktWEKLUMqOSLJcD', // $19.99/month
-        pro: 'price_1QhxdEBNEktWEKLUhJKgwEsG'     // $24.99/month
+        creator: 'price_1RlNOzBgDMz6aj4lHmgcVgJS',
+        indie: 'price_1RlNJeBgDMz6aj4l8fdmlTLO',
+        pro: 'price_1RlNLdBgDMz6aj4lzZuZuGcg'
       };
 
       sessionParams = {
@@ -62,13 +63,22 @@ export async function POST(req: NextRequest) {
       };
     } else {
       // One-time submission packs
-      const packPrices = {
-        single: { price: 499, name: '1 Submission' },      // $4.99
-        bundle_5: { price: 1999, name: '5 Submissions' },  // $19.99
-        bundle_10: { price: 3499, name: '10 Submissions' } // $34.99
+      const packPriceIds = {
+        single: {
+          priceId: 'price_1RlNS6BgDMz6aj4l3YHD8Gm2',
+          name: 'Platinum Bundle +4'
+        },
+        bundle_5: {
+          priceId: 'price_1RlNRIBgDMz6aj4lRwI51D64',
+          name: 'Gold Bundle +2'
+        },
+        bundle_10: {
+          priceId: 'price_1RlNQEBgDMz6aj4lu54v9JTX',
+          name: 'Silver Select +1'
+        }
       };
 
-      const pack = packPrices[planType as keyof typeof packPrices];
+      const pack = packPriceIds[planType as keyof typeof packPriceIds];
       if (!pack) {
         return NextResponse.json({ error: 'Invalid pack type' }, { status: 400 });
       }
@@ -78,13 +88,7 @@ export async function POST(req: NextRequest) {
         payment_method_types: ['card'],
         line_items: [
           {
-            price_data: {
-              currency: 'usd',
-              product_data: {
-                name: `${pack.name} - Man Behind the Music`,
-              },
-              unit_amount: pack.price,
-            },
+            price: pack.priceId,
             quantity: 1,
           },
         ],
