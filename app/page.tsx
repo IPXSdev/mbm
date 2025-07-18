@@ -23,7 +23,13 @@ export default function HomePage() {
   useEffect(() => {
     const supabase = createClient();
     supabase.auth.getUser().then(({ data }) => {
-      setUserId(data?.user?.id);
+      if (data?.user?.id) {
+        setUserId(data.user.id);
+        console.log("Supabase user ID:", data.user.id); // Debug log
+      } else {
+        setUserId(undefined);
+        console.log("No Supabase user found");
+      }
     });
   }, []);
 
