@@ -2,20 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createClient } from '@/lib/auth';
 
-let stripe: Stripe | null = null;
-const stripeSecret = process.env.STRIPE_SECRET_KEY;
-if (stripeSecret) {
-  stripe = new Stripe(stripeSecret, {
-    apiVersion: '2024-12-18.acacia',
-  });
-}
-
 export async function POST(req: NextRequest) {
   try {
-    if (!stripe) {
-      console.error('Stripe secret key missing');
-      return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 });
+    const stripeSecret = process.env.STRIPE_SECRET_KEY || process.env.NEXT_PUBLIC_STRIPE_SECRET_KEY
+    if (!stripeSecret) {
+      console.error('Stripe secret key missing')
+      return NextResponse.json(
+        { error: 'Server misconfiguration' },
+        { status: 500 }
+      )
     }
+
+    const stripe = new Stripe(stripeSecret, { apiVersion: '2024-12-18.acacia' })
     const { planType, userId, productType = 'subscription' } = await req.json();
 
     if (!userId) {
