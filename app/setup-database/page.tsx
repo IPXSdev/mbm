@@ -8,7 +8,7 @@ export default function DatabaseSetupPage() {
 CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
   email TEXT UNIQUE NOT NULL,
-  full_name TEXT,
+  name TEXT,
   role TEXT DEFAULT 'user' CHECK (role IN ('user', 'admin', 'master_admin')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()

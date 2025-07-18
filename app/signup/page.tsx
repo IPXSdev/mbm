@@ -69,7 +69,7 @@ export default function SignUpPage() {
         const { error: profileError } = await supabase.from("profiles").upsert({
           id: data.user.id,
           email: data.user.email,
-          full_name: name.trim(),
+          name: name.trim(),
           role: "user",
           updated_at: new Date().toISOString(),
         })

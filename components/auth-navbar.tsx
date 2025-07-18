@@ -21,7 +21,7 @@ import {
 interface Profile {
   id: string
   email: string
-  full_name?: string
+  name?: string
   role: "user" | "admin" | "master_admin"
 }
 
@@ -288,7 +288,7 @@ export default function AuthNavbar() {
                 {user ? (
                   <>
                     <div className="border-t border-gray-800 pt-4">
-                      <p className="text-sm text-gray-400 mb-4">{profile?.full_name || user.email}</p>
+                      <p className="text-sm text-gray-400 mb-4">{profile?.name || user.email}</p>
                       <div className="flex flex-col space-y-2">
                         <Link href="/submit">
                           <Button

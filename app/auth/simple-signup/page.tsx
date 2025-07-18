@@ -31,7 +31,7 @@ export default function SimpleSignupPage() {
         email,
         password,
         options: {
-          data: { full_name: name },
+          data: { name },
         },
       })
 
@@ -42,7 +42,7 @@ export default function SimpleSignupPage() {
           const { error: profileError } = await supabase.from("profiles").upsert({
             id: data.user.id,
             email: data.user.email!,
-            full_name: name,
+            name,
             role: "user",
             updated_at: new Date().toISOString(),
           })

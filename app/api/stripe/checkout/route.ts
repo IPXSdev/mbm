@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     const supabase = createClient(supabaseUrl, serviceKey);
     const { data: user } = await supabase
       .from('profiles')
-      .select('email, full_name')
+      .select('email, name')
       .eq('id', userId)
       .single();
 
