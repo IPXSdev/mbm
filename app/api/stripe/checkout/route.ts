@@ -1,20 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { createClient } from '@/lib/supabase-client';
+import { createClient } from '@/lib/auth';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-12-18.acacia',
-});
+let stripe: Stripe | null = null;
+const stripeSecret = process.env.STRIPE_SECRET_KEY;
+if (stripeSecret) {
+  stripe = new Stripe(stripeSecret, {
+    apiVersion: '2024-12-18.acacia',
+  });
+}
 
 export async function POST(req: NextRequest) {
   try {
+    if (!stripe) {
+      console.error('Stripe secret key missing');
+      return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 });
+    }
     const { planType, userId, productType = 'subscription' } = await req.json();
 
     if (!userId) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
     }
 
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: user } = await supabase
       .from('profiles')
       .select('email, full_name')
