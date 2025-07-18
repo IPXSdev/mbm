@@ -9,8 +9,8 @@ export async function middleware(request: NextRequest) {
   })
 
   // Get environment variables
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   // Skip middleware if Supabase credentials are not properly configured
   if (!supabaseUrl || !supabaseAnonKey || !supabaseUrl.includes(".supabase.co")) {

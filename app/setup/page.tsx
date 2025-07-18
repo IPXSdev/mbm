@@ -154,9 +154,9 @@ export default function SetupPage() {
             <div className="relative">
               <div className="bg-black text-green-400 p-4 rounded-lg font-mono text-sm overflow-x-auto">
                 <div className="text-gray-500"># Supabase Configuration</div>
-                <div>NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co</div>
-                <div>NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here</div>
-                <div>SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here</div>
+                <div>SUPABASE_URL=https://your-project-id.supabase.co</div>
+                <div>SUPABASE_ANON_KEY=your_anon_key_here</div>
+                <div>SUPABASE_SERVICE_KEY=your_service_role_key_here</div>
                 <div></div>
                 <div className="text-gray-500"># Site Configuration</div>
                 <div>NEXT_PUBLIC_SITE_URL=http://localhost:3000</div>
@@ -168,9 +168,9 @@ export default function SetupPage() {
                 onClick={() =>
                   copyToClipboard(
                     `# Supabase Configuration
-NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
+SUPABASE_URL=https://your-project-id.supabase.co
+SUPABASE_ANON_KEY=your_anon_key_here
+SUPABASE_SERVICE_KEY=your_service_role_key_here
 
 # Site Configuration
 NEXT_PUBLIC_SITE_URL=http://localhost:3000`,

@@ -19,15 +19,15 @@ export default function TestAuthPage() {
       setStatus("🔄 Testing Supabase connection...")
 
       // Check environment variables
-      const hasUrl = !!process.env.NEXT_PUBLIC_SUPABASE_URL
-      const hasKey = !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      const hasUrl = !!(process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL)
+      const hasKey = !!(process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
 
       let details = `Environment Variables:\n`
-      details += `- NEXT_PUBLIC_SUPABASE_URL: ${hasUrl ? "✅ Set" : "❌ Missing"}\n`
-      details += `- NEXT_PUBLIC_SUPABASE_ANON_KEY: ${hasKey ? "✅ Set" : "❌ Missing"}\n\n`
+      details += `- SUPABASE_URL: ${hasUrl ? "✅ Set" : "❌ Missing"}\n`
+      details += `- SUPABASE_ANON_KEY: ${hasKey ? "✅ Set" : "❌ Missing"}\n\n`
 
       if (hasUrl) {
-        details += `URL: ${process.env.NEXT_PUBLIC_SUPABASE_URL}\n\n`
+        details += `URL: ${process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL}\n\n`
       }
 
       // Test connection

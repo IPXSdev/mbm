@@ -10,8 +10,8 @@ export default function DebugSupabasePage() {
     setMounted(true)
 
     // Get environment variables
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
     setEnvVars({
       url: supabaseUrl,
@@ -93,7 +93,7 @@ export default function DebugSupabasePage() {
                   marginBottom: "12px",
                 }}
               >
-                <span style={{ fontSize: "14px", fontWeight: "500", color: "#374151" }}>NEXT_PUBLIC_SUPABASE_URL:</span>
+                <span style={{ fontSize: "14px", fontWeight: "500", color: "#374151" }}>SUPABASE_URL:</span>
                 <span
                   style={{
                     fontSize: "12px",
@@ -121,7 +121,7 @@ export default function DebugSupabasePage() {
                 }}
               >
                 <span style={{ fontSize: "14px", fontWeight: "500", color: "#374151" }}>
-                  NEXT_PUBLIC_SUPABASE_ANON_KEY:
+                  SUPABASE_ANON_KEY:
                 </span>
                 <span
                   style={{

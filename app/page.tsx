@@ -12,7 +12,10 @@ import { SubscriptionButtons } from "@/components/pricing-buttons";
 import { SubmissionPackButton } from "@/components/submission-pack-buttons";
 
 function isSupabaseConfigured() {
-  return !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+  return !!(
+    (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL) &&
+    (process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+  );
 }
 
 export default function HomePage() {
