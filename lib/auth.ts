@@ -17,8 +17,8 @@ export async function createClient() {
     return {} as any
   }
 
-  // DO NOT use await here!
-  const cookieStore = cookies()
+  // FIX: Use await to get the cookie store
+  const cookieStore = await cookies()
 
   return createServerClient(cfg.url, cfg.key, {
     cookies: {

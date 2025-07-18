@@ -12,7 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Progress } from "@/components/ui/progress"
 import { Upload, Music, ImageIcon, CheckCircle, AlertCircle, Play, Pause } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase-client"
+import { supabase } from "@/lib/supabase-client"
 import { submitTrack, uploadAudioFile } from "@/lib/db"
 
 export default function SubmitPage() {
@@ -71,7 +71,6 @@ export default function SubmitPage() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const supabase = createClient()
         const {
           data: { session },
         } = await supabase.auth.getSession()
@@ -193,7 +192,7 @@ export default function SubmitPage() {
         genre: formData.genre,
         email: formData.email,
         mood: formData.mood,
-        file_url: audioUrl && audioUrl.trim() !== "" ? audioUrl : null,
+        file_url: audioUrl && audioUrl.trim() !== "" ? audioUrl : undefined, // <-- FIXED HERE
         image_url: imageUrl, // Always use default image
         file_name: audioFile?.name || undefined,
         file_size: audioFile?.size || undefined,
@@ -268,202 +267,7 @@ export default function SubmitPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-white mb-4">Submit Your Track</h1>
-            <p className="text-xl text-gray-300">
-              Share your music with the world. Get discovered by industry professionals.
-            </p>
-          </div>
-
-          <Card className="bg-white/10 backdrop-blur-md border-white/20">
-            <CardHeader>
-              <CardTitle className="text-white">Track Submission</CardTitle>
-              <CardDescription className="text-gray-300">
-                Fill out the form below to submit your track for review
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Basic Information */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="title" className="text-white">
-                      Track Title *
-                    </Label>
-                    <Input
-                      id="title"
-                      value={formData.title}
-                      onChange={(e) => handleInputChange("title", e.target.value)}
-                      placeholder="Enter track title"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="artist" className="text-white">
-                      Artist Name *
-                    </Label>
-                    <Input
-                      id="artist"
-                      value={formData.artist}
-                      onChange={(e) => handleInputChange("artist", e.target.value)}
-                      placeholder="Enter artist name"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="genre" className="text-white">
-                      Genre *
-                    </Label>
-                    <Select value={formData.genre} onValueChange={(value) => handleInputChange("genre", value)}>
-                      <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                        <SelectValue placeholder="Select genre" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {genres.map((genre) => (
-                          <SelectItem key={genre} value={genre}>
-                            {genre}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-white">
-                      Email *
-                    </Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => handleInputChange("email", e.target.value)}
-                      placeholder="Enter your email"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-white">
-                    Track Mood *
-                  </Label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {moods.map((mood) => (
-                      <button
-                        key={mood}
-                        type="button"
-                        onClick={() => handleInputChange("mood", mood)}
-                        className={`px-3 py-2 rounded-full text-sm transition-all ${
-                          formData.mood === mood
-                            ? "bg-blue-600 text-white border-2 border-blue-400"
-                            : "bg-white/10 text-gray-300 border-2 border-white/20 hover:bg-white/20 hover:border-white/30"
-                        }`}
-                      >
-                        {mood}
-                      </button>
-                    ))}
-                  </div>
-                  {!formData.mood && (
-                    <p className="text-gray-400 text-sm">Please select a mood that best describes your track</p>
-                  )}
-                </div>
-
-                {/* File Uploads */}
-                <div className="space-y-4">
-                  {/* Audio File Upload */}
-                  <div className="space-y-2">
-                    <Label className="text-white">Audio File *</Label>
-                    <div className="border-2 border-dashed border-white/20 rounded-lg p-6 text-center">
-                      <input
-                        type="file"
-                        accept=".mp3,.wav,.m4a,.aac,audio/mpeg,audio/wav,audio/mp4,audio/m4a,audio/aac"
-                        onChange={handleAudioFileChange}
-                        className="hidden"
-                        id="audio-upload"
-                      />
-                      <label htmlFor="audio-upload" className="cursor-pointer">
-                        <Music className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                        <p className="text-white mb-2">{audioFile ? audioFile.name : "Click to upload audio file"}</p>
-                        <p className="text-sm text-gray-400">Accepts MP3, WAV, M4A, AAC files (max 50MB)</p>
-                        <p className="text-xs text-gray-500 mt-1">Mobile tip: If files appear grayed out, try renaming with .mp3 extension</p>
-                      </label>
-                    </div>
-
-                    {audioPreview && (
-                      <div className="flex items-center gap-2 p-3 bg-white/10 rounded-lg">
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          onClick={toggleAudioPreview}
-                          className="bg-white/10 border-white/20 text-white hover:bg-white/20"
-                        >
-                          {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                        </Button>
-                        <span className="text-white text-sm">Preview: {audioFile?.name}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Upload Progress */}
-                {isSubmitting && (
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm text-white">
-                      <span>Uploading...</span>
-                      <span>{uploadProgress}%</span>
-                    </div>
-                    <Progress value={uploadProgress} className="w-full" />
-                  </div>
-                )}
-
-                {/* Status Messages */}
-                {errorMessage && (
-                  <Alert className="bg-red-500/20 border-red-500/50">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription className="text-white">{errorMessage}</AlertDescription>
-                  </Alert>
-                )}
-
-                {submitStatus === "success" && (
-                  <Alert className="bg-green-500/20 border-green-500/50">
-                    <CheckCircle className="h-4 w-4" />
-                    <AlertDescription className="text-white">
-                      Track submitted successfully! Redirecting to dashboard...
-                    </AlertDescription>
-                  </Alert>
-                )}
-
-                {/* Submit Button */}
-                <Button
-                  type="submit"
-                  disabled={isSubmitting || !audioFile}
-                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold py-3"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Upload className="mr-2 h-4 w-4 animate-spin" />
-                      Submitting...
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="mr-2 h-4 w-4" />
-                      Submit Track
-                    </>
-                  )}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+      {/* ...existing code... */}
     </div>
   )
 }

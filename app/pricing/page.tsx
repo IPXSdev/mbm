@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/auth-client";
+import { supabase } from "@/lib/supabase-client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, Star, Zap, Crown, Play, Users, Headphones } from "lucide-react";
@@ -68,10 +68,11 @@ export default function PricingPage() {
   const [userId, setUserId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => {
-      setUserId(data?.user?.id);
-    });
+    supabase.auth.getUser().then(
+      ({ data }: { data: { user: { id: string } | null } }) => {
+        setUserId(data?.user?.id);
+      }
+    );
   }, []);
 
   return (
