@@ -24,7 +24,7 @@ import { Users, Plus, MoreHorizontal, Shield, User, Crown, Trash2 } from "lucide
 interface Profile {
   id: string
   email: string
-  full_name?: string
+  name?: string
   role: "user" | "admin" | "master_admin"
   created_at: string
   updated_at: string
@@ -330,7 +330,7 @@ export default function UserManagement() {
                   <div className="flex items-center space-x-2">
                     {getRoleIcon(user.role)}
                     <div>
-                      <div className="font-medium">{user.full_name || "No name"}</div>
+                      <div className="font-medium">{user.name || "No name"}</div>
                       <div className="text-sm text-muted-foreground">{user.email}</div>
                     </div>
                   </div>

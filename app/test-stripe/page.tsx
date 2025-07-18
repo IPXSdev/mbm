@@ -10,7 +10,7 @@ import { createClient } from "@/lib/auth-client";
 interface User {
   id: string;
   email: string;
-  full_name: string;
+  name: string;
   created_at: string;
 }
 
@@ -178,7 +178,7 @@ export default function TestStripePage() {
                 )}
                 {availableUsers.map((user) => (
                   <option key={user.id} value={user.id}>
-                    {user.email} ({user.full_name || 'No name'}) - {user.id}
+                    {user.email} ({user.name || 'No name'}) - {user.id}
                   </option>
                 ))}
               </select>

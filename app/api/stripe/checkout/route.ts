@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const serviceKey = process.env.SUPABASE_SERVICE_KEY;
+const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
 
 let stripe: Stripe | null = null;
 const stripeSecret = process.env.STRIPE_SECRET_KEY;
@@ -12,8 +12,8 @@ if (stripeSecret) {
   });
 }
 
-// Import your Supabase client factory if needed
-import { createClient } from '@/lib/supabase-client';
+// Use server-side Supabase client with service role key
+import { createClient } from '@supabase/supabase-js';
 
 export async function POST(req: NextRequest) {
   try {
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     const supabase = createClient(supabaseUrl, serviceKey);
     const { data: user } = await supabase
       .from('profiles')
-      .select('email, full_name')
+      .select('email, name')
       .eq('id', userId)
       .single();
 

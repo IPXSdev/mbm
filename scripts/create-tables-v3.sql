@@ -5,7 +5,7 @@ ALTER DATABASE postgres SET "app.jwt_secret" TO 'your-jwt-secret';
 CREATE TABLE IF NOT EXISTS public.profiles (
     id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
     email TEXT UNIQUE NOT NULL,
-    full_name TEXT,
+    name TEXT,
     role TEXT DEFAULT 'user' CHECK (role IN ('user', 'admin', 'master_admin')),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -122,7 +122,7 @@ CREATE TRIGGER handle_updated_at_submissions
     FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
 
 -- Insert some sample data for demo
-INSERT INTO public.profiles (id, email, full_name, role) VALUES 
+INSERT INTO public.profiles (id, email, name, role) VALUES
 ('00000000-0000-0000-0000-000000000001', 'admin@manbehindthemusic.com', 'Master Admin', 'master_admin')
 ON CONFLICT (email) DO UPDATE SET role = 'master_admin';
 

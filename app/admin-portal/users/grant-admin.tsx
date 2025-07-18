@@ -18,7 +18,7 @@ export default function GrantAdminForm() {
     setLoading(true)
     
     // Find user by email
-    const { data: profile, error } = await supabase.from("profiles").select("id, email, full_name, role").eq("email", email).single()
+    const { data: profile, error } = await supabase.from("profiles").select("id, email, name, role").eq("email", email).single()
     if (error || !profile) {
       setStatus("User not found. Make sure they have signed up.")
       setLoading(false)
@@ -33,7 +33,7 @@ export default function GrantAdminForm() {
         return
       }
       // Update role to admin
-      const { error: updateError } = await supabase.from("profiles").update({ role: "admin", full_name: fullName }).eq("id", profile.id)
+      const { error: updateError } = await supabase.from("profiles").update({ role: "admin", name: fullName }).eq("id", profile.id)
       if (updateError) {
         setStatus("Failed to grant admin access: " + updateError.message)
       } else {
