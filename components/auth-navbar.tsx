@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import type { User } from "@supabase/supabase-js"
-import { createClient } from "@supabase/supabase-js"
+import { createClient } from "@/lib/auth-client"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { VisuallyHidden } from "@/components/ui/visually-hidden"
@@ -25,20 +25,7 @@ interface Profile {
   role: "user" | "admin" | "master_admin"
 }
 
-// Use the same client configuration as db.ts to avoid multiple instances
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-
-let supabaseClient: any = null
-if (typeof window !== 'undefined' && !supabaseClient) {
-  supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: true,
-    },
-  })
-}
+const supabaseClient = createClient()
 
 export default function AuthNavbar() {
   const [user, setUser] = useState<User | null>(null)
