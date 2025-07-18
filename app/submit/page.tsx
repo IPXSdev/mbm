@@ -12,7 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Progress } from "@/components/ui/progress"
 import { Upload, Music, ImageIcon, CheckCircle, AlertCircle, Play, Pause } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase-client"
+import { supabase } from "@/lib/supabase-client"
 import { submitTrack, uploadAudioFile } from "@/lib/db"
 
 export default function SubmitPage() {
@@ -71,7 +71,6 @@ export default function SubmitPage() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const supabase = createClient()
         const {
           data: { session },
         } = await supabase.auth.getSession()

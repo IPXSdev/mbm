@@ -12,10 +12,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Progress } from "@/components/ui/progress"
 import { Upload, Music, ImageIcon, CheckCircle, AlertCircle, Play, Pause } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/auth-client"
+import { supabase } from "@/lib/auth-client"
 
 export default function SubmitPage() {
-  const supabase = createClient()
   const router = useRouter()
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)

@@ -1,4 +1,5 @@
-import { createClient } from "@supabase/supabase-js"
+import { createClient as createSupabaseClient } from "@supabase/supabase-js"
+import { supabase as userClient } from "@/lib/supabase-client"
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -7,7 +8,7 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 // Create a Supabase client with service role key for admin operations (server-side only)
 const supabaseAdmin =
   typeof window === 'undefined' && supabaseUrl && supabaseServiceKey
-    ? createClient(supabaseUrl, supabaseServiceKey, {
+    ? createSupabaseClient(supabaseUrl, supabaseServiceKey, {
         auth: {
           autoRefreshToken: false,
           persistSession: false,
@@ -15,24 +16,8 @@ const supabaseAdmin =
       })
     : null
 
-// Create a single Supabase client for user operations (avoid multiple instances)
-let supabase: any = null
-if (supabaseUrl && supabaseAnonKey) {
-  if (typeof window !== 'undefined') {
-    if (!supabase) {
-      supabase = createClient(supabaseUrl, supabaseAnonKey, {
-        auth: {
-          autoRefreshToken: true,
-          persistSession: true,
-          detectSessionInUrl: true,
-        },
-      })
-    }
-  } else {
-    // Server-side: create a fresh instance each time
-    supabase = createClient(supabaseUrl, supabaseAnonKey)
-  }
-}
+// Use the singleton client for user operations
+const supabase = userClient
 
 export interface User {
   id: string

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { createClient } from "@/lib/supabase-client"
+import { supabase } from "@/lib/supabase-client"
 import { Button } from "@/components/ui/button"
 
 export default function GrantAdminForm() {
@@ -10,7 +10,6 @@ export default function GrantAdminForm() {
   const [mode, setMode] = useState<"grant" | "revoke">("grant")
   const [status, setStatus] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const supabase = createClient()
 
   const handleRoleChange = async (e: React.FormEvent) => {
     e.preventDefault()
