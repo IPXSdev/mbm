@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import type { User } from "@supabase/supabase-js"
-import { createClient } from "@supabase/supabase-js"
+import { supabase } from "@/lib/supabase-client"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { VisuallyHidden } from "@/components/ui/visually-hidden"
@@ -25,21 +25,6 @@ interface Profile {
   role: "user" | "admin" | "master_admin"
 }
 
-// Use the same client configuration as db.ts to avoid multiple instances
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-
-let supabaseClient: any = null
-if (typeof window !== 'undefined' && !supabaseClient) {
-  supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: true,
-    },
-  })
-}
-
 export default function AuthNavbar() {
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
@@ -47,30 +32,29 @@ export default function AuthNavbar() {
   const router = useRouter()
 
   useEffect(() => {
-    if (!supabaseClient) return
+    if (!supabase) return
 
     let mounted = true
     let timeoutId: NodeJS.Timeout
-    
+
     const getUser = async () => {
       try {
         const {
           data: { user },
-        } = await supabaseClient.auth.getUser()
-        
+        } = await supabase.auth.getUser()
+
         if (!mounted) return
-        
+
         setUser(user)
 
         if (user) {
           try {
-            const { data: profileData } = await supabaseClient.from("profiles").select("*").eq("id", user.id).single()
+            const { data: profileData } = await supabase.from("profiles").select("*").eq("id", user.id).single()
             if (mounted) {
               setProfile(profileData)
             }
           } catch (profileError) {
             console.warn("Could not fetch profile:", profileError)
-            // Continue without profile data
           }
         }
 
@@ -85,7 +69,6 @@ export default function AuthNavbar() {
       }
     }
 
-    // Set a timeout to ensure loading state doesn't persist too long
     timeoutId = setTimeout(() => {
       if (mounted && loading) {
         console.warn("Auth loading timeout - forcing loaded state")
@@ -97,20 +80,19 @@ export default function AuthNavbar() {
 
     const {
       data: { subscription },
-    } = supabaseClient.auth.onAuthStateChange(async (event: any, session: any) => {
+    } = supabase.auth.onAuthStateChange(async (event: any, session: any) => {
       if (!mounted) return
-      
+
       setUser(session?.user ?? null)
 
       if (session?.user) {
         try {
-          const { data: profileData } = await supabaseClient.from("profiles").select("*").eq("id", session.user.id).single()
+          const { data: profileData } = await supabase.from("profiles").select("*").eq("id", session.user.id).single()
           if (mounted) {
             setProfile(profileData)
           }
         } catch (profileError) {
           console.warn("Could not fetch profile:", profileError)
-          // Continue without profile data
         }
       } else {
         if (mounted) {
@@ -133,21 +115,13 @@ export default function AuthNavbar() {
   const handleSignOut = async () => {
     try {
       setLoading(true)
-      
-      // Clear local state immediately
       setUser(null)
       setProfile(null)
-      
-      // Sign out from Supabase with global scope
-      const { error } = await supabaseClient.auth.signOut({ scope: 'global' })
-      
+      const { error } = await supabase.auth.signOut({ scope: 'global' })
       if (error) {
         console.error("Error signing out:", error)
       }
-      
-      // Aggressively clear all auth-related storage
       if (typeof window !== 'undefined') {
-        // Clear all Supabase auth keys
         const keysToRemove = [
           'supabase.auth.token',
           'sb-izeozsebupuihhitwwql-auth-token',
@@ -155,23 +129,16 @@ export default function AuthNavbar() {
           'supabase.session',
           'supabase.user'
         ]
-        
         keysToRemove.forEach(key => {
           localStorage.removeItem(key)
           sessionStorage.removeItem(key)
         })
-        
-        // Clear all localStorage items that contain 'supabase' or 'auth'
         Object.keys(localStorage).forEach(key => {
           if (key.includes('supabase') || key.includes('auth')) {
             localStorage.removeItem(key)
           }
         })
-        
-        // Clear session storage completely
         sessionStorage.clear()
-        
-        // Clear any auth cookies (though Supabase mainly uses localStorage)
         document.cookie.split(";").forEach(cookie => {
           const eqPos = cookie.indexOf("=")
           const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim()
@@ -179,8 +146,6 @@ export default function AuthNavbar() {
             document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`
           }
         })
-        
-        // Force a hard reload to clear all state and prevent caching
         setTimeout(() => {
           window.location.replace("/")
         }, 100)
@@ -189,7 +154,6 @@ export default function AuthNavbar() {
       }
     } catch (error) {
       console.error("Error signing out:", error)
-      // Even if sign out fails, clear local data and redirect
       if (typeof window !== 'undefined') {
         localStorage.clear()
         sessionStorage.clear()
@@ -212,7 +176,6 @@ export default function AuthNavbar() {
     { href: "/contact", label: "Contact" },
   ]
 
-  // Show loading only initially while checking auth state
   if (loading) {
     return (
       <nav className="bg-black text-white p-4">
@@ -239,15 +202,12 @@ export default function AuthNavbar() {
         <Link href="/" className="text-2xl font-bold">
           Man Behind The Music
         </Link>
-
-        {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-6">
           {navItems.map((item) => (
             <Link key={item.href} href={item.href} className="hover:text-yellow-400 transition-colors">
               {item.label}
             </Link>
           ))}
-
           {user ? (
             <div className="flex items-center space-x-4">
               <Link href="/submit">
@@ -280,8 +240,6 @@ export default function AuthNavbar() {
             </div>
           )}
         </div>
-
-        {/* Mobile Navigation */}
         <div className="md:hidden">
           <Sheet>
             <SheetTrigger asChild>
@@ -297,7 +255,6 @@ export default function AuthNavbar() {
                     {item.label}
                   </Link>
                 ))}
-
                 {user ? (
                   <>
                     <div className="border-t border-gray-800 pt-4">
@@ -323,7 +280,6 @@ export default function AuthNavbar() {
                             Dashboard
                           </Button>
                         </Link>
-
                         {isAdmin && (
                           <>
                             <div className="border-t border-gray-800 pt-2 mt-2">
@@ -360,7 +316,6 @@ export default function AuthNavbar() {
                             </div>
                           </>
                         )}
-
                         <Button
                           variant="ghost"
                           className="w-full justify-start text-white hover:text-yellow-400"
