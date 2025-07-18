@@ -10,9 +10,10 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Eye, EyeOff, AlertCircle, Loader2 } from "lucide-react"
-import { supabase } from "@/lib/auth-client"
+import { createClient } from "@/lib/auth-client"
 
 export default function LoginPage() {
+  const supabase = createClient()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
@@ -50,7 +51,11 @@ export default function LoginPage() {
         const { error: profileError } = await supabase.from("profiles").upsert({
           id: data.user.id,
           email: data.user.email,
-          name: data.user.user_metadata?.name || data.user.email?.split("@")[0] || "User",
+          full_name:
+            data.user.user_metadata?.full_name ||
+            data.user.user_metadata?.name ||
+            data.user.email?.split("@")[0] ||
+            "User",
           role: "user",
           updated_at: new Date().toISOString(),
         })
