@@ -9,10 +9,9 @@ import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Music, AlertCircle, CheckCircle } from "lucide-react"
 import Link from "next/link"
-import { createClient } from "@/lib/auth-client"
+import { supabase } from "@/lib/supabase-client"
 
 export default function ForgotPasswordPage() {
-  const supabase = createClient()
   const [email, setEmail] = useState("")
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState("")
@@ -58,51 +57,46 @@ export default function ForgotPasswordPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <Music className="h-12 w-12 text-primary" />
+            <Music className="h-10 w-10 text-primary" />
           </div>
-          <CardTitle className="text-2xl">Forgot Password</CardTitle>
-          <CardDescription>Enter your email to receive a password reset link</CardDescription>
+          <CardTitle>Forgot Password</CardTitle>
+          <CardDescription>
+            Enter your email address and we'll send you a link to reset your password.
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          {error && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
-          {message && (
-            <Alert className="mb-4">
-              <CheckCircle className="h-4 w-4" />
-              <AlertDescription>{message}</AlertDescription>
-            </Alert>
-          )}
-
-          {!message && (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  disabled={loading}
-                />
-              </div>
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Sending..." : "Send Reset Link"}
-              </Button>
-            </form>
-          )}
-
-          <div className="mt-4 text-center">
-            <Link href="/login" className="text-sm text-muted-foreground hover:underline">
-              Back to Login
-            </Link>
-          </div>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            {error && (
+              <Alert className="bg-red-500/20 border-red-500/50">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription className="text-red-700">{error}</AlertDescription>
+              </Alert>
+            )}
+            {message && (
+              <Alert className="bg-green-500/20 border-green-500/50">
+                <CheckCircle className="h-4 w-4" />
+                <AlertDescription className="text-green-700">{message}</AlertDescription>
+              </Alert>
+            )}
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Sending..." : "Send Reset Link"}
+            </Button>
+            <div className="text-center mt-4">
+              <Link href="/login" className="text-blue-600 hover:underline">
+                Back to Login
+              </Link>
+            </div>
+          </form>
         </CardContent>
       </Card>
     </div>

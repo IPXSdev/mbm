@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 export async function POST() {
   try {
@@ -15,7 +15,7 @@ export async function POST() {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    // Create sync_finalizations table
+    // Create sync_finalizations table and related tables
     const { error: syncTableError } = await supabase.rpc('exec_sql', {
       sql: `
         -- Create sync finalization tables

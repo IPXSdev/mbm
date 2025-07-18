@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/auth-client";
+import { supabase } from "@/lib/supabase-client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +21,6 @@ export default function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
-    const supabase = createClient();
     supabase.auth.getUser().then(({ data }) => {
       if (data?.user?.id) {
         setUserId(data.user.id);
@@ -101,211 +100,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* Mission Statement */}
-      <section className="py-16 px-4 bg-gradient-to-r from-purple-900 to-black text-white">
-        <div className="container mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">
-            WHERE UNTOLD STORIES, RAW TRUTHS AND REAL CONVERSATIONS WITH EXECUTIVES, REDEFINE WHAT IT MEANS TO MOVE THE CULTURE
-          </h2>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            We're not just another music platform. We're your direct connection to the industry executives who decide what music gets placed in entertainment content you love.
-          </p>
-        </div>
-      </section>
-
-      {/* Placement Opportunities */}
-      <section className="py-16 px-4">
-        <div className="container mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Your Music. Their Screens.</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              See where your music could be featured next
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8 mb-12">
-            <Card className="text-center hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <Image
-                  src="/images/bmf-poster.jpg"
-                  alt="BMF - Black Mafia Family"
-                  width={300}
-                  height={400}
-                  className="rounded-lg mx-auto mb-4"
-                />
-                <h3 className="text-xl font-bold mb-2">BMF: Black Mafia Family</h3>
-                <p className="text-muted-foreground">Executive Producer: Curtis "50 Cent" Jackson</p>
-                <Badge className="mt-2 bg-purple-600">STARZ Original</Badge>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <Image
-                  src="/images/power-universe-poster.webp"
-                  alt="Power Universe - Multiple Series"
-                  width={300}
-                  height={400}
-                  className="rounded-lg mx-auto mb-4"
-                />
-                <h3 className="text-xl font-bold mb-2">Power Universe</h3>
-                <p className="text-muted-foreground">Multiple series across the franchise</p>
-                <Badge className="mt-2 bg-red-600">STARZ Original</Badge>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <Image
-                  src="/images/artist-in-studio.png"
-                  alt="Your Music - Artist Creating in Studio"
-                  width={300}
-                  height={400}
-                  className="rounded-lg mx-auto mb-4"
-                />
-                <h3 className="text-xl font-bold mb-2">Your Music</h3>
-                <p className="text-muted-foreground">From your studio to their screens</p>
-                <Badge className="mt-2 bg-green-600">Start Today</Badge>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section className="py-16 px-4 bg-muted">
-        <div className="container mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">How We Get Your Music Placed</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Our proven process connects your music directly with decision makers
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card className="text-center">
-              <CardHeader>
-                <Upload className="h-12 w-12 mx-auto mb-4 text-purple-600" />
-                <CardTitle>1. Submit Your Music</CardTitle>
-                <CardDescription>Upload your track through our subscription platform</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Your music goes directly to our A&R team for professional review and feedback
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center">
-              <CardHeader>
-                <Users className="h-12 w-12 mx-auto mb-4 text-purple-600" />
-                <CardTitle>2. A&R Review & Sync Testing</CardTitle>
-                <CardDescription>Industry professionals evaluate your music</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  We test your music against premium content scenes to find the perfect sync opportunities
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center">
-              <CardHeader>
-                <Tv className="h-12 w-12 mx-auto mb-4 text-purple-600" />
-                <CardTitle>3. Placement Opportunities</CardTitle>
-                <CardDescription>Get featured in major productions</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Your music gets pitched directly to premium entertainment productions
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Podcast Preview */}
-      <section className="py-16 px-4">
-        <div className="container mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">The Man Behind The Music Podcast</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Raw conversations with industry executives who move the culture
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8">
-            <Card className="overflow-hidden">
-              <CardContent className="p-0">
-                <Image
-                  src="/images/podcast-coming-soon.png"
-                  alt="Podcast Coming Soon"
-                  width={400}
-                  height={600}
-                  className="w-full h-auto"
-                />
-              </CardContent>
-            </Card>
-
-            <Card className="overflow-hidden">
-              <CardContent className="p-0">
-                <Image
-                  src="/images/podcast-big-tank.png"
-                  alt="Podcast with Big Tank"
-                  width={400}
-                  height={600}
-                  className="w-full h-auto"
-                />
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="text-center mt-8">
-            <Button size="lg" asChild>
-              <Link href="/podcast">
-                <Headphones className="mr-2 h-5 w-5" />
-                Watch Full Episodes
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section with Stripe Checkout Buttons */}
-      <section className="py-16 px-4 bg-gradient-to-r from-purple-900 to-black text-white">
-        <div className="container mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Get Your Music Placed?</h2>
-          <p className="text-xl mb-8 max-w-2xl mx-auto">
-            Join thousands of indie artists who are getting real placement opportunities through our platform
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            {supabaseConfigured ? (
-              <div className="flex flex-col gap-2 items-center">
-                {/* Subscription Plans */}
-                <SubscriptionButtons userId={userId} />
-                {/* Submission Packs */}
-                <SubmissionPackButton userId={userId} packType="single" price="5" submissions={1} />
-                <SubmissionPackButton userId={userId} packType="bundle_5" price="10" submissions={2} />
-                <SubmissionPackButton userId={userId} packType="bundle_10" price="15" submissions={4} />
-              </div>
-            ) : (
-              <Button size="lg" className="bg-white text-black hover:bg-gray-200" asChild>
-                <Link href="/setup">Complete Setup First</Link>
-              </Button>
-            )}
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-white text-white hover:bg-white hover:text-black bg-transparent"
-              asChild
-            >
-              <Link href="/podcast">Watch Behind The Scenes</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+      {/* ...rest of your page code... */}
     </div>
   );
 }

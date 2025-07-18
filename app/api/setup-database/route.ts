@@ -4,13 +4,13 @@ import { NextResponse } from "next/server"
 export async function POST() {
   try {
     const supabaseAdmin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
+      process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 
     console.log("Creating tables...")
 
-    // Create profiles table
+    // Example: Try to select from a table to check connection
     const { error: profilesError } = await supabaseAdmin
       .from('_placeholder')
       .select('*')
