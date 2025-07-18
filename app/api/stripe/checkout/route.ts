@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { createClient } from '@/lib/supabase-client';
+
+const supabaseUrl = process.env.SUPABASE_URL;
+const serviceKey = process.env.SUPABASE_SERVICE_KEY;
 
 let stripe: Stripe | null = null;
 const stripeSecret = process.env.STRIPE_SECRET_KEY;
@@ -10,19 +12,28 @@ if (stripeSecret) {
   });
 }
 
+// Import your Supabase client factory if needed
+import { createClient } from '@/lib/supabase-client';
+
 export async function POST(req: NextRequest) {
   try {
     if (!stripe) {
       console.error('Stripe secret key missing');
       return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 });
     }
+
+    if (!supabaseUrl || !serviceKey) {
+      console.error('Supabase credentials missing');
+      return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 });
+    }
+
     const { planType, userId, productType = 'subscription' } = await req.json();
 
     if (!userId) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
     }
 
-    const supabase = await createClient();
+    const supabase = createClient(supabaseUrl, serviceKey);
     const { data: user } = await supabase
       .from('profiles')
       .select('email, full_name')
@@ -41,14 +52,19 @@ export async function POST(req: NextRequest) {
         creator: 'price_1RlNOzBgDMz6aj4lHmgcVgJS',
         indie: 'price_1RlNJeBgDMz6aj4l8fdmlTLO',
         pro: 'price_1RlNLdBgDMz6aj4lzZuZuGcg'
-      };
+      } as const;
+
+      const priceId = priceIds[planType as keyof typeof priceIds];
+      if (!priceId) {
+        return NextResponse.json({ error: 'Invalid plan type' }, { status: 400 });
+      }
 
       sessionParams = {
         mode: 'subscription',
         payment_method_types: ['card'],
         line_items: [
           {
-            price: priceIds[planType as keyof typeof priceIds],
+            price: priceId,
             quantity: 1,
           },
         ],
@@ -76,7 +92,7 @@ export async function POST(req: NextRequest) {
           priceId: 'price_1RlNQEBgDMz6aj4lu54v9JTX',
           name: 'Silver Select +1'
         }
-      };
+      } as const;
 
       const pack = packPriceIds[planType as keyof typeof packPriceIds];
       if (!pack) {
