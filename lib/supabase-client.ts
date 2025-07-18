@@ -1,4 +1,5 @@
 import { createBrowserClient } from "@supabase/ssr"
+import { createClient as createServerClient } from "@supabase/supabase-js"
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -32,10 +33,13 @@ export function createClient() {
     return globalThis.__supabaseClient
   }
 
-  if (!globalThis.__supabaseClient) {
-    globalThis.__supabaseClient = createBrowserClient(url, key)
-  }
-  return globalThis.__supabaseClient
+  // Server-side: create a new lightweight client per invocation
+  return createServerClient(url, key, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  })
 }
 
 export function isSupabaseConfigured(): boolean {
