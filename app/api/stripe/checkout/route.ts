@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { createClient } from '@/lib/supabase-client';
+import { createClient } from '@supabase/supabase-js';
 
 let stripe: Stripe | null = null;
 const stripeSecret = process.env.STRIPE_SECRET_KEY;
@@ -22,7 +22,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
     }
 
-    const supabase = await createClient();
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseUrl || !serviceKey) {
+      console.error('Supabase credentials missing');
+      return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 });
+    }
+
+    const supabase = createClient(supabaseUrl, serviceKey);
     const { data: user } = await supabase
       .from('profiles')
       .select('email, full_name')
@@ -41,14 +49,19 @@ export async function POST(req: NextRequest) {
         creator: 'price_1RlNOzBgDMz6aj4lHmgcVgJS',
         indie: 'price_1RlNJeBgDMz6aj4l8fdmlTLO',
         pro: 'price_1RlNLdBgDMz6aj4lzZuZuGcg'
-      };
+      } as const;
+
+      const priceId = priceIds[planType as keyof typeof priceIds];
+      if (!priceId) {
+        return NextResponse.json({ error: 'Invalid plan type' }, { status: 400 });
+      }
 
       sessionParams = {
         mode: 'subscription',
         payment_method_types: ['card'],
         line_items: [
           {
-            price: priceIds[planType as keyof typeof priceIds],
+            price: priceId,
             quantity: 1,
           },
         ],
