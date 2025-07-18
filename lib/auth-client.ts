@@ -1,1 +1,0 @@
-export { createClient, isSupabaseConfigured, getSupabaseConfig } from "@/lib/supabase-client";

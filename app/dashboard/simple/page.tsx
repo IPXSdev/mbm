@@ -5,10 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Music, Upload } from "lucide-react"
 import Link from "next/link"
-import { createClient } from "@/lib/auth-client"
+import { supabase } from "@/lib/supabase-client"
 
 export default function SimpleDashboard() {
-  const supabase = createClient()
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
