@@ -6,10 +6,16 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 if (!supabaseUrl || !supabaseAnonKey) {
   console.error("Missing Supabase environment variables")
   console.error("NEXT_PUBLIC_SUPABASE_URL:", supabaseUrl ? "Present" : "Missing")
-  console.error("NEXT_PUBLIC_SUPABASE_ANON_KEY:", supabaseAnonKey ? "Present" : "Missing")
+  console.error(
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY:",
+    supabaseAnonKey ? "Present" : "Missing",
+  )
 }
 
-let supabase: ReturnType<typeof createBrowserClient> | null = null
+declare global {
+  // eslint-disable-next-line no-var
+  var __supabaseClient: ReturnType<typeof createBrowserClient> | undefined
+}
 
 export function createClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -18,10 +24,18 @@ export function createClient() {
     console.error("Supabase environment variables not set")
     return {} as any
   }
-  if (!supabase) {
-    supabase = createBrowserClient(url, key)
+
+  if (typeof window !== "undefined") {
+    if (!globalThis.__supabaseClient) {
+      globalThis.__supabaseClient = createBrowserClient(url, key)
+    }
+    return globalThis.__supabaseClient
   }
-  return supabase
+
+  if (!globalThis.__supabaseClient) {
+    globalThis.__supabaseClient = createBrowserClient(url, key)
+  }
+  return globalThis.__supabaseClient
 }
 
 export function isSupabaseConfigured(): boolean {
