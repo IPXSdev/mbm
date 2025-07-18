@@ -9,10 +9,9 @@ import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Music, AlertCircle, CheckCircle } from "lucide-react"
 import Link from "next/link"
-import { createClient } from "@/lib/auth-client"
+import { supabase } from "@/lib/auth-client"
 
 export default function ForgotPasswordPage() {
-  const supabase = createClient()
   const [email, setEmail] = useState("")
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState("")

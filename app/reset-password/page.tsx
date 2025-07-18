@@ -10,11 +10,10 @@ import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Music, AlertCircle, CheckCircle, Eye, EyeOff } from "lucide-react"
 import Link from "next/link"
-import { createClient } from "@/lib/auth-client"
+import { supabase } from "@/lib/auth-client"
 import { useSearchParams } from "next/navigation"
 
 export default function ResetPasswordPage() {
-  const supabase = createClient()
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SubscriptionButtons } from "@/components/pricing-buttons";
 import { SubmissionPackButton } from "@/components/submission-pack-buttons";
-import { createClient } from "@/lib/auth-client";
+import { supabase } from "@/lib/auth-client";
 
 interface User {
   id: string;
@@ -40,7 +40,6 @@ export default function TestStripePage() {
   useEffect(() => {
     // Get current user
     const getCurrentUser = async () => {
-      const supabase = createClient();
       const { data: { user }, error } = await supabase.auth.getUser();
       
       if (user && !error) {

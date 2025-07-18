@@ -3,10 +3,9 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { createClient } from "@/lib/auth-client"
+import { supabase } from "@/lib/auth-client"
 
 export default function TestAuthPage() {
-  const supabase = createClient()
   const [status, setStatus] = useState<string>("Testing...")
   const [details, setDetails] = useState<string>("")
 

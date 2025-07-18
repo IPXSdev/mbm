@@ -3,14 +3,13 @@
 import type React from "react"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/auth-client"
+import { supabase } from "@/lib/auth-client"
 
 export default function AdminLayoutClient({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const supabase = createClient()
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<any>(null)
   const [isAdmin, setIsAdmin] = useState(false)
