@@ -39,3 +39,35 @@ export async function getTracks(status?: string): Promise<Track[]> {
   if (error) throw error
   return data
 }
+
+// Fetch all episodes
+export async function getEpisodes(): Promise<Episode[]> {
+  const { data, error } = await supabase
+    .from("episodes")
+    .select("*")
+    .order("published_at", { ascending: false })
+  if (error) throw error
+  return data || []
+}
+
+// Fetch featured episodes (where featured = true)
+export async function getFeaturedEpisodes(): Promise<Episode[]> {
+  const { data, error } = await supabase
+    .from("episodes")
+    .select("*")
+    .eq("featured", true)
+    .order("published_at", { ascending: false })
+  if (error) throw error
+  return data || []
+}
+
+// Fetch top tracks (example: by rating, descending)
+export async function getTopTracks(limit: number = 10): Promise<Track[]> {
+  const { data, error } = await supabase
+    .from("submissions")
+    .select("*")
+    .order("rating", { ascending: false })
+    .limit(limit)
+  if (error) throw error
+  return data || []
+}
