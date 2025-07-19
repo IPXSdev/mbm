@@ -69,24 +69,25 @@ export default function SubmitPage() {
 
   // Check authentication
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession()
-        if (session?.user) {
-          setUser(session.user)
-          setFormData((prev) => ({ ...prev, email: session.user.email || "" }))
-        }
-      } catch (error) {
-        console.error("Auth check error:", error)
-      } finally {
-        setLoading(false)
+  const checkAuth = async () => {
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+      console.log("Session in submit page:", session)
+      if (session?.user) {
+        setUser(session.user)
+        setFormData((prev) => ({ ...prev, email: session.user.email || "" }))
       }
+    } catch (error) {
+      console.error("Auth check error:", error)
+    } finally {
+      setLoading(false)
     }
+  }
 
-    checkAuth()
-  }, [])
+  checkAuth()
+}, [])
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
