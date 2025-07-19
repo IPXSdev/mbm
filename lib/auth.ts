@@ -17,7 +17,7 @@ export async function createClient() {
     return {} as any
   }
 
-  // FIX: Use await to get the cookie store
+  // Use await to get the cookie store for SSR
   const cookieStore = await cookies()
 
   return createServerClient(cfg.url, cfg.key, {
@@ -39,5 +39,11 @@ export async function createClient() {
 }
 
 export async function getUser() {
-  // ...your existing getUser implementation...
+  const supabase = await createClient()
+  const { data, error } = await supabase.auth.getUser()
+  if (error || !data?.user) {
+    console.error("Error getting user:", error)
+    return null
+  }
+  return data.user
 }

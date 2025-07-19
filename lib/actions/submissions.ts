@@ -1,12 +1,11 @@
 "use server"
 
-import { createClient } from "@/lib/auth"
+import { supabase } from "@/lib/supabase-client"
 import { requireAuth } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
 
 export async function submitTrack(formData: FormData) {
   const user = await requireAuth()
-  const supabase = await createClient()
 
   const title = formData.get("title") as string
   const artist = formData.get("artist") as string
@@ -81,7 +80,6 @@ export async function submitTrack(formData: FormData) {
 
 export async function updateTrackStatus(trackId: string, status: string, adminNotes?: string) {
   await requireAuth() // Could add admin check here
-  const supabase = await createClient()
 
   const { error } = await supabase
     .from("submissions")

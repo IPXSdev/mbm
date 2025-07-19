@@ -41,10 +41,8 @@ interface FinalizeSubmissionFormProps {
 export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmissionFormProps) {
   const [loading, setLoading] = useState(false)
   const [status, setStatus] = useState<string | null>(null)
-  
-  // Generate storage key for this specific track
   const storageKey = `finalize-form-${track.id}`
-  
+
   // Main submission info
   const [firstName, setFirstName] = useState("")
   const [middleName, setMiddleName] = useState("")
@@ -73,7 +71,6 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
     { id: "1", name: "", role: "Producer", percentage: 0, proPlan: "" }
   ])
 
-  // Load saved data on component mount
   useEffect(() => {
     const savedData = localStorage.getItem(storageKey)
     if (savedData) {
@@ -107,7 +104,6 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
     }
   }, [storageKey])
 
-  // Save data to localStorage whenever form data changes
   useEffect(() => {
     const formData = {
       firstName,
@@ -168,55 +164,23 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
     setStatus(null)
 
     try {
-      console.log("Form submission started - simple data entry mode...")
+      // Validation (unchanged)
+      if (!firstName.trim()) throw new Error("First name is required")
+      if (!lastName.trim()) throw new Error("Last name is required")
+      if (!email.trim()) throw new Error("Email is required")
+      if (!contactNumber.trim()) throw new Error("Contact number is required")
+      if (!proPlan || proPlan.trim() === "") throw new Error("PRO plan is required")
+      if (!proNumber.trim()) throw new Error("PRO number is required")
+      if (!publisherName.trim()) throw new Error("Publisher name is required")
+      if (!publisherPRO || publisherPRO.trim() === "") throw new Error("Publisher PRO is required")
+      if (!publisherNumber.trim()) throw new Error("Publisher number is required")
+      if (!copyrightOwner.trim()) throw new Error("Copyright owner is required")
+      if (!masterOwner.trim()) throw new Error("Master owner is required")
+      if (!territoryRights.trim()) throw new Error("Territory rights is required")
+      if (!duration.trim()) throw new Error("Duration is required")
 
-      // Validate required fields
-      if (!firstName.trim()) {
-        throw new Error("First name is required")
-      }
-      if (!lastName.trim()) {
-        throw new Error("Last name is required")
-      }
-      if (!email.trim()) {
-        throw new Error("Email is required")
-      }
-      if (!contactNumber.trim()) {
-        throw new Error("Contact number is required")
-      }
-      if (!proPlan || proPlan.trim() === "") {
-        throw new Error("PRO plan is required - please select one from the dropdown (ASCAP, BMI, SESAC, Other, or None)")
-      }
-      if (!proNumber.trim()) {
-        throw new Error("PRO number is required")
-      }
-      if (!publisherName.trim()) {
-        throw new Error("Publisher name is required")
-      }
-      if (!publisherPRO || publisherPRO.trim() === "") {
-        throw new Error("Publisher PRO is required - please select one from the dropdown")
-      }
-      if (!publisherNumber.trim()) {
-        throw new Error("Publisher number is required")
-      }
-      if (!copyrightOwner.trim()) {
-        throw new Error("Copyright owner is required")
-      }
-      if (!masterOwner.trim()) {
-        throw new Error("Master owner is required")
-      }
-      if (!territoryRights.trim()) {
-        throw new Error("Territory rights is required")
-      }
-      if (!duration.trim()) {
-        throw new Error("Duration is required")
-      }
-
-      console.log("Validation passed - preparing data for admin review...")
-
-      // Prepare submission data for admin review
       const submissionData = {
         track_id: track.id,
-        // user_id will be generated in the database function
         first_name: firstName.trim(),
         middle_name: middleName.trim() || undefined,
         last_name: lastName.trim(),
@@ -241,23 +205,11 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
         contributors: contributors
       }
 
-      console.log("Saving sync finalization data for admin review...")
-      
-      // Save to database for admin review
       await saveSyncFinalization(submissionData)
-      
       setStatus("✅ Sync finalization data saved successfully! An admin will review your submission.")
-      
-      // Clear saved form data after successful submission
       localStorage.removeItem(storageKey)
-      
-      // Auto-close after success
-      setTimeout(() => {
-        onClose()
-      }, 3000)
-      
+      setTimeout(() => { onClose() }, 3000)
     } catch (error: any) {
-      console.error("Error finalizing submission:", error)
       const errorMessage = error.message || "Failed to save sync finalization data. Please try again."
       setStatus(`❌ ${errorMessage}`)
     } finally {
@@ -297,7 +249,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                   id="firstName"
                   value={firstName}
                   onChange={e => setFirstName(e.target.value)}
-                  placeholder="First name"
+                  placeholder=""
                   required
                 />
               </div>
@@ -307,7 +259,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                   id="middleName"
                   value={middleName}
                   onChange={e => setMiddleName(e.target.value)}
-                  placeholder="Middle name (optional)"
+                  placeholder=""
                 />
               </div>
               <div>
@@ -316,7 +268,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                   id="lastName"
                   value={lastName}
                   onChange={e => setLastName(e.target.value)}
-                  placeholder="Last name"
+                  placeholder=""
                   required
                 />
               </div>
@@ -329,7 +281,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                   type="email"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  placeholder="your.email@example.com"
+                  placeholder=""
                   required
                 />
               </div>
@@ -340,7 +292,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                   type="tel"
                   value={contactNumber}
                   onChange={e => setContactNumber(e.target.value)}
-                  placeholder="(555) 123-4567"
+                  placeholder=""
                   required
                 />
               </div>
@@ -357,7 +309,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                 <Label htmlFor="proPlan" className="text-blue-800">Your PRO *</Label>
                 <Select value={proPlan} onValueChange={setProPlan}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select your PRO" />
+                    <SelectValue placeholder="" />
                   </SelectTrigger>
                   <SelectContent>
                     {proOptions.map(option => (
@@ -372,7 +324,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                   id="proNumber"
                   value={proNumber}
                   onChange={e => setProNumber(e.target.value)}
-                  placeholder="Your PRO member number"
+                  placeholder=""
                 />
               </div>
             </div>
@@ -390,14 +342,14 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                   id="publisherName"
                   value={publisherName}
                   onChange={e => setPublisherName(e.target.value)}
-                  placeholder="Publishing company name"
+                  placeholder=""
                 />
               </div>
               <div>
                 <Label htmlFor="publisherPRO" className="text-blue-800">Publisher PRO *</Label>
                 <Select value={publisherPRO} onValueChange={setPublisherPRO}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Publisher's PRO" />
+                    <SelectValue placeholder="" />
                   </SelectTrigger>
                   <SelectContent>
                     {proOptions.map(option => (
@@ -412,7 +364,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                   id="publisherNumber"
                   value={publisherNumber}
                   onChange={e => setPublisherNumber(e.target.value)}
-                  placeholder="Publisher PRO number"
+                  placeholder=""
                 />
               </div>
             </div>
@@ -430,7 +382,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                   id="copyrightOwner"
                   value={copyrightOwner}
                   onChange={e => setCopyrightOwner(e.target.value)}
-                  placeholder="Who owns the composition"
+                  placeholder=""
                   required
                 />
               </div>
@@ -440,7 +392,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                   id="masterOwner"
                   value={masterOwner}
                   onChange={e => setMasterOwner(e.target.value)}
-                  placeholder="Who owns the master recording"
+                  placeholder=""
                   required
                 />
               </div>
@@ -448,7 +400,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                 <Label htmlFor="territoryRights" className="text-blue-800">Territory Rights *</Label>
                 <Select value={territoryRights} onValueChange={setTerritoryRights}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select territory" />
+                    <SelectValue placeholder="" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="worldwide">Worldwide</SelectItem>
@@ -474,7 +426,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                   id="isrc"
                   value={isrc}
                   onChange={e => setIsrc(e.target.value)}
-                  placeholder="ISRC code (if available)"
+                  placeholder=""
                 />
               </div>
               <div>
@@ -483,7 +435,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                   id="upc"
                   value={upc}
                   onChange={e => setUpc(e.target.value)}
-                  placeholder="UPC/EAN code (if available)"
+                  placeholder=""
                 />
               </div>
               <div>
@@ -492,7 +444,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                   id="duration"
                   value={duration}
                   onChange={e => setDuration(e.target.value)}
-                  placeholder="e.g., 3:45"
+                  placeholder=""
                   required
                 />
               </div>
@@ -503,7 +455,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                   type="number"
                   value={bpm}
                   onChange={e => setBpm(e.target.value)}
-                  placeholder="Beats per minute"
+                  placeholder=""
                 />
               </div>
               <div>
@@ -512,7 +464,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                   id="key"
                   value={key}
                   onChange={e => setKey(e.target.value)}
-                  placeholder="e.g., C Major, A Minor"
+                  placeholder=""
                 />
               </div>
               <div className="flex items-center space-x-2">
@@ -568,7 +520,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                     <Input
                       value={contributor.name}
                       onChange={e => updateContributor(contributor.id, "name", e.target.value)}
-                      placeholder="Full name"
+                      placeholder=""
                       required
                     />
                   </div>
@@ -596,7 +548,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                       max="100"
                       value={contributor.percentage}
                       onChange={e => updateContributor(contributor.id, "percentage", parseInt(e.target.value) || 0)}
-                      placeholder="0"
+                      placeholder=""
                     />
                   </div>
                   <div>
@@ -606,7 +558,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                       onValueChange={(value) => updateContributor(contributor.id, "proPlan", value)}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select PRO" />
+                        <SelectValue placeholder="" />
                       </SelectTrigger>
                       <SelectContent>
                         {proOptions.map(option => (
@@ -631,7 +583,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                 id="lyrics"
                 value={lyrics}
                 onChange={e => setLyrics(e.target.value)}
-                placeholder="Enter song lyrics here..."
+                placeholder=""
                 rows={6}
               />
             </div>
@@ -641,7 +593,7 @@ export default function FinalizeSubmissionForm({ track, onClose }: FinalizeSubmi
                 id="additionalNotes"
                 value={additionalNotes}
                 onChange={e => setAdditionalNotes(e.target.value)}
-                placeholder="Any additional information for sync licensing..."
+                placeholder=""
                 rows={3}
               />
             </div>
