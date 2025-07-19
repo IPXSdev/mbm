@@ -38,3 +38,4 @@ export async function getTracks(status?: string): Promise<Track[]> {
   const { data, error } = await query.order("created_at", { ascending: false })
   if (error) throw error
   return data
+}
